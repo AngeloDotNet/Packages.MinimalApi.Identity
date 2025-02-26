@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Net.Http.Headers;
-using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.BusinessLayer.Options;
 using MinimalApi.Identity.Common.Extensions;
 
@@ -22,54 +18,13 @@ public class Program
         var jwtOptions = builder.Configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>()
             ?? throw new ArgumentNullException("JWT options not found");
 
-        builder.Services.AddRegisterServices<Program>(connectionString, jwtOptions);
-        //builder.Services.AddAuthorization();
-        //builder.Services.AddScoped<IAuthorizationHandler, UserActiveHandler>();
+        var identityOptions = builder.Configuration.GetSection(nameof(NetIdentityOptions)).Get<NetIdentityOptions>()
+            ?? throw new ArgumentNullException("Identity options not found");
 
-        //builder.Services.AddAuthorization(options =>
-        //{
-        //    var policyBuilder = new AuthorizationPolicyBuilder().RequireAuthenticatedUser();
-        //    policyBuilder.Requirements.Add(new UserActiveRequirement());
-        //    options.FallbackPolicy = options.DefaultPolicy = policyBuilder.Build();
+        builder.Services.AddRegisterServices<Program>(connectionString, jwtOptions, identityOptions).AddAuthorization();
+        builder.Services.AddSwaggerConfiguration();
 
-        //    //options.AddPolicy("AdministratorOrPowerUser", policy =>
-        //    //{
-        //    //    policy.RequireRole(RoleNames.Administrator, RoleNames.PowerUser);
-        //    //});
-        //});
-
-        //builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
-        //builder.Services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
-
-        builder.Services.AddEndpointsApiExplorer()
-            .AddSwaggerGen(options =>
-            {
-                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
-                {
-                    In = ParameterLocation.Header,
-                    Description = "Insert the Bearer Token",
-                    Name = HeaderNames.Authorization,
-                    Type = SecuritySchemeType.ApiKey
-                });
-
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference= new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = JwtBearerDefaults.AuthenticationScheme
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
-            });
-
-        builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true)
-            .Configure<KestrelServerOptions>(builder.Configuration.GetSection("Kestrel"));
+        builder.Services.AddRegisterOptions(builder.Configuration);
 
         var app = builder.Build();
 
