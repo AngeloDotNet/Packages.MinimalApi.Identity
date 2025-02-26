@@ -18,7 +18,7 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/utenti")
-            .RequireAuthorization()
+            .RequireAuthorization("Users")
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Utenti" }];
@@ -44,10 +44,11 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.BadRequest(result.Errors);
-        });
+        })
+        .WithOpenApi();
 
-        apiGroup.MapGet("/profilo/{username}", [Authorize("Users")] async Task<Results<Ok<UserProfileModel>,
-            NotFound<string>>> ([FromServices] UserManager<ApplicationUser> userManager, [FromRoute] string username) =>
+        apiGroup.MapGet("/profilo/{username}", async Task<Results<Ok<UserProfileModel>, NotFound<string>>>
+            ([FromServices] UserManager<ApplicationUser> userManager, [FromRoute] string username) =>
         {
             var user = await userManager.FindByNameAsync(username);
 
@@ -65,11 +66,15 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
             };
 
             return TypedResults.Ok(profile);
-        });
+        })
+        .Produces<UserProfileModel>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status403Forbidden)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .WithOpenApi();
 
-        apiGroup.MapPut("/profilo/{username}", async Task<Results<Ok<string>, NotFound<string>,
-            BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
-            [FromRoute] string username, [FromBody] UserProfileModel inputModel) =>
+        apiGroup.MapPut("/profilo/{username}", async Task<Results<Ok<string>, NotFound<string>, BadRequest<IEnumerable<IdentityError>>>>
+            ([FromServices] UserManager<ApplicationUser> userManager, [FromRoute] string username, [FromBody] UserProfileModel inputModel) =>
         {
             var user = await userManager.FindByNameAsync(username);
 
@@ -90,11 +95,11 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.BadRequest(result.Errors);
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapDelete("/profilo/{username}", async Task<Results<Ok<string>, NotFound<string>,
-            BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
-            [FromRoute] string username) =>
+            BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager, [FromRoute] string username) =>
         {
             var user = await userManager.FindByNameAsync(username);
 
@@ -111,6 +116,7 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.BadRequest(result.Errors);
-        });
+        })
+        .WithOpenApi();
     }
 }

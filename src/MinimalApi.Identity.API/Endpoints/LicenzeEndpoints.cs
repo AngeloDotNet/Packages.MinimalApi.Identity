@@ -19,6 +19,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/licenze")
+            .RequireAuthorization("Licenses")
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Licenze" }];
@@ -35,7 +36,8 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.Ok(result);
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/crea-licenza", async (MinimalApiDbContext dbContext, [FromBody] License inputModel) =>
         {
@@ -43,7 +45,8 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/assegna-licenza", async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext,
             [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignLicenseModel inputModel) =>
@@ -71,7 +74,8 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapDelete("/rimuovi-licenza", async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext,
              [FromBody] AssignLicenseModel inputModel) =>
@@ -88,6 +92,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
     }
 }

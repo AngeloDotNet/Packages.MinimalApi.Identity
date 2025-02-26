@@ -18,6 +18,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/ruoli")
+            .RequireAuthorization("Roles")
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Ruoli" }];
@@ -35,7 +36,8 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.Ok(result);
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/crea-ruolo", async Task<Results<Ok, BadRequest<IEnumerable<IdentityError>>, Conflict<string>>>
             ([FromServices] RoleManager<ApplicationRole> roleManager, [FromBody] string roleName) =>
@@ -53,7 +55,8 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.BadRequest(result.Errors);
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/assegna-ruolo", async Task<Results<Ok<string>, NotFound<string>, BadRequest<IEnumerable<IdentityError>>>>
             ([FromServices] UserManager<ApplicationUser> userManager, [FromServices] RoleManager<ApplicationRole> roleManager,
@@ -81,7 +84,8 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.BadRequest(result.Errors);
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapDelete("/rimuovi-ruolo", async Task<Results<Ok, NotFound<string>, BadRequest<IEnumerable<IdentityError>>>>
             ([FromServices] UserManager<ApplicationUser> userManager, [FromServices] RoleManager<ApplicationRole> roleManager,
@@ -102,6 +106,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.BadRequest(result.Errors);
-        });
+        })
+        .WithOpenApi();
     }
 }

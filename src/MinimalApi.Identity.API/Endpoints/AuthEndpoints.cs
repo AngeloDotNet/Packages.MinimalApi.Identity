@@ -10,8 +10,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MinimalApi.Identity.BusinessLayer.Options;
 using MinimalApi.Identity.BusinessLayer.Services.Interfaces;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 using MinimalApi.Identity.DataAccessLayer.Entities;
@@ -25,6 +27,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/autenticazione")
+            //.RequireAuthorization("Autentication") //Usare questo tipo solamente se si aggiunge un claim dedicato per l'autenticazione
             .RequireAuthorization()
             .WithOpenApi(opt =>
             {
@@ -33,7 +36,8 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             });
 
         apiGroup.MapPost("/login", [AllowAnonymous] async Task<Results<Ok<AuthResponse>, UnauthorizedHttpResult>>
-            ([FromServices] UserManager<ApplicationUser> userManager, [FromBody] LoginModel inputModel) =>
+            ([FromServices] IConfiguration configuration, [FromServices] UserManager<ApplicationUser> userManager,
+            [FromBody] LoginModel inputModel) =>
         {
             var user = await userManager.FindByNameAsync(inputModel.Username);
 
@@ -53,7 +57,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
                 new(ClaimTypes.SerialNumber, user.SecurityStamp!.ToString()),
             }.Union(userRoles.Select(role => new Claim(ClaimTypes.Role, role))).ToList();
 
-            var loginResponse = await CreateTokenAsync(claims);
+            var loginResponse = CreateToken(claims, configuration);
 
             //user.RefreshToken = loginResponse.RefreshToken;
             //user.RefreshTokenExpirationDate = DateTime.UtcNow.AddMinutes(60);
@@ -61,7 +65,8 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             await userManager.UpdateAsync(user);
 
             return TypedResults.Ok(loginResponse);
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/forgot-password", async Task<Results<Ok<string>, BadRequest<string>>>
                 ([FromServices] UserManager<ApplicationUser> userManager, [FromServices] IEmailSender emailSender,
@@ -78,16 +83,18 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
                 var request = httpContextAccessor.HttpContext!.Request;
 
                 var queryParams = new Dictionary<string, string?>
-                    {
+                {
                     { "token", token },
                     { "email", user.Email }
-                    };
+                };
+
                 var callbackUrl = QueryHelpers.AddQueryString($"{request.Scheme}://{request.Host}/reset-password", queryParams);
 
                 await emailSender.SendEmailAsync(user.Email!, "Reset Password", $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
 
                 return TypedResults.Ok("Password reset email sent");
-            });
+            })
+            .WithOpenApi();
 
         apiGroup.MapPost("/reset-password", async Task<Results<Ok<string>, BadRequest<string>, BadRequest<IEnumerable<IdentityError>>>>
             ([FromServices] UserManager<ApplicationUser> userManager, [FromBody] ResetPasswordModel inputModel) =>
@@ -99,23 +106,29 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             }
 
             var result = await userManager.ResetPasswordAsync(user, inputModel.Token, inputModel.Password);
+
             if (result.Succeeded)
             {
                 return TypedResults.Ok("Password reset successful");
             }
+
             return TypedResults.BadRequest(result.Errors);
-        });
+        })
+        .WithOpenApi();
     }
 
-    private static async Task<AuthResponse> CreateTokenAsync(IList<Claim> claims)
+    private static AuthResponse CreateToken(IList<Claim> claims, IConfiguration configuration)
     {
+        var jwtOptions = configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>()
+            ?? throw new ArgumentNullException("JWT options not found");
+
         var audienceClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud);
         claims.Remove(audienceClaim!);
 
-        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("aY4Rz54vETFOlfl8gZJ4p95d2cWVMAC7HZMnqtggJfjeQATIvVroknVUKcP0ClSE9r9u856UjGKcXkyr7ugB0X3FsxWvbnDcaqIjhYZAwtt0CU24RLgCdoIjQl5tnapPjNgZYLsHl7qUMLASbNSL5MkTbfCjhBOjqcrkbBeMoHZfdwkQrmslBq6xgtcLOUlLA3GmSvhq15eAPaq5kX0J85rtfTVpGr1ZShJLUVVaASm50thUXJEuxeQLKB2a5bcLC4OuX9xkjS7LqpKpCAwTEEOXcrYJAKJ03Tf7tRRnplknkP6QPOQqPviKQXRZ47gwR0sTZwL9ZHpRokEyaTpRLkyNLpSnRAvwwk2N8tezsZPWjd3rCecC38QM9RKF1xCWtxooo8qR1kTGXdGzORRX1RCpR717koB1xFdPJbLYV1c3za1vWpf7foYyfGHdj9XfvnEogNgygsJnSBAa9ghv3mQzbXspOQafIweknF2PCd2FBlSSTdt8JY2iSDGbD2gy"));
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey));
         var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
-        var jwtSecurityToken = new JwtSecurityToken("iss-localhost", "aud-localhost", claims,
+        var jwtSecurityToken = new JwtSecurityToken(jwtOptions.Issuer, jwtOptions.Audience, claims,
             DateTime.UtcNow, DateTime.UtcNow.AddMinutes(60), signingCredentials);
 
         var accessToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
@@ -123,13 +136,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
         var italyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
         var expiredLocalNow = TimeZoneInfo.ConvertTimeFromUtc(jwtSecurityToken.ValidTo, italyTimeZone);
 
-        var response = new AuthResponse
-        {
-            AccessToken = accessToken,
-            RefreshToken = GenerateRefreshToken(),
-            ExpiredToken = expiredLocalNow
-        };
-
+        var response = new AuthResponse(accessToken, GenerateRefreshToken(), expiredLocalNow);
         return response;
 
         static string GenerateRefreshToken()
@@ -140,12 +147,5 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
 
             return Convert.ToBase64String(randomNumber);
         }
-    }
-
-    private class AuthResponse
-    {
-        public string AccessToken { get; set; } = null!;
-        public string RefreshToken { get; set; } = null!;
-        public DateTime ExpiredToken { get; set; }
     }
 }

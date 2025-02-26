@@ -19,6 +19,7 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/permessi")
+            .RequireAuthorization("Permissions")
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Permessi" }];
@@ -35,7 +36,8 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.Ok(result);
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/crea-permesso", async (MinimalApiDbContext dbContext, [FromBody] Permission inputModel) =>
         {
@@ -43,7 +45,8 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/assegna-permesso", async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext,
            [FromServices] RoleManager<IdentityRole> roleManager, [FromBody] AssignPermissionModel inputModel) =>
@@ -72,7 +75,8 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapDelete("/rimuovi-permesso", async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext,
             [FromServices] RoleManager<IdentityRole> roleManager, [FromBody] AssignPermissionModel inputModel) =>
@@ -89,6 +93,7 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
     }
 }

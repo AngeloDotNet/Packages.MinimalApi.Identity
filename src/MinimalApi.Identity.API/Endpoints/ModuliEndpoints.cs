@@ -19,6 +19,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/moduli")
+            .RequireAuthorization("Modules")
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Moduli" }];
@@ -35,7 +36,8 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             }
 
             return TypedResults.Ok(result);
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/crea-modulo", async (MinimalApiDbContext dbContext, [FromBody] Module inputModel) =>
         {
@@ -43,7 +45,8 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapPost("/assegna-modulo", async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext,
            [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignModuleModel inputModel) =>
@@ -71,7 +74,8 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
 
         apiGroup.MapDelete("/rimuovi-modulo", async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext,
              [FromBody] AssignModuleModel inputModel) =>
@@ -88,6 +92,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok();
-        });
+        })
+        .WithOpenApi();
     }
 }
