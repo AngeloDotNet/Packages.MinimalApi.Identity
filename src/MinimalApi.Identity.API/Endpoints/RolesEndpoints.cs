@@ -18,7 +18,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/ruoli")
-            .RequireAuthorization("Roles")
+            .RequireAuthorization()
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Ruoli" }];

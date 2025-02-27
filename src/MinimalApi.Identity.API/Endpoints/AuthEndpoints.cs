@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MinimalApi.Identity.BusinessLayer.Extensions;
 using MinimalApi.Identity.BusinessLayer.Options;
 using MinimalApi.Identity.BusinessLayer.Services.Interfaces;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
@@ -27,7 +28,6 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/autenticazione")
-            //.RequireAuthorization("Autentication") //Usare questo tipo solamente se si aggiunge un claim dedicato per l'autenticazione
             .RequireAuthorization()
             .WithOpenApi(opt =>
             {
@@ -37,7 +37,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
 
         apiGroup.MapPost("/login", [AllowAnonymous] async Task<Results<Ok<AuthResponse>, UnauthorizedHttpResult>>
             ([FromServices] IConfiguration configuration, [FromServices] UserManager<ApplicationUser> userManager,
-            [FromBody] LoginModel inputModel) =>
+            [FromServices] IAuthService authService, [FromBody] LoginModel inputModel) =>
         {
             var user = await userManager.FindByNameAsync(inputModel.Username);
 
@@ -49,13 +49,19 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             await userManager.UpdateSecurityStampAsync(user);
 
             var userRoles = await userManager.GetRolesAsync(user);
+            var rolePermissions = await authService.GetPermissionsFromRolesAsync(userRoles);
+
             var claims = new List<Claim>()
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, inputModel.Username),
                 new(ClaimTypes.Email, user.Email ?? string.Empty),
                 new(ClaimTypes.SerialNumber, user.SecurityStamp!.ToString()),
-            }.Union(userRoles.Select(role => new Claim(ClaimTypes.Role, role))).ToList();
+
+                //new(ClaimsExtensions.Permission, nameof(PermissionPolicy.GetPermission)),
+            }
+            .Union(rolePermissions.Select(permission => new Claim(ClaimsExtensions.Permission, permission)))
+            .Union(userRoles.Select(role => new Claim(ClaimTypes.Role, role))).ToList();
 
             var loginResponse = CreateToken(claims, configuration);
 

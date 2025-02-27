@@ -19,7 +19,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/licenze")
-            .RequireAuthorization("Licenses")
+            .RequireAuthorization()
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Licenze" }];

@@ -19,7 +19,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/moduli")
-            .RequireAuthorization("Modules")
+            .RequireAuthorization()
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Moduli" }];

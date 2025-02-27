@@ -1,13 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net8.0</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Authors>Angelo Pirola</Authors>
+        <Product>A custom implementation of Asp Net Core Identity</Product>
+        <Description>A custom implementation of Asp Net Core Identity</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/AngeloDotNet/Packages.MinimalApi.Identity</PackageProjectUrl>
+        <!--<PackageIcon>LibraryTools.png</PackageIcon>-->
+        <PackageTags>csharp dotnet net8 open source custom implementation aspnet core identity minimal api</PackageTags>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/AngeloDotNet/Packages.MinimalApi.Identity.git</RepositoryUrl>
+        <RepositoryBranch>main</RepositoryBranch>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Title>Packages.MinimalApi.Identity</Title>
+    </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MinimalApi.Identity.BusinessLayer\MinimalApi.Identity.BusinessLayer.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.7.115">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using MinimalApi.Identity.BusinessLayer.Enums;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 using MinimalApi.Identity.DataAccessLayer;
 using MinimalApi.Identity.DataAccessLayer.Entities;
@@ -19,14 +21,15 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/permessi")
-            .RequireAuthorization("Permissions")
+            .RequireAuthorization()
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Permessi" }];
                 return opt;
             });
 
-        apiGroup.MapGet(string.Empty, async Task<Results<Ok<List<Permission>>, BadRequest>> (MinimalApiDbContext dbContext) =>
+        apiGroup.MapGet(string.Empty, [Authorize(Policy = nameof(AuthPolicy.GetPermissions))]
+        async Task<Results<Ok<List<Permission>>, BadRequest>> (MinimalApiDbContext dbContext) =>
         {
             var result = await dbContext.Permissions.ToListAsync();
 
@@ -39,7 +42,8 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
         })
         .WithOpenApi();
 
-        apiGroup.MapPost("/crea-permesso", async (MinimalApiDbContext dbContext, [FromBody] Permission inputModel) =>
+        apiGroup.MapPost("/crea-permesso", [Authorize(Policy = nameof(AuthPolicy.CreatePermission))]
+        async (MinimalApiDbContext dbContext, [FromBody] Permission inputModel) =>
         {
             await dbContext.Permissions.AddAsync(inputModel);
             await dbContext.SaveChangesAsync();
@@ -48,8 +52,9 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
         })
         .WithOpenApi();
 
-        apiGroup.MapPost("/assegna-permesso", async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext,
-           [FromServices] RoleManager<IdentityRole> roleManager, [FromBody] AssignPermissionModel inputModel) =>
+        apiGroup.MapPost("/assegna-permesso", [Authorize(Policy = nameof(AuthPolicy.AssignPermission))]
+        async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext, [FromServices] RoleManager<IdentityRole> roleManager,
+        [FromBody] AssignPermissionModel inputModel) =>
         {
             var role = await roleManager.FindByIdAsync(inputModel.RoleId.ToString());
 
@@ -78,8 +83,9 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
         })
         .WithOpenApi();
 
-        apiGroup.MapDelete("/rimuovi-permesso", async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext,
-            [FromServices] RoleManager<IdentityRole> roleManager, [FromBody] AssignPermissionModel inputModel) =>
+        apiGroup.MapDelete("/rimuovi-permesso", [Authorize(Policy = nameof(AuthPolicy.DeletePermission))]
+        async Task<Results<Ok, NotFound<string>>> (MinimalApiDbContext dbContext, [FromServices] RoleManager<IdentityRole> roleManager,
+        [FromBody] AssignPermissionModel inputModel) =>
         {
             var rolePermission = await dbContext.RolePermissions.SingleOrDefaultAsync(rp
                 => rp.RoleId == inputModel.RoleId && rp.PermissionId == inputModel.PermissionId);

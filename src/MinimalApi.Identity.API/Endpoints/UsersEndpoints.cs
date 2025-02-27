@@ -18,7 +18,7 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
     {
         var apiGroup = endpoints
             .MapGroup("/utenti")
-            .RequireAuthorization("Users")
+            .RequireAuthorization()
             .WithOpenApi(opt =>
             {
                 opt.Tags = [new OpenApiTag { Name = "Utenti" }];
