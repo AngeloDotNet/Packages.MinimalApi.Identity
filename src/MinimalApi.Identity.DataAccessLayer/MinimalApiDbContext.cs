@@ -67,5 +67,33 @@ public class MinimalApiDbContext(DbContextOptions<MinimalApiDbContext> options) 
             .HasOne(um => um.Module)
             .WithMany(m => m.UserModules)
             .HasForeignKey(um => um.ModuleId);
+
+        builder.Entity<Permission>().HasData(
+            new Permission { Id = 1, Name = "Licenses", Default = true },
+            new Permission { Id = 2, Name = "Modules", Default = true },
+            new Permission { Id = 3, Name = "Permissions", Default = true },
+            new Permission { Id = 4, Name = "Roles", Default = true },
+            new Permission { Id = 5, Name = "Users", Default = true },
+
+            new Permission { Id = 6, Name = "GetLicenses", Default = true },
+            new Permission { Id = 7, Name = "CreateLicenses", Default = true },
+            new Permission { Id = 8, Name = "AssignLicense", Default = true },
+            new Permission { Id = 9, Name = "DeleteLicenses", Default = true },
+
+            new Permission { Id = 10, Name = "GetModules", Default = true },
+            new Permission { Id = 11, Name = "CreateModules", Default = true },
+            new Permission { Id = 12, Name = "AssignModule", Default = true },
+            new Permission { Id = 13, Name = "DeleteModules", Default = true },
+
+            new Permission { Id = 14, Name = "GetPermissions", Default = true },
+            new Permission { Id = 15, Name = "CreatePermissions", Default = true },
+            new Permission { Id = 16, Name = "AssignPermission", Default = true },
+            new Permission { Id = 17, Name = "DeletePermissions", Default = true },
+
+            new Permission { Id = 18, Name = "GetRoles", Default = true },
+            new Permission { Id = 19, Name = "CreateRoles", Default = true },
+            new Permission { Id = 20, Name = "AssignRole", Default = true },
+            new Permission { Id = 21, Name = "DeleteRoles", Default = true }
+        );
     }
 }
