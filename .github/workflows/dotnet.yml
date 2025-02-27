@@ -20,12 +20,12 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4.1.0
+      uses: actions/checkout@v4.2.2
       with:
         fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
     - name: Setup .NET Core SDK ${{ env.NET_VERSION }}
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4.3.0
       with:
         dotnet-version: ${{ env.NET_VERSION }}
 
@@ -36,7 +36,7 @@ jobs:
       run: dotnet test
 
     - name: Nerdbank.GitVersioning 
-      uses: dotnet/nbgv@v0.4
+      uses: dotnet/nbgv@v0.4.2
       id: nbgv
       with:        
         path: ${{ env.PROJECT_NAME }}
@@ -52,12 +52,12 @@ jobs:
 #          dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 #          dotnet nuget push **\*.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
-    - name: Create release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-          tag_name: ${{ env.TAG_NAME }}_v${{ steps.nbgv.outputs.NuGetPackageVersion }}
-          release_name: ${{ env.RELEASE_NAME }} ${{ steps.nbgv.outputs.NuGetPackageVersion }}
-          draft: false
-          prerelease: false
+#    - name: Create release
+#      uses: actions/create-release@v1
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      with:
+#          tag_name: ${{ env.TAG_NAME }}_v${{ steps.nbgv.outputs.NuGetPackageVersion }}
+#          release_name: ${{ env.RELEASE_NAME }} ${{ steps.nbgv.outputs.NuGetPackageVersion }}
+#          draft: false
+#          prerelease: false
