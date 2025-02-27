@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
+using MinimalApi.Identity.BusinessLayer.Extensions;
 
 namespace MinimalApi.Identity.BusinessLayer.Handlers;
 
@@ -18,12 +20,12 @@ public class PermissionHandler : AuthorizationHandler<AuthorizationRequirement>
 
             if (requirement != null && context.User.Identity!.IsAuthenticated == true && permission != null)
             {
-                if (context.User.Claims.Any(c => c.Type == "Permission" && c.Value == permission))
+                if (!context.User.Claims.Any(c => c.Type == ClaimsExtensions.Permission && c.Value == permission))
                 {
-                    context.Succeed(requirement);
+                    context.Fail();
                 }
 
-                context.Fail();
+                context.Succeed(requirement);
             }
         }
 

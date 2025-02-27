@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
 
-namespace MinimalApi.Identity.BusinessLayer.Handlers;
+namespace MinimalApi.Identity.BusinessLayer.Authorization.Provider;
 
 public class AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options) : DefaultAuthorizationPolicyProvider(options)
 {
