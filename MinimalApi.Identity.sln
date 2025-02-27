@@ -5,12 +5,6 @@ VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalApi.Identity.API", "src\MinimalApi.Identity.API\MinimalApi.Identity.API.csproj", "{A91765FE-48B1-4170-80D6-237D2B1E8B73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalApi.Identity.BusinessLayer", "src\MinimalApi.Identity.BusinessLayer\MinimalApi.Identity.BusinessLayer.csproj", "{EBD50582-9D3D-4634-88D8-2196B0F89C3B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalApi.Identity.DataAccessLayer", "src\MinimalApi.Identity.DataAccessLayer\MinimalApi.Identity.DataAccessLayer.csproj", "{CC81CD2F-BE0C-4DE8-9EF3-7647E9477C28}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalApi.Identity.Shared", "src\MinimalApi.Identity.Shared\MinimalApi.Identity.Shared.csproj", "{44EE2E6F-E3F9-445D-B2FB-491C4FFF1E09}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -32,18 +26,6 @@ Global
 		{A91765FE-48B1-4170-80D6-237D2B1E8B73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A91765FE-48B1-4170-80D6-237D2B1E8B73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A91765FE-48B1-4170-80D6-237D2B1E8B73}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EBD50582-9D3D-4634-88D8-2196B0F89C3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EBD50582-9D3D-4634-88D8-2196B0F89C3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EBD50582-9D3D-4634-88D8-2196B0F89C3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EBD50582-9D3D-4634-88D8-2196B0F89C3B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CC81CD2F-BE0C-4DE8-9EF3-7647E9477C28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC81CD2F-BE0C-4DE8-9EF3-7647E9477C28}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CC81CD2F-BE0C-4DE8-9EF3-7647E9477C28}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CC81CD2F-BE0C-4DE8-9EF3-7647E9477C28}.Release|Any CPU.Build.0 = Release|Any CPU
-		{44EE2E6F-E3F9-445D-B2FB-491C4FFF1E09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{44EE2E6F-E3F9-445D-B2FB-491C4FFF1E09}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{44EE2E6F-E3F9-445D-B2FB-491C4FFF1E09}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{44EE2E6F-E3F9-445D-B2FB-491C4FFF1E09}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A034A663-0531-A5F0-02C3-ACD174E55AF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A034A663-0531-A5F0-02C3-ACD174E55AF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A034A663-0531-A5F0-02C3-ACD174E55AF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
