@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.OpenApi.Models;
+using MinimalApi.Identity.API.Constants;
+using MinimalApi.Identity.API.Entities;
+using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
-using MinimalApi.Identity.DataAccessLayer.Entities;
-using MinimalApi.Identity.Shared;
 
 namespace MinimalApi.Identity.API.Endpoints;
 
@@ -40,7 +41,7 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
 
             if (result.Succeeded)
             {
-                return TypedResults.Ok("User registered successfully");
+                return TypedResults.Ok(MessageApi.UserCreated);
             }
 
             return TypedResults.BadRequest(result.Errors);
@@ -54,7 +55,7 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
 
             if (user == null)
             {
-                return TypedResults.NotFound("User not found");
+                return TypedResults.NotFound(MessageApi.ProfileNotFound);
             }
 
             var profile = new UserProfileModel
@@ -80,7 +81,7 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
 
             if (user == null)
             {
-                return TypedResults.NotFound("User not found");
+                return TypedResults.NotFound(MessageApi.ProfileNotFound);
             }
 
             user.FirstName = inputModel.FirstName;
@@ -91,7 +92,7 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
 
             if (result.Succeeded)
             {
-                return TypedResults.Ok("Profile updated successfully");
+                return TypedResults.Ok(MessageApi.ProfileUpdated);
             }
 
             return TypedResults.BadRequest(result.Errors);
@@ -105,14 +106,14 @@ public class UsersEndpoints : IEndpointRouteHandlerBuilder
 
             if (user == null)
             {
-                return TypedResults.NotFound("User not found");
+                return TypedResults.NotFound(MessageApi.ProfileNotFound);
             }
 
             var result = await userManager.DeleteAsync(user);
 
             if (result.Succeeded)
             {
-                return TypedResults.Ok("User deleted successfully");
+                return TypedResults.Ok(MessageApi.UserDeleted);
             }
 
             return TypedResults.BadRequest(result.Errors);

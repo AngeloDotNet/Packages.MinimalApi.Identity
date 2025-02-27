@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using MinimalApi.Identity.API.Entities;
+using MinimalApi.Identity.API.Enums;
+using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
-using MinimalApi.Identity.DataAccessLayer.Entities;
-using MinimalApi.Identity.Shared;
 
 namespace MinimalApi.Identity.API.Endpoints;
 
@@ -37,6 +38,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
 
             return TypedResults.Ok(result);
         })
+        .RequireAuthorization(nameof(Authorization.GetRoles))
         .WithOpenApi();
 
         apiGroup.MapPost("/crea-ruolo", async Task<Results<Ok, BadRequest<IEnumerable<IdentityError>>, Conflict<string>>>
@@ -56,6 +58,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
 
             return TypedResults.BadRequest(result.Errors);
         })
+        .RequireAuthorization(nameof(Authorization.CreateRole))
         .WithOpenApi();
 
         apiGroup.MapPost("/assegna-ruolo", async Task<Results<Ok<string>, NotFound<string>, BadRequest<IEnumerable<IdentityError>>>>
@@ -85,6 +88,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
 
             return TypedResults.BadRequest(result.Errors);
         })
+        .RequireAuthorization(nameof(Authorization.AssignRole))
         .WithOpenApi();
 
         apiGroup.MapDelete("/rimuovi-ruolo", async Task<Results<Ok, NotFound<string>, BadRequest<IEnumerable<IdentityError>>>>
@@ -107,6 +111,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
 
             return TypedResults.BadRequest(result.Errors);
         })
+        .RequireAuthorization(nameof(Authorization.DeleteRole))
         .WithOpenApi();
     }
 }
