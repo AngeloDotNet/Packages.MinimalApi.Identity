@@ -3,7 +3,7 @@ name: Build, Test and Pack
 on:
   push:
     branches: [ main ]
-    paths: [ 'src/ClassLibrary.EFCore/**' ]
+    paths: [ 'src/MinimalApi.Identity.API/**' ]
   workflow_dispatch:
       
 env:
