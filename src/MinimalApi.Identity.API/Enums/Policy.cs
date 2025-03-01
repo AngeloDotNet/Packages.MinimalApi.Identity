@@ -6,5 +6,5 @@ public enum Policy
     Licenses,
     Modules,
     Roles,
-    Users
+    Profiles
 }

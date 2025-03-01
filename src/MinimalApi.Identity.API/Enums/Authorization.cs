@@ -22,7 +22,7 @@ public enum Authorization
     AssignRole,
     DeleteRole,
 
-    //GetProfile,
-    //EditProfile,
-    //DeleteProfile
+    GetProfile,
+    EditProfile,
+    DeleteProfile
 }

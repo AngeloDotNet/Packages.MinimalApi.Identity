@@ -72,7 +72,7 @@ public class MinimalApiDbContext(DbContextOptions<MinimalApiDbContext> options) 
             new Permission { Id = 2, Name = "Modules", Default = true },
             new Permission { Id = 3, Name = "Permissions", Default = true },
             new Permission { Id = 4, Name = "Roles", Default = true },
-            new Permission { Id = 5, Name = "Users", Default = true },
+            new Permission { Id = 5, Name = "Profiles", Default = true },
 
             new Permission { Id = 6, Name = "GetLicenses", Default = true },
             new Permission { Id = 7, Name = "CreateLicenses", Default = true },
@@ -92,7 +92,11 @@ public class MinimalApiDbContext(DbContextOptions<MinimalApiDbContext> options) 
             new Permission { Id = 18, Name = "GetRoles", Default = true },
             new Permission { Id = 19, Name = "CreateRoles", Default = true },
             new Permission { Id = 20, Name = "AssignRole", Default = true },
-            new Permission { Id = 21, Name = "DeleteRoles", Default = true }
+            new Permission { Id = 21, Name = "DeleteRoles", Default = true },
+
+            new Permission { Id = 22, Name = "GetProfiles", Default = true },
+            new Permission { Id = 23, Name = "EditProfiles", Default = true },
+            new Permission { Id = 24, Name = "DeleteProfiles", Default = true }
         );
     }
 }

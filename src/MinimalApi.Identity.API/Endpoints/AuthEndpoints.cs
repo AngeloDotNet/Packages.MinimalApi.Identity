@@ -27,15 +27,38 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
     public static void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
         var apiGroup = endpoints
-            .MapGroup("/autenticazione")
+            .MapGroup(EndpointsApi.EndpointsAuthGroup)
             .RequireAuthorization()
             .WithOpenApi(opt =>
             {
-                opt.Tags = [new OpenApiTag { Name = "Autenticazione" }];
+                opt.Tags = [new OpenApiTag { Name = EndpointsApi.EndpointsAuthTag }];
                 return opt;
             });
 
-        apiGroup.MapPost("/login", [AllowAnonymous] async Task<Results<Ok<AuthResponse>, BadRequest<string>>>
+        apiGroup.MapPost(EndpointsApi.EndpointsAuthRegister, [AllowAnonymous] async Task<Results<Ok<string>,
+            BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
+            [FromBody] RegisterModel inputModel) =>
+        {
+            var user = new ApplicationUser
+            {
+                FirstName = inputModel.FirstName,
+                LastName = inputModel.LastName,
+                UserName = inputModel.Username,
+                Email = inputModel.Email
+            };
+
+            var result = await userManager.CreateAsync(user, inputModel.Password);
+
+            if (result.Succeeded)
+            {
+                return TypedResults.Ok(MessageApi.UserCreated);
+            }
+
+            return TypedResults.BadRequest(result.Errors);
+        })
+        .WithOpenApi();
+
+        apiGroup.MapPost(EndpointsApi.EndpointsAuthLogin, [AllowAnonymous] async Task<Results<Ok<AuthResponse>, BadRequest<string>>>
             ([FromServices] IConfiguration configuration, [FromServices] UserManager<ApplicationUser> userManager,
             [FromServices] IAuthService authService, [FromBody] LoginModel inputModel) =>
         {
@@ -72,7 +95,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
         })
         .WithOpenApi();
 
-        apiGroup.MapPost("/forgot-password", async Task<Results<Ok<string>, NotFound<string>>>
+        apiGroup.MapPost(EndpointsApi.EndpointsForgotPassword, async Task<Results<Ok<string>, NotFound<string>>>
                 ([FromServices] UserManager<ApplicationUser> userManager, [FromServices] IEmailSender emailSender,
                 [FromServices] IHttpContextAccessor httpContextAccessor, [FromBody] ForgotPasswordModel inputModel) =>
             {
@@ -86,15 +109,6 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
                 var token = await userManager.GeneratePasswordResetTokenAsync(user);
                 var request = httpContextAccessor.HttpContext!.Request;
 
-                //var queryParams = new Dictionary<string, string?>
-                //{
-                //    { "token", token },
-                //    { "email", user.Email }
-                //};
-
-                //var callbackUrl = QueryHelpers.AddQueryString($"{request.Scheme}://{request.Host}/reset-password", queryParams);
-                //await emailSender.SendEmailAsync(user.Email!, "Reset Password", $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
-
                 await emailSender.SendEmailAsync(user.Email!, "Reset Password", $"To reset your password, you will need to indicate " +
                     $"this token: {token}. It is recommended to copy and paste for simplicity.");
 
@@ -102,8 +116,9 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             })
             .WithOpenApi();
 
-        apiGroup.MapPost("/reset-password", async Task<Results<Ok<string>, NotFound<string>, BadRequest<IEnumerable<IdentityError>>>>
-            ([FromServices] UserManager<ApplicationUser> userManager, [FromBody] ResetPasswordModel inputModel) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsResetPassword, async Task<Results<Ok<string>, NotFound<string>,
+            BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
+            [FromBody] ResetPasswordModel inputModel) =>
         {
             var user = await userManager.FindByEmailAsync(inputModel.Email);
             if (user == null)

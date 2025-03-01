@@ -19,15 +19,16 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
     public static void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
         var apiGroup = endpoints
-            .MapGroup("/moduli")
+            .MapGroup(EndpointsApi.EndpointsModulesGroup)
             .RequireAuthorization()
             .WithOpenApi(opt =>
             {
-                opt.Tags = [new OpenApiTag { Name = "Moduli" }];
+                opt.Tags = [new OpenApiTag { Name = EndpointsApi.EndpointsModulesTag }];
                 return opt;
             });
 
-        apiGroup.MapGet(string.Empty, async Task<Results<Ok<List<Module>>, NotFound<string>>> (MinimalApiDbContext dbContext) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<Results<Ok<List<Module>>, NotFound<string>>>
+            (MinimalApiDbContext dbContext) =>
         {
             var result = await dbContext.Modules.ToListAsync();
 
@@ -41,7 +42,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         .RequireAuthorization(nameof(Authorization.GetModules))
         .WithOpenApi();
 
-        apiGroup.MapPost("/crea-modulo", async (MinimalApiDbContext dbContext, [FromBody] Module inputModel) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsCreateModule, async (MinimalApiDbContext dbContext, [FromBody] Module inputModel) =>
         {
             dbContext.Modules.Add(inputModel);
             await dbContext.SaveChangesAsync();
@@ -51,7 +52,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         .RequireAuthorization(nameof(Authorization.CreateModule))
         .WithOpenApi();
 
-        apiGroup.MapPost("/assegna-modulo", async Task<Results<Ok<string>, NotFound<string>>> (MinimalApiDbContext dbContext,
+        apiGroup.MapPost(EndpointsApi.EndpointsAssignModule, async Task<Results<Ok<string>, NotFound<string>>> (MinimalApiDbContext dbContext,
            [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignModuleModel inputModel) =>
         {
             var user = await userManager.FindByIdAsync(inputModel.UserId.ToString());
@@ -81,8 +82,8 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         .RequireAuthorization(nameof(Authorization.AssignModule))
         .WithOpenApi();
 
-        apiGroup.MapDelete("/rimuovi-modulo", async Task<Results<Ok<string>, NotFound<string>>> (MinimalApiDbContext dbContext,
-             [FromBody] AssignModuleModel inputModel) =>
+        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeModule, async Task<Results<Ok<string>, NotFound<string>>>
+            (MinimalApiDbContext dbContext, [FromBody] AssignModuleModel inputModel) =>
         {
             var userModule = await dbContext.UserModules
                 .SingleOrDefaultAsync(um => um.UserId == inputModel.UserId && um.ModuleId == inputModel.ModuleId);

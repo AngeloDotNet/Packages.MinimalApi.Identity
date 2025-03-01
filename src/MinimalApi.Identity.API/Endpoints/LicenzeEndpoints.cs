@@ -19,15 +19,16 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
     public static void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
         var apiGroup = endpoints
-            .MapGroup("/licenze")
+            .MapGroup(EndpointsApi.EndpointsLicenzeGroup)
             .RequireAuthorization()
             .WithOpenApi(opt =>
             {
-                opt.Tags = [new OpenApiTag { Name = "Licenze" }];
+                opt.Tags = [new OpenApiTag { Name = EndpointsApi.EndpointsLicenzeTag }];
                 return opt;
             });
 
-        apiGroup.MapGet(string.Empty, async Task<Results<Ok<List<License>>, NotFound<string>>> (MinimalApiDbContext dbContext) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<Results<Ok<List<License>>, NotFound<string>>>
+            (MinimalApiDbContext dbContext) =>
         {
             var result = await dbContext.Licenses.ToListAsync();
 
@@ -41,7 +42,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
         .RequireAuthorization(nameof(Authorization.GetLicenses))
         .WithOpenApi();
 
-        apiGroup.MapPost("/crea-licenza", async (MinimalApiDbContext dbContext, [FromBody] License inputModel) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsCreateLicense, async (MinimalApiDbContext dbContext, [FromBody] License inputModel) =>
         {
             dbContext.Licenses.Add(inputModel);
             await dbContext.SaveChangesAsync();
@@ -51,8 +52,8 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
         .RequireAuthorization(nameof(Authorization.CreateLicense))
         .WithOpenApi();
 
-        apiGroup.MapPost("/assegna-licenza", async Task<Results<Ok<string>, NotFound<string>>> (MinimalApiDbContext dbContext,
-            [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignLicenseModel inputModel) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsAssignLicense, async Task<Results<Ok<string>, NotFound<string>>>
+            (MinimalApiDbContext dbContext, [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignLicenseModel inputModel) =>
         {
             var user = await userManager.FindByIdAsync(inputModel.UserId.ToString());
 
@@ -82,8 +83,8 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
         .RequireAuthorization(nameof(Authorization.AssignLicense))
         .WithOpenApi();
 
-        apiGroup.MapDelete("/rimuovi-licenza", async Task<Results<Ok<string>, NotFound<string>>> (MinimalApiDbContext dbContext,
-             [FromBody] AssignLicenseModel inputModel) =>
+        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeLicense, async Task<Results<Ok<string>, NotFound<string>>>
+            (MinimalApiDbContext dbContext, [FromBody] AssignLicenseModel inputModel) =>
         {
             var userLicense = await dbContext.UserLicenses.SingleOrDefaultAsync(ul
                 => ul.UserId == inputModel.UserId && ul.LicenseId == inputModel.LicenseId);

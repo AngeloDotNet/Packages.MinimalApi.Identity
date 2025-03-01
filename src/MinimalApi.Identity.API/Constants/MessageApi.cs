@@ -2,28 +2,37 @@
 
 public static class MessageApi
 {
-    public const string InvalidCredentials = "Credenziali non valide";
-    public const string UserNotFound = "Utente non trovato";
-    public const string SendEmailResetPassword = "Email inviata con successo";
-    public const string ResetPassword = "Password reimpostata con successo";
-    public const string UserCreated = "Utente creato con successo";
-    public const string ProfileUpdated = "Profilo aggiornato con successo";
-    public const string ProfileNotFound = "Profilo non trovato";
-    public const string UserDeleted = "Utente eliminato con successo";
+    public const string InvalidCredentials = "Invalid credentials";
+    public const string UserNotFound = "User not found";
+    public const string SendEmailResetPassword = "Email sent successfully";
+    public const string ResetPassword = "Password reset successfully";
+    public const string UserCreated = "User created successfully";
+    public const string ProfileUpdated = "Profile updated successfully";
+    public const string ProfileNotFound = "Profile not found";
+    public const string UserDeleted = "User deleted successfully";
 
-    public const string LicenseCreated = "Licenza creata con successo";
-    public const string LicenseNotFound = "Licenza non trovata";
-    public const string LicenseAssigned = "Licenza assegnata con successo";
-    public const string LicenseCanceled = "Licenza rimossa con successo";
-    public const string LicensesNotFound = "Licenze non trovate";
+    public const string LicenseCreated = "License created successfully";
+    public const string LicenseNotFound = "License not found";
+    public const string LicenseAssigned = "License assigned successfully";
+    public const string LicenseCanceled = "License removed successfully";
+    public const string LicensesNotFound = "Licenses not found";
 
-    public const string ModuleCreated = "Modulo creato con successo";
-    public const string ModuleNotFound = "Modulo non trovato";
-    public const string ModuleAssigned = "Modulo assegnato con successo";
-    public const string ModuleCanceled = "Modulo rimosso con successo";
-    public const string ModulesNotFound = "Moduli non trovati";
+    public const string ModuleCreated = "Module created successfully";
+    public const string ModuleNotFound = "Module not found";
+    public const string ModuleAssigned = "Module assigned successfully";
+    public const string ModuleCanceled = "Module removed successfully";
+    public const string ModulesNotFound = "Modules not found";
 
-    // TODO: Permessi
+    public const string PermissionCreated = "Permission created successfully";
+    public const string PermissionNotFound = "Permission not found";
+    public const string PermissionAssigned = "Permission assigned successfully";
+    public const string PermissionCanceled = "Permission removed successfully";
+    public const string PermissionsNotFound = "Permissions not found";
 
-    // TODO: Ruoli
+    public const string RoleCreated = "Role created successfully";
+    public const string RoleNotFound = "Role not found";
+    public const string RoleAssigned = "Role assigned successfully";
+    public const string RoleCanceled = "Role removed successfully";
+    public const string RoleExists = "Role already exists";
+    public const string RolesNotFound = "Roles not found";
 }

@@ -31,7 +31,7 @@ public static class RegisterServicesExtensions
     public static IServiceCollection AddRegisterServices<TMigrations>(this IServiceCollection services, string connectionString,
         JwtOptions jwtOptions, NetIdentityOptions identityOptions) where TMigrations : class
     {
-        services.AddMinimalApiDbContext(connectionString, typeof(TMigrations).Assembly.FullName!);
+        services.AddMinimalApiDbContext(connectionString, typeof(TMigrations).Assembly.FullName!, "MigrationsHistory");
         services.AddMinimalApiIdentityServices(jwtOptions);
         services.AddMinimalApiIdentityOptionsServices(identityOptions);
 
@@ -94,14 +94,15 @@ public static class RegisterServicesExtensions
             });
     }
 
-    internal static IServiceCollection AddMinimalApiDbContext(this IServiceCollection services, string connectionString, string migrationAssembly)
+    internal static IServiceCollection AddMinimalApiDbContext(this IServiceCollection services, string connectionString,
+        string migrationAssembly, string migrationTableName)
     {
         services.AddDbContext<MinimalApiDbContext>(options =>
         {
             options.UseSqlServer(connectionString, opt =>
             {
                 opt.MigrationsAssembly(migrationAssembly);
-                opt.MigrationsHistoryTable("MigrationsHistory");
+                opt.MigrationsHistoryTable(migrationTableName);
                 opt.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
         });
@@ -187,9 +188,9 @@ public static class RegisterServicesExtensions
             (nameof(Authorization.AssignRole), nameof(Policy.Roles)),
             (nameof(Authorization.DeleteRole), nameof(Policy.Roles)),
 
-            //(nameof(AuthPolicy.GetProfile), nameof(Policy.Users)),
-            //(nameof(AuthPolicy.EditProfile), nameof(Policy.Users)),
-            //(nameof(AuthPolicy.DeleteProfile), nameof(Policy.Users))
+            (nameof(Authorization.GetProfile), nameof(Policy.Profiles)),
+            (nameof(Authorization.EditProfile), nameof(Policy.Profiles)),
+            (nameof(Authorization.DeleteProfile), nameof(Policy.Profiles))
         };
 
         foreach (var (policyName, requirementName) in policies)
