@@ -9,11 +9,13 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Entities;
+using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Options;
@@ -36,9 +38,11 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             });
 
         apiGroup.MapPost(EndpointsApi.EndpointsAuthRegister, [AllowAnonymous] async Task<Results<Ok<string>,
-            BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
-            [FromBody] RegisterModel inputModel) =>
+            BadRequest<string>, BadRequest<IEnumerable<IdentityError>>>> ([FromServices] IConfiguration configuration,
+            [FromServices] UserManager<ApplicationUser> userManager, [FromServices] IEmailSender emailSender,
+            [FromServices] IHttpContextAccessor httpContextAccessor, [FromBody] RegisterModel inputModel) =>
         {
+            var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
             var user = new ApplicationUser
             {
                 FirstName = inputModel.FirstName,
@@ -51,6 +55,31 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
 
             if (result.Succeeded)
             {
+                if (user.Email.Equals(userOptions.AssignAdminRoleOnRegistration, StringComparison.OrdinalIgnoreCase))
+                {
+                    var claim = new Claim(ClaimTypes.Role, nameof(DefaultRoles.Admin));
+                    var roleAssignmentResult = await userManager.AddClaimAsync(user, claim);
+
+                    if (!roleAssignmentResult.Succeeded)
+                    {
+                        //_logger.LogWarning("Could not assign the administrator role to the user");
+                        //return TypedResults.BadRequest(roleAssignmentResult.Errors);
+                        return TypedResults.BadRequest(MessageApi.RoleNotAssigned);
+                    }
+                }
+
+                var userId = await userManager.GetUserIdAsync(user);
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+                var request = httpContextAccessor.HttpContext!.Request;
+                //var returnUrl = request.Query["returnUrl"].ToString();
+                //var callbackUrl = $"{request.Scheme}://{request.Host}/Account/ConfirmEmail?userId={userId}&code={token}&returnUrl={returnUrl}";
+                var callbackUrl = $"{request.Scheme}://{request.Host}/{EndpointsApi.EndpointsAccountGroup}{EndpointsApi.EndpointsConfirmEmail}?userId={userId}&code={token}";
+
+                await emailSender.SendEmailAsync(user.Email!, "Confirm your email", $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+
                 return TypedResults.Ok(MessageApi.UserCreated);
             }
 
@@ -60,13 +89,34 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
 
         apiGroup.MapPost(EndpointsApi.EndpointsAuthLogin, [AllowAnonymous] async Task<Results<Ok<AuthResponse>, BadRequest<string>>>
             ([FromServices] IConfiguration configuration, [FromServices] UserManager<ApplicationUser> userManager,
-            [FromServices] IAuthService authService, [FromBody] LoginModel inputModel) =>
+            [FromServices] SignInManager<ApplicationUser> signInManager, [FromServices] IAuthService authService,
+            [FromBody] LoginModel inputModel) =>
         {
+            var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
+
+            var signInResult = await signInManager.PasswordSignInAsync(inputModel.Username, inputModel.Password, inputModel.RememberMe, identityOptions.AllowedForNewUsers);
+
+            if (!signInResult.Succeeded)
+            {
+                return signInResult switch
+                {
+                    { IsNotAllowed: true } => TypedResults.BadRequest(MessageApi.UserNotAllowedLogin),
+                    { IsLockedOut: true } => TypedResults.BadRequest(MessageApi.UserLockedOut),
+                    { RequiresTwoFactor: true } => TypedResults.BadRequest(MessageApi.RequiredTwoFactor),
+                    _ => TypedResults.BadRequest(MessageApi.InvalidCredentials)
+                };
+            }
+
             var user = await userManager.FindByNameAsync(inputModel.Username);
 
-            if (user == null || !await userManager.CheckPasswordAsync(user, inputModel.Password))
+            if (user == null)
             {
-                return TypedResults.BadRequest(MessageApi.InvalidCredentials);
+                return TypedResults.BadRequest(MessageApi.UserNotFound);
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                return TypedResults.BadRequest(MessageApi.UserNotEmailConfirmed);
             }
 
             await userManager.UpdateSecurityStampAsync(user);
@@ -77,7 +127,10 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             var claims = new List<Claim>()
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Name, inputModel.Username),
+                new(ClaimTypes.Name, user.UserName ?? string.Empty),
+                //new(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
+                //new(ClaimTypes.Surname, user.LastName ?? string.Empty),
+                new(ClaimsExtensions.FullName, $"{user.FirstName} {user.LastName}"),
                 new(ClaimTypes.Email, user.Email ?? string.Empty),
                 new(ClaimTypes.SerialNumber, user.SecurityStamp!.ToString()),
             }
@@ -95,47 +148,47 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
         })
         .WithOpenApi();
 
-        apiGroup.MapPost(EndpointsApi.EndpointsForgotPassword, async Task<Results<Ok<string>, NotFound<string>>>
-                ([FromServices] UserManager<ApplicationUser> userManager, [FromServices] IEmailSender emailSender,
-                [FromServices] IHttpContextAccessor httpContextAccessor, [FromBody] ForgotPasswordModel inputModel) =>
-            {
-                var user = await userManager.FindByEmailAsync(inputModel.Email);
+        //apiGroup.MapPost(EndpointsApi.EndpointsForgotPassword, async Task<Results<Ok<string>, NotFound<string>>>
+        //        ([FromServices] UserManager<ApplicationUser> userManager, [FromServices] IEmailSender emailSender,
+        //        [FromServices] IHttpContextAccessor httpContextAccessor, [FromBody] ForgotPasswordModel inputModel) =>
+        //    {
+        //        var user = await userManager.FindByEmailAsync(inputModel.Email);
 
-                if (user == null)
-                {
-                    return TypedResults.NotFound(MessageApi.UserNotFound);
-                }
+        //        if (user == null)
+        //        {
+        //            return TypedResults.NotFound(MessageApi.UserNotFound);
+        //        }
 
-                var token = await userManager.GeneratePasswordResetTokenAsync(user);
-                var request = httpContextAccessor.HttpContext!.Request;
+        //        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        //        var request = httpContextAccessor.HttpContext!.Request;
 
-                await emailSender.SendEmailAsync(user.Email!, "Reset Password", $"To reset your password, you will need to indicate " +
-                    $"this token: {token}. It is recommended to copy and paste for simplicity.");
+        //        await emailSender.SendEmailAsync(user.Email!, "Reset Password", $"To reset your password, you will need to indicate " +
+        //            $"this token: {token}. It is recommended to copy and paste for simplicity.");
 
-                return TypedResults.Ok(MessageApi.SendEmailResetPassword);
-            })
-            .WithOpenApi();
+        //        return TypedResults.Ok(MessageApi.SendEmailResetPassword);
+        //    })
+        //    .WithOpenApi();
 
-        apiGroup.MapPost(EndpointsApi.EndpointsResetPassword, async Task<Results<Ok<string>, NotFound<string>,
-            BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
-            [FromBody] ResetPasswordModel inputModel) =>
-        {
-            var user = await userManager.FindByEmailAsync(inputModel.Email);
-            if (user == null)
-            {
-                return TypedResults.NotFound(MessageApi.UserNotFound);
-            }
+        //apiGroup.MapPost(EndpointsApi.EndpointsResetPassword, async Task<Results<Ok<string>, NotFound<string>,
+        //    BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
+        //    [FromBody] ResetPasswordModel inputModel) =>
+        //{
+        //    var user = await userManager.FindByEmailAsync(inputModel.Email);
+        //    if (user == null)
+        //    {
+        //        return TypedResults.NotFound(MessageApi.UserNotFound);
+        //    }
 
-            var result = await userManager.ResetPasswordAsync(user, inputModel.Token, inputModel.Password);
+        //    var result = await userManager.ResetPasswordAsync(user, inputModel.Token, inputModel.Password);
 
-            if (result.Succeeded)
-            {
-                return TypedResults.Ok(MessageApi.ResetPassword);
-            }
+        //    if (result.Succeeded)
+        //    {
+        //        return TypedResults.Ok(MessageApi.ResetPassword);
+        //    }
 
-            return TypedResults.BadRequest(result.Errors);
-        })
-        .WithOpenApi();
+        //    return TypedResults.BadRequest(result.Errors);
+        //})
+        //.WithOpenApi();
     }
 
     private static AuthResponse CreateToken(IList<Claim> claims, IConfiguration configuration)
