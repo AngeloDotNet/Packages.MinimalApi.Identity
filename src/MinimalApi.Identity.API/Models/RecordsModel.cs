@@ -9,4 +9,3 @@ public record class UserProfileModel(string Username, string Email, string First
 {
     public string FullName => $"{FirstName} {LastName}";
 }
-public record class ConfirmEmailModel(string UserId, string Token);

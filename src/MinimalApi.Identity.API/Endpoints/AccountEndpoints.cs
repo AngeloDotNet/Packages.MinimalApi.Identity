@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Entities;
-using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -29,22 +28,23 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             });
 
         apiGroup.MapGet(EndpointsApi.EndpointsConfirmEmail, [AllowAnonymous] async Task<Results<Ok<string>,
-            BadRequest<string>>> ([FromServices] UserManager<ApplicationUser> userManager, [FromQuery] ConfirmEmailModel inputModel) =>
+            BadRequest<string>>> ([FromServices] UserManager<ApplicationUser> userManager, [FromRoute] string userId,
+            [FromRoute] string token) =>
         {
-            if (inputModel.UserId == null || inputModel.Token == null)
+            if (userId == null || token == null)
             {
                 return TypedResults.BadRequest(MessageApi.UserIdTokenRequired);
             }
 
-            var user = await userManager.FindByIdAsync(inputModel.UserId);
+            var user = await userManager.FindByIdAsync(userId);
 
             if (user == null)
             {
                 return TypedResults.BadRequest(MessageApi.UserNotFound);
             }
 
-            var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(inputModel.Token));
-            var result = await userManager.ConfirmEmailAsync(user, inputModel.Token);
+            var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(userId));
+            var result = await userManager.ConfirmEmailAsync(user, code);
 
             if (!result.Succeeded)
             {
