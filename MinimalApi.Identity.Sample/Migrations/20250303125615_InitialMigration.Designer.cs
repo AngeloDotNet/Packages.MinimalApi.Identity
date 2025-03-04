@@ -7,14 +7,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MinimalApi.Identity.API;
 
-
 #nullable disable
 
 namespace MinimalApi.Identity.Sample.Migrations
 {
     [DbContext(typeof(MinimalApiDbContext))]
-    [Migration("20250226111544_AddDefaultPermissions")]
-    partial class AddDefaultPermissions
+    [Migration("20250303125615_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,7 +113,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationRole", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.ApplicationRole", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -125,6 +124,9 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Default")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -142,9 +144,19 @@ namespace MinimalApi.Identity.Sample.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ConcurrencyStamp = "52D77FEB-3860-4523-B022-4F5CB859E434",
+                            Default = true,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        });
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUser", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -220,7 +232,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUserRole", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.ApplicationUserRole", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -235,7 +247,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.License", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.License", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -255,7 +267,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.ToTable("Licenses");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.Module", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.Module", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -276,52 +288,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.ToTable("Modules");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.RolePermission", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("RolePermissions");
-                });
-
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.UserLicense", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LicenseId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId", "LicenseId");
-
-                    b.HasIndex("LicenseId");
-
-                    b.ToTable("UserLicenses");
-                });
-
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.UserModule", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ModuleId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId", "ModuleId");
-
-                    b.HasIndex("ModuleId");
-
-                    b.ToTable("UserModules");
-                });
-
-            modelBuilder.Entity("MinimalApi.Identity.Shared.Permission", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.Permission", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -369,13 +336,172 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 5,
                             Default = true,
-                            Name = "Users"
+                            Name = "Profiles"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Default = true,
+                            Name = "GetLicenses"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Default = true,
+                            Name = "CreateLicense"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Default = true,
+                            Name = "AssignLicense"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Default = true,
+                            Name = "DeleteLicense"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Default = true,
+                            Name = "GetModules"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Default = true,
+                            Name = "CreateModule"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Default = true,
+                            Name = "AssignModule"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Default = true,
+                            Name = "DeleteModule"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Default = true,
+                            Name = "GetPermissions"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Default = true,
+                            Name = "CreatePermission"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            Default = true,
+                            Name = "AssignPermission"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Default = true,
+                            Name = "DeletePermission"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            Default = true,
+                            Name = "GetRoles"
+                        },
+                        new
+                        {
+                            Id = 19,
+                            Default = true,
+                            Name = "CreateRole"
+                        },
+                        new
+                        {
+                            Id = 20,
+                            Default = true,
+                            Name = "AssignRole"
+                        },
+                        new
+                        {
+                            Id = 21,
+                            Default = true,
+                            Name = "DeleteRole"
+                        },
+                        new
+                        {
+                            Id = 22,
+                            Default = true,
+                            Name = "GetProfile"
+                        },
+                        new
+                        {
+                            Id = 23,
+                            Default = true,
+                            Name = "EditProfile"
+                        },
+                        new
+                        {
+                            Id = 24,
+                            Default = true,
+                            Name = "DeleteProfile"
                         });
+                });
+
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.RolePermission", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermissions");
+                });
+
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.UserLicense", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LicenseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "LicenseId");
+
+                    b.HasIndex("LicenseId");
+
+                    b.ToTable("UserLicenses");
+                });
+
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.UserModule", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "ModuleId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("UserModules");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationRole", null)
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -384,7 +510,7 @@ namespace MinimalApi.Identity.Sample.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUser", null)
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -393,7 +519,7 @@ namespace MinimalApi.Identity.Sample.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUser", null)
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -402,22 +528,22 @@ namespace MinimalApi.Identity.Sample.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUser", null)
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUserRole", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.ApplicationUserRole", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationRole", "Role")
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationRole", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUser", "User")
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationUser", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -428,15 +554,15 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.RolePermission", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.RolePermission", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.Shared.Permission", "Permission")
+                    b.HasOne("MinimalApi.Identity.API.Entities.Permission", "Permission")
                         .WithMany("RolePermissions")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationRole", "Role")
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationRole", "Role")
                         .WithMany("RolePermissions")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -447,15 +573,15 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.UserLicense", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.UserLicense", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.License", "License")
+                    b.HasOne("MinimalApi.Identity.API.Entities.License", "License")
                         .WithMany("UserLicenses")
                         .HasForeignKey("LicenseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUser", "User")
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationUser", "User")
                         .WithMany("UserLicenses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -466,15 +592,15 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.UserModule", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.UserModule", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.Module", "Module")
+                    b.HasOne("MinimalApi.Identity.API.Entities.Module", "Module")
                         .WithMany("UserModules")
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUser", "User")
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationUser", "User")
                         .WithMany("UserModules")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -485,14 +611,14 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationRole", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.ApplicationRole", b =>
                 {
                     b.Navigation("RolePermissions");
 
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.ApplicationUser", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("UserLicenses");
 
@@ -501,17 +627,17 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.License", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.License", b =>
                 {
                     b.Navigation("UserLicenses");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.DataAccessLayer.Entities.Module", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.Module", b =>
                 {
                     b.Navigation("UserModules");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.Shared.Permission", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
                 });

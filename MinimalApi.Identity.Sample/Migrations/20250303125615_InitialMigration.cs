@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace MinimalApi.Identity.Sample.Migrations
 {
     /// <inheritdoc />
@@ -17,6 +19,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Default = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -88,7 +91,8 @@ namespace MinimalApi.Identity.Sample.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Default = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -271,6 +275,42 @@ namespace MinimalApi.Identity.Sample.Migrations
                         principalTable: "Permissions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Default", "Name", "NormalizedName" },
+                values: new object[] { 1, "52D77FEB-3860-4523-B022-4F5CB859E434", true, "Admin", "ADMIN" });
+
+            migrationBuilder.InsertData(
+                table: "Permissions",
+                columns: new[] { "Id", "Default", "Name" },
+                values: new object[,]
+                {
+                    { 1, true, "Licenses" },
+                    { 2, true, "Modules" },
+                    { 3, true, "Permissions" },
+                    { 4, true, "Roles" },
+                    { 5, true, "Profiles" },
+                    { 6, true, "GetLicenses" },
+                    { 7, true, "CreateLicense" },
+                    { 8, true, "AssignLicense" },
+                    { 9, true, "DeleteLicense" },
+                    { 10, true, "GetModules" },
+                    { 11, true, "CreateModule" },
+                    { 12, true, "AssignModule" },
+                    { 13, true, "DeleteModule" },
+                    { 14, true, "GetPermissions" },
+                    { 15, true, "CreatePermission" },
+                    { 16, true, "AssignPermission" },
+                    { 17, true, "DeletePermission" },
+                    { 18, true, "GetRoles" },
+                    { 19, true, "CreateRole" },
+                    { 20, true, "AssignRole" },
+                    { 21, true, "DeleteRole" },
+                    { 22, true, "GetProfile" },
+                    { 23, true, "EditProfile" },
+                    { 24, true, "DeleteProfile" }
                 });
 
             migrationBuilder.CreateIndex(

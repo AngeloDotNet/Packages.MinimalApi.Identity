@@ -122,6 +122,9 @@ namespace MinimalApi.Identity.Sample.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Default")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -138,6 +141,16 @@ namespace MinimalApi.Identity.Sample.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ConcurrencyStamp = "52D77FEB-3860-4523-B022-4F5CB859E434",
+                            Default = true,
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        });
                 });
 
             modelBuilder.Entity("MinimalApi.Identity.API.Entities.ApplicationUser", b =>
@@ -332,7 +345,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 7,
                             Default = true,
-                            Name = "CreateLicenses"
+                            Name = "CreateLicense"
                         },
                         new
                         {
@@ -344,7 +357,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 9,
                             Default = true,
-                            Name = "DeleteLicenses"
+                            Name = "DeleteLicense"
                         },
                         new
                         {
@@ -356,7 +369,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 11,
                             Default = true,
-                            Name = "CreateModules"
+                            Name = "CreateModule"
                         },
                         new
                         {
@@ -368,7 +381,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 13,
                             Default = true,
-                            Name = "DeleteModules"
+                            Name = "DeleteModule"
                         },
                         new
                         {
@@ -380,7 +393,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 15,
                             Default = true,
-                            Name = "CreatePermissions"
+                            Name = "CreatePermission"
                         },
                         new
                         {
@@ -392,7 +405,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 17,
                             Default = true,
-                            Name = "DeletePermissions"
+                            Name = "DeletePermission"
                         },
                         new
                         {
@@ -404,7 +417,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 19,
                             Default = true,
-                            Name = "CreateRoles"
+                            Name = "CreateRole"
                         },
                         new
                         {
@@ -416,25 +429,25 @@ namespace MinimalApi.Identity.Sample.Migrations
                         {
                             Id = 21,
                             Default = true,
-                            Name = "DeleteRoles"
+                            Name = "DeleteRole"
                         },
                         new
                         {
                             Id = 22,
                             Default = true,
-                            Name = "GetProfiles"
+                            Name = "GetProfile"
                         },
                         new
                         {
                             Id = 23,
                             Default = true,
-                            Name = "EditProfiles"
+                            Name = "EditProfile"
                         },
                         new
                         {
                             Id = 24,
                             Default = true,
-                            Name = "DeleteProfiles"
+                            Name = "DeleteProfile"
                         });
                 });
 
