@@ -6,6 +6,7 @@ public static class EndpointsApi
     public const string EndpointsProfile = "/{username}";
 
     public const string EndpointsAuthGroup = "/authentication";
+    public const string EndpointsAccountGroup = "/account";
     public const string EndpointsLicenzeGroup = "/licenses";
     public const string EndpointsModulesGroup = "/modules";
     public const string EndpointsPermissionsGroup = "/permissions";
@@ -13,6 +14,7 @@ public static class EndpointsApi
     public const string EndpointsProfilesGroup = "/profiles";
 
     public const string EndpointsAuthTag = "Authentication";
+    public const string EndpointsAccountTag = "Account";
     public const string EndpointsLicenzeTag = "Licenses";
     public const string EndpointsModulesTag = "Modules";
     public const string EndpointsPermissionsTag = "Permissions";
@@ -23,6 +25,7 @@ public static class EndpointsApi
     public const string EndpointsAuthLogin = "/login";
     public const string EndpointsForgotPassword = "/forgot-password";
     public const string EndpointsResetPassword = "/reset-password";
+    public const string EndpointsConfirmEmail = "/confirm-email";
 
     public const string EndpointsCreateLicense = "/create-license";
     public const string EndpointsAssignLicense = "/assign-license";
