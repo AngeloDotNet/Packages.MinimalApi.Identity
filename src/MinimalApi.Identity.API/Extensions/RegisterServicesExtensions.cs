@@ -38,8 +38,11 @@ public static class RegisterServicesExtensions
         services
             .AddTransient<IEmailSender, EmailSender>()
             .AddTransient<IAuthService, AuthService>()
+
+            .AddScoped<SignInManager<ApplicationUser>>()
             .AddScoped<IAuthorizationHandler, PermissionHandler>()
             .AddScoped<IAuthorizationHandler, MultiPermissionHandler>()
+
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
 
         return services;
