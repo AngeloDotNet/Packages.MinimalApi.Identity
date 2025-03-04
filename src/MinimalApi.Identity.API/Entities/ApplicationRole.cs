@@ -10,6 +10,7 @@ public class ApplicationRole : IdentityRole<int>
     public ApplicationRole(string roleName) : base(roleName)
     { }
 
+    public bool Default { get; set; } = false;
     public ICollection<ApplicationUserRole> UserRoles { get; set; }
     public ICollection<RolePermission> RolePermissions { get; set; } = [];
 }
