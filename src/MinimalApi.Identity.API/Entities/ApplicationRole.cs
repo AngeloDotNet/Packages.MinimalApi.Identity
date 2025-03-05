@@ -11,6 +11,7 @@ public class ApplicationRole : IdentityRole<int>
     { }
 
     public bool Default { get; set; } = false;
+
     public ICollection<ApplicationUserRole> UserRoles { get; set; }
     public ICollection<RolePermission> RolePermissions { get; set; } = [];
 }
