@@ -4,7 +4,6 @@ public static class MessageApi
 {
     public const string InvalidCredentials = "Invalid credentials";
     public const string UserNotAllowedLogin = "User is not allowed to sign in";
-    //public const string UserLockedOut = "User is locked out";
     public const string UserLockedOut = "This account has been locked out, please try again later";
     public const string UserNotEmailConfirmed = "User is not email confirmed";
     public const string RequiredTwoFactor = "Two-factor authentication is required";
@@ -18,7 +17,6 @@ public static class MessageApi
     public const string ProfileUpdated = "Profile updated successfully";
     public const string ProfileNotFound = "Profile not found";
     public const string UserDeleted = "User deleted successfully";
-
     public const string LicenseCreated = "License created successfully";
     public const string LicenseNotFound = "License not found";
     public const string LicenseAssigned = "License assigned successfully";

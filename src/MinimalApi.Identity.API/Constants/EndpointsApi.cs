@@ -2,16 +2,17 @@
 
 public static class EndpointsApi
 {
+    public const string EndpointsDefaultApi = "/api";
     public const string EndpointsStringEmpty = "";
     public const string EndpointsProfile = "/{username}";
 
-    public const string EndpointsAuthGroup = "/authentication";
-    public const string EndpointsAccountGroup = "/account";
-    public const string EndpointsLicenzeGroup = "/licenses";
-    public const string EndpointsModulesGroup = "/modules";
-    public const string EndpointsPermissionsGroup = "/permissions";
-    public const string EndpointsRolesGroup = "/roles";
-    public const string EndpointsProfilesGroup = "/profiles";
+    public const string EndpointsAuthGroup = EndpointsDefaultApi + "/authentication";
+    public const string EndpointsAccountGroup = EndpointsDefaultApi + "/account";
+    public const string EndpointsLicenzeGroup = EndpointsDefaultApi + "/licenses";
+    public const string EndpointsModulesGroup = EndpointsDefaultApi + "/modules";
+    public const string EndpointsPermissionsGroup = EndpointsDefaultApi + "/permissions";
+    public const string EndpointsRolesGroup = EndpointsDefaultApi + "/roles";
+    public const string EndpointsProfilesGroup = EndpointsDefaultApi + "/profiles";
 
     public const string EndpointsAuthTag = "Authentication";
     public const string EndpointsAccountTag = "Account";
