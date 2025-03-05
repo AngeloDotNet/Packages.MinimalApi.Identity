@@ -32,18 +32,25 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
         {
             var result = await roleManager.Roles.ToListAsync();
 
-            if (result == null)
-            {
-                return TypedResults.NotFound(MessageApi.RolesNotFound);
-            }
+            //if (result == null)
+            //{
+            //    return TypedResults.NotFound(MessageApi.RolesNotFound);
+            //}
 
-            return TypedResults.Ok(result);
+            //return TypedResults.Ok(result);
+
+            return result == null ? TypedResults.NotFound(MessageApi.RolesNotFound) : TypedResults.Ok(result);
         })
         .Produces<List<ApplicationRole>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.GetRoles))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Get all roles";
+            opt.Description = "Get all roles";
+            return opt;
+        });
 
         apiGroup.MapPost(EndpointsApi.EndpointsCreateRole, async Task<Results<Ok<string>, BadRequest<IEnumerable<IdentityError>>,
             Conflict<string>>> ([FromServices] RoleManager<ApplicationRole> roleManager, [FromBody] string roleName) =>
@@ -55,19 +62,26 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
 
             var result = await roleManager.CreateAsync(new ApplicationRole(roleName));
 
-            if (result.Succeeded)
-            {
-                return TypedResults.Ok(MessageApi.RoleCreated);
-            }
+            //if (result.Succeeded)
+            //{
+            //    return TypedResults.Ok(MessageApi.RoleCreated);
+            //}
 
-            return TypedResults.BadRequest(result.Errors);
+            //return TypedResults.BadRequest(result.Errors);
+
+            return result.Succeeded ? TypedResults.Ok(MessageApi.RoleCreated) : TypedResults.BadRequest(result.Errors);
         })
         .Produces<string>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status409Conflict)
         .RequireAuthorization(nameof(Authorization.CreateRole))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Create role";
+            opt.Description = "Create role";
+            return opt;
+        });
 
         apiGroup.MapPost(EndpointsApi.EndpointsAssignRole, async Task<Results<Ok<string>, NotFound<string>,
             BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
@@ -89,19 +103,26 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
 
             var result = await userManager.AddToRoleAsync(user, inputModel.Role);
 
-            if (result.Succeeded)
-            {
-                return TypedResults.Ok(MessageApi.RoleAssigned);
-            }
+            //if (result.Succeeded)
+            //{
+            //    return TypedResults.Ok(MessageApi.RoleAssigned);
+            //}
 
-            return TypedResults.BadRequest(result.Errors);
+            //return TypedResults.BadRequest(result.Errors);
+
+            return result.Succeeded ? TypedResults.Ok(MessageApi.RoleAssigned) : TypedResults.BadRequest(result.Errors);
         })
         .Produces<string>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.AssignRole))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Assign role";
+            opt.Description = "Assign role to user";
+            return opt;
+        });
 
         apiGroup.MapDelete(EndpointsApi.EndpointsRevokeRole, async Task<Results<Ok<string>, NotFound<string>,
             BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
@@ -116,18 +137,25 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
 
             var result = await userManager.RemoveFromRoleAsync(user, inputModel.Role);
 
-            if (result.Succeeded)
-            {
-                return TypedResults.Ok(MessageApi.RoleCanceled);
-            }
+            //if (result.Succeeded)
+            //{
+            //    return TypedResults.Ok(MessageApi.RoleCanceled);
+            //}
 
-            return TypedResults.BadRequest(result.Errors);
+            //return TypedResults.BadRequest(result.Errors);
+
+            return result.Succeeded ? TypedResults.Ok(MessageApi.RoleCanceled) : TypedResults.BadRequest(result.Errors);
         })
         .Produces<string>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.DeleteRole))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Revoke role";
+            opt.Description = "Revoke role from user";
+            return opt;
+        });
     }
 }

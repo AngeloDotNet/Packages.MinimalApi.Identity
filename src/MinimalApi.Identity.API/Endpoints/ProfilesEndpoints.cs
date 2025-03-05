@@ -31,19 +31,26 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
         {
             var user = await userManager.FindByNameAsync(username);
 
-            if (user == null)
-            {
-                return TypedResults.NotFound(MessageApi.ProfileNotFound);
-            }
+            //if (user == null)
+            //{
+            //    return TypedResults.NotFound(MessageApi.ProfileNotFound);
+            //}
 
-            return TypedResults.Ok(new UserProfileModel(username, user.Email!, user.FirstName, user.LastName));
+            //return TypedResults.Ok(new UserProfileModel(username, user.Email!, user.FirstName, user.LastName));
+
+            return user == null ? TypedResults.NotFound(MessageApi.ProfileNotFound) : TypedResults.Ok(new UserProfileModel(username, user.Email!, user.FirstName, user.LastName));
         })
         .Produces<UserProfileModel>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status403Forbidden)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.GetProfile))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Get user profile";
+            opt.Description = "Get user profile by username";
+            return opt;
+        });
 
         apiGroup.MapPut(EndpointsApi.EndpointsProfile, async Task<Results<Ok<string>, NotFound<string>,
             BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
@@ -62,19 +69,26 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
 
             var result = await userManager.UpdateAsync(user);
 
-            if (result.Succeeded)
-            {
-                return TypedResults.Ok(MessageApi.ProfileUpdated);
-            }
+            //if (result.Succeeded)
+            //{
+            //    return TypedResults.Ok(MessageApi.ProfileUpdated);
+            //}
 
-            return TypedResults.BadRequest(result.Errors);
+            //return TypedResults.BadRequest(result.Errors);
+
+            return result.Succeeded ? TypedResults.Ok(MessageApi.ProfileUpdated) : TypedResults.BadRequest(result.Errors);
         })
         .Produces<string>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.EditProfile))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Update user profile";
+            opt.Description = "Update user profile by username";
+            return opt;
+        });
 
         apiGroup.MapDelete(EndpointsApi.EndpointsProfile, async Task<Results<Ok<string>, NotFound<string>,
             BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager, [FromRoute] string username) =>
@@ -88,18 +102,25 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
 
             var result = await userManager.DeleteAsync(user);
 
-            if (result.Succeeded)
-            {
-                return TypedResults.Ok(MessageApi.UserDeleted);
-            }
+            //if (result.Succeeded)
+            //{
+            //    return TypedResults.Ok(MessageApi.UserDeleted);
+            //}
 
-            return TypedResults.BadRequest(result.Errors);
+            //return TypedResults.BadRequest(result.Errors);
+
+            return result.Succeeded ? TypedResults.Ok(MessageApi.UserDeleted) : TypedResults.BadRequest(result.Errors);
         })
         .Produces<string>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.DeleteProfile))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Delete user profile";
+            opt.Description = "Delete user profile by username";
+            return opt;
+        });
     }
 }

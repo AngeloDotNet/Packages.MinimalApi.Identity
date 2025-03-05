@@ -32,15 +32,25 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         {
             var result = await dbContext.Modules.ToListAsync();
 
-            if (result == null)
-            {
-                return TypedResults.NotFound(MessageApi.ModulesNotFound);
-            }
+            //if (result == null)
+            //{
+            //    return TypedResults.NotFound(MessageApi.ModulesNotFound);
+            //}
 
-            return TypedResults.Ok(result);
+            //return TypedResults.Ok(result);
+
+            return result == null ? TypedResults.NotFound(MessageApi.ModulesNotFound) : TypedResults.Ok(result);
         })
+        .Produces<Ok<List<Module>>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.GetModules))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Get all modules";
+            opt.Summary = "Get all modules";
+            return opt;
+        });
 
         apiGroup.MapPost(EndpointsApi.EndpointsCreateModule, async (MinimalApiDbContext dbContext, [FromBody] Module inputModel) =>
         {
@@ -49,8 +59,15 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
 
             return TypedResults.Ok(MessageApi.ModuleCreated);
         })
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
         .RequireAuthorization(nameof(Authorization.CreateModule))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Create a new module";
+            opt.Summary = "Create a new module";
+            return opt;
+        });
 
         apiGroup.MapPost(EndpointsApi.EndpointsAssignModule, async Task<Results<Ok<string>, NotFound<string>>> (MinimalApiDbContext dbContext,
            [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignModuleModel inputModel) =>
@@ -79,8 +96,16 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
 
             return TypedResults.Ok(MessageApi.ModuleAssigned);
         })
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.AssignModule))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Assign a module to a user";
+            opt.Summary = "Assign a module to a user";
+            return opt;
+        });
 
         apiGroup.MapDelete(EndpointsApi.EndpointsRevokeModule, async Task<Results<Ok<string>, NotFound<string>>>
             (MinimalApiDbContext dbContext, [FromBody] AssignModuleModel inputModel) =>
@@ -98,7 +123,15 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
 
             return TypedResults.Ok(MessageApi.ModuleCanceled);
         })
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Authorization.DeleteModule))
-        .WithOpenApi();
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Revoke a module from a user";
+            opt.Summary = "Revoke a module from a user";
+            return opt;
+        });
     }
 }

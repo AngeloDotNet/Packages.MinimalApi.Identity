@@ -80,12 +80,22 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
 
                 await emailSender.SendEmailAsync(user.Email!, "Confirm your email", $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
 
-                return TypedResults.Ok(MessageApi.UserCreated);
+                //return TypedResults.Ok(MessageApi.UserCreated);
             }
 
-            return TypedResults.BadRequest(result.Errors);
+            //return TypedResults.BadRequest(result.Errors);
+
+            return result.Succeeded ? TypedResults.Ok(MessageApi.UserCreated) : TypedResults.BadRequest(result.Errors);
         })
-        .WithOpenApi();
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Register new user";
+            opt.Summary = "Register new user";
+
+            return opt;
+        });
 
         apiGroup.MapPost(EndpointsApi.EndpointsAuthLogin, [AllowAnonymous] async Task<Results<Ok<AuthResponse>, BadRequest<string>>>
             ([FromServices] IConfiguration configuration, [FromServices] UserManager<ApplicationUser> userManager,
@@ -146,7 +156,15 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
 
             return TypedResults.Ok(loginResponse);
         })
-        .WithOpenApi();
+        .Produces<Ok<AuthResponse>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Login user";
+            opt.Summary = "Login user";
+
+            return opt;
+        });
 
         //apiGroup.MapPost(EndpointsApi.EndpointsForgotPassword, async Task<Results<Ok<string>, NotFound<string>>>
         //        ([FromServices] UserManager<ApplicationUser> userManager, [FromServices] IEmailSender emailSender,

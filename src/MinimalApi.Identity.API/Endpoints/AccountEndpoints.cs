@@ -46,12 +46,23 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(userId));
             var result = await userManager.ConfirmEmailAsync(user, code);
 
-            if (!result.Succeeded)
-            {
-                return TypedResults.BadRequest(MessageApi.ErrorConfirmEmail);
-            }
+            //if (!result.Succeeded)
+            //{
+            //    return TypedResults.BadRequest(MessageApi.ErrorConfirmEmail);
+            //}
 
-            return TypedResults.Ok(MessageApi.ConfirmingEmail);
+            //return TypedResults.Ok(MessageApi.ConfirmingEmail);
+
+            return result.Succeeded ? TypedResults.Ok(MessageApi.ConfirmingEmail) : TypedResults.BadRequest(MessageApi.ErrorConfirmEmail);
+        })
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Confirm email address";
+            opt.Summary = "Confirm email address";
+
+            return opt;
         });
     }
 }
