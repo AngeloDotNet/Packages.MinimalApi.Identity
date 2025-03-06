@@ -6,5 +6,6 @@ public class Permission
     public string Name { get; set; } = null!;
     public bool Default { get; set; } = false;
 
+    //public ICollection<UserPermission> UserPermissions { get; set; } = [];
     public ICollection<RolePermission> RolePermissions { get; set; } = [];
 }
