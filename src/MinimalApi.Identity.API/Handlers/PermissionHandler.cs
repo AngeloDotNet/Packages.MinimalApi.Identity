@@ -20,7 +20,7 @@ public class PermissionHandler : AuthorizationHandler<AuthorizationRequirement>
 
             if (requirement != null && context.User.Identity!.IsAuthenticated == true && permission != null)
             {
-                if (!context.User.Claims.Any(claim => claim.Type == ClaimsExtensions.Permission && claim.Value == permission))
+                if (!context.User.Claims.Any(claim => claim.Type == CustomClaimTypes.Permission && claim.Value == permission))
                 {
                     context.Fail();
                 }

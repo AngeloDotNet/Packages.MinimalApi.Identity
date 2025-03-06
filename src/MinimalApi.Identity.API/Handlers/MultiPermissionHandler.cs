@@ -16,7 +16,7 @@ public class MultiPermissionHandler : IAuthorizationHandler
             {
                 foreach (var permission in requirement.Policies)
                 {
-                    if (!context.User.Claims.Any(claim => claim.Type == ClaimsExtensions.Permission && claim.Value == permission))
+                    if (!context.User.Claims.Any(claim => claim.Type == CustomClaimTypes.Permission && claim.Value == permission))
                     {
                         confirmedPolicies = false;
                         break;
