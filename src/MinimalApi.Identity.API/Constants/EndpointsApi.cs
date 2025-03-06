@@ -24,11 +24,15 @@ public static class EndpointsApi
 
     public const string EndpointsAuthRegister = "/register";
     public const string EndpointsAuthLogin = "/login";
+    public const string EndpointsAuthLogout = "/logout";
     public const string EndpointsForgotPassword = "/forgot-password";
     public const string EndpointsResetPassword = "/reset-password";
+    public const string EndpointChangeEmail = "/change-email";
 
     public const string EndpointUserIdToken = "/{userId}/{token}";
     public const string EndpointsConfirmEmail = "/confirm-email" + EndpointUserIdToken;
+    public const string EndpointUserIdEmailToken = "/{userId}/{email}/{token}";
+    public const string EndpointsConfirmEmailChange = "/confirm-email-change" + EndpointUserIdEmailToken;
 
     public const string EndpointsCreateLicense = "/create-license";
     public const string EndpointsAssignLicense = "/assign-license";
