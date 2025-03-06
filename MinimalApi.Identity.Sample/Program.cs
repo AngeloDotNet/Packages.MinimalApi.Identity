@@ -21,7 +21,6 @@ public class Program
             .AddAuthorization(options =>
             {
                 options.AddDefaultAuthorizationPolicy(); // Adds default authorization policies
-
                 // Here you can add additional authorization policies
             });
 

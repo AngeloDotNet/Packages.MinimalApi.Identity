@@ -58,6 +58,19 @@ namespace MinimalApi.Identity.Sample.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EmailSendingTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmailType = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailSendingTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Licenses",
                 columns: table => new
                 {
@@ -206,6 +219,32 @@ namespace MinimalApi.Identity.Sample.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EmailSendings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmailSendingTypeId = table.Column<int>(type: "int", nullable: false),
+                    EmailTo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Subject = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Sent = table.Column<bool>(type: "bit", nullable: false),
+                    DateSent = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ErrorDetails = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailSendings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmailSendings_EmailSendingTypes_EmailSendingTypeId",
+                        column: x => x.EmailSendingTypeId,
+                        principalTable: "EmailSendingTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserLicenses",
                 columns: table => new
                 {
@@ -254,23 +293,23 @@ namespace MinimalApi.Identity.Sample.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RolePermissions",
+                name: "UserPermissions",
                 columns: table => new
                 {
-                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
                     PermissionId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RolePermissions", x => new { x.RoleId, x.PermissionId });
+                    table.PrimaryKey("PK_UserPermissions", x => new { x.UserId, x.PermissionId });
                     table.ForeignKey(
-                        name: "FK_RolePermissions_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
+                        name: "FK_UserPermissions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RolePermissions_Permissions_PermissionId",
+                        name: "FK_UserPermissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
                         principalTable: "Permissions",
                         principalColumn: "Id",
@@ -281,6 +320,15 @@ namespace MinimalApi.Identity.Sample.Migrations
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Default", "Name", "NormalizedName" },
                 values: new object[] { 1, "52D77FEB-3860-4523-B022-4F5CB859E434", true, "Admin", "ADMIN" });
+
+            migrationBuilder.InsertData(
+                table: "EmailSendingTypes",
+                columns: new[] { "Id", "EmailType" },
+                values: new object[,]
+                {
+                    { 1, "RegisterUser" },
+                    { 2, "ChangeEmail" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Permissions",
@@ -353,9 +401,9 @@ namespace MinimalApi.Identity.Sample.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RolePermissions_PermissionId",
-                table: "RolePermissions",
-                column: "PermissionId");
+                name: "IX_EmailSendings_EmailSendingTypeId",
+                table: "EmailSendings",
+                column: "EmailSendingTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserLicenses_LicenseId",
@@ -366,6 +414,11 @@ namespace MinimalApi.Identity.Sample.Migrations
                 name: "IX_UserModules_ModuleId",
                 table: "UserModules",
                 column: "ModuleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPermissions_PermissionId",
+                table: "UserPermissions",
+                column: "PermissionId");
         }
 
         /// <inheritdoc />
@@ -387,7 +440,7 @@ namespace MinimalApi.Identity.Sample.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "RolePermissions");
+                name: "EmailSendings");
 
             migrationBuilder.DropTable(
                 name: "UserLicenses");
@@ -396,19 +449,25 @@ namespace MinimalApi.Identity.Sample.Migrations
                 name: "UserModules");
 
             migrationBuilder.DropTable(
+                name: "UserPermissions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Permissions");
+                name: "EmailSendingTypes");
 
             migrationBuilder.DropTable(
                 name: "Licenses");
 
             migrationBuilder.DropTable(
+                name: "Modules");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Modules");
+                name: "Permissions");
         }
     }
 }

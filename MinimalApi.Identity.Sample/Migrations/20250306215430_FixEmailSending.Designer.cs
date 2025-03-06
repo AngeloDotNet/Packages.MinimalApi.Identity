@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MinimalApi.Identity.API;
+using MinimalApi.Identity.API.Database;
 
 #nullable disable
 
 namespace MinimalApi.Identity.Sample.Migrations
 {
     [DbContext(typeof(MinimalApiDbContext))]
-    [Migration("20250303125615_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250306215430_FixEmailSending")]
+    partial class FixEmailSending
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -247,6 +247,77 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.EmailSending", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateSent")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EmailSendingTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmailTo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ErrorDetails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Sent")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmailSendingTypeId");
+
+                    b.ToTable("EmailSendings");
+                });
+
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.EmailSendingType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EmailType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmailSendingTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EmailType = "RegisterUser"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            EmailType = "ChangeEmail"
+                        });
+                });
+
             modelBuilder.Entity("MinimalApi.Identity.API.Entities.License", b =>
                 {
                     b.Property<int>("Id")
@@ -454,21 +525,6 @@ namespace MinimalApi.Identity.Sample.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.API.Entities.RolePermission", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("RolePermissions");
-                });
-
             modelBuilder.Entity("MinimalApi.Identity.API.Entities.UserLicense", b =>
                 {
                     b.Property<int>("UserId")
@@ -497,6 +553,21 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.HasIndex("ModuleId");
 
                     b.ToTable("UserModules");
+                });
+
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.UserPermission", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("UserPermissions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -554,23 +625,15 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MinimalApi.Identity.API.Entities.RolePermission", b =>
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.EmailSending", b =>
                 {
-                    b.HasOne("MinimalApi.Identity.API.Entities.Permission", "Permission")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("PermissionId")
+                    b.HasOne("MinimalApi.Identity.API.Entities.EmailSendingType", "EmailSendingType")
+                        .WithMany("EmailSendings")
+                        .HasForeignKey("EmailSendingTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationRole", "Role")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
+                    b.Navigation("EmailSendingType");
                 });
 
             modelBuilder.Entity("MinimalApi.Identity.API.Entities.UserLicense", b =>
@@ -611,10 +674,27 @@ namespace MinimalApi.Identity.Sample.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.UserPermission", b =>
+                {
+                    b.HasOne("MinimalApi.Identity.API.Entities.Permission", "Permission")
+                        .WithMany("UserPermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MinimalApi.Identity.API.Entities.ApplicationUser", "User")
+                        .WithMany("UserPermissions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MinimalApi.Identity.API.Entities.ApplicationRole", b =>
                 {
-                    b.Navigation("RolePermissions");
-
                     b.Navigation("UserRoles");
                 });
 
@@ -624,7 +704,14 @@ namespace MinimalApi.Identity.Sample.Migrations
 
                     b.Navigation("UserModules");
 
+                    b.Navigation("UserPermissions");
+
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("MinimalApi.Identity.API.Entities.EmailSendingType", b =>
+                {
+                    b.Navigation("EmailSendings");
                 });
 
             modelBuilder.Entity("MinimalApi.Identity.API.Entities.License", b =>
@@ -639,7 +726,7 @@ namespace MinimalApi.Identity.Sample.Migrations
 
             modelBuilder.Entity("MinimalApi.Identity.API.Entities.Permission", b =>
                 {
-                    b.Navigation("RolePermissions");
+                    b.Navigation("UserPermissions");
                 });
 #pragma warning restore 612, 618
         }
