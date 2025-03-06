@@ -69,6 +69,7 @@ public static class RegisterServicesExtensions
     public static IServiceCollection AddSwaggerConfiguration(this IServiceCollection services)
     {
         return services
+            .AddHttpContextAccessor()
             .AddEndpointsApiExplorer()
             .AddSwaggerGen(options =>
             {
