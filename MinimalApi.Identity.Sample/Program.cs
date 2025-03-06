@@ -10,7 +10,6 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var connectionString = builder.Configuration.GetDatabaseConnString("DefaultConnection");
 
-        builder.Services.AddHttpContextAccessor();
         builder.Services.AddCors(options => options.AddPolicy("cors", builder
             => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
@@ -21,9 +20,9 @@ public class Program
         builder.Services.AddRegisterServices<Program>(connectionString, jwtOptions, identityOptions)
             .AddAuthorization(options =>
             {
-                options.AddDefaultAuthorizationPolicy(); // Aggiunge le authorization policy di default
+                options.AddDefaultAuthorizationPolicy(); // Adds default authorization policies
 
-                // Qui è possibile aggiungere ulteriori authorization policy
+                // Here you can add additional authorization policies
             });
 
         builder.Services
