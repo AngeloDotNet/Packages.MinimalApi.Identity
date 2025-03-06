@@ -56,7 +56,8 @@ Adding this sections in the _appsettings.json_ file:
         "Security": "StartTls",
         "Username": "Username del server SMTP",
         "Password": "Password del server SMTP",
-        "Sender": "MyApplication <noreply@example.org>"
+        "Sender": "MyApplication <noreply@example.org>",
+        "SaveEmailSent": false 
     },
     "UsersOptions": {
         "AssignAdminRoleOnRegistration": "admin@example.org"
@@ -66,6 +67,8 @@ Adding this sections in the _appsettings.json_ file:
     }
 }
 ```
+
+> **Note**: If SaveEmailSent is false, only emails that failed while sending will be saved, if SaveEmailSent is true, both emails that were sent successfully and emails that failed will be saved
 
 Registering services at startup:
 
@@ -206,6 +209,7 @@ The library provides a series of endpoints to manage the identity of the applica
 - [Entity Framework Core for SQL Server](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.SqlServer)
 - [JWT Bearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer)
 - [MailKit](https://www.nuget.org/packages/MailKit)
+- [Scrutor](https://www.nuget.org/packages/Scrutor)
 
 ### 📝 License
 
