@@ -3,7 +3,11 @@
 ### 🏗️ ToDo
 
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
-- [ ] Add endpoints present in asp net core identity scaffolding
+- [ ] Add endpoints for two-factor authentication
+- [ ] Add endpoint for forgotten password recovery
+- [ ] Add endpoint for password change
+- [ ] Add endpoints for two-factor authentication management
+- [ ] Add endpoints for downloading and deleting personal data
 - [ ] Add endpoints to delete license, module, permission and role (possible only if the data is not default)
 - [ ] Add endpoints to manage users (including one to impersonate the user)
 - [ ] Add validation input models
@@ -68,8 +72,6 @@ Registering services at startup:
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetDatabaseConnString("DefaultConnection");
-
-builder.Services.AddHttpContextAccessor();
 
 //...
 
