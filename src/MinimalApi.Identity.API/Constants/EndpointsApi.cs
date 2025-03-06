@@ -4,7 +4,6 @@ public static class EndpointsApi
 {
     public const string EndpointsDefaultApi = "/api";
     public const string EndpointsStringEmpty = "";
-    public const string EndpointsProfile = "/{username}";
 
     public const string EndpointsAuthGroup = EndpointsDefaultApi + "/authentication";
     public const string EndpointsAccountGroup = EndpointsDefaultApi + "/account";
@@ -29,8 +28,12 @@ public static class EndpointsApi
     public const string EndpointsResetPassword = "/reset-password";
     public const string EndpointChangeEmail = "/change-email";
 
+    public const string EndpointsUsername = "/{username}";
+    public const string EndpointsProfile = "/profile" + EndpointsUsername;
+
     public const string EndpointUserIdToken = "/{userId}/{token}";
     public const string EndpointsConfirmEmail = "/confirm-email" + EndpointUserIdToken;
+
     public const string EndpointUserIdEmailToken = "/{userId}/{email}/{token}";
     public const string EndpointsConfirmEmailChange = "/confirm-email-change" + EndpointUserIdEmailToken;
 
