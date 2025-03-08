@@ -1,15 +1,13 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
-using MinimalApi.Identity.API.Entities;
+using MinimalApi.Identity.API.Models;
+using MinimalApi.Identity.API.Services.Interfaces;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -27,33 +25,10 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsConfirmEmail, [AllowAnonymous] async Task<Results<Ok<string>,
-            BadRequest<string>>> ([FromServices] UserManager<ApplicationUser> userManager, [FromRoute] string userId,
-            [FromRoute] string token) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsConfirmEmail, [AllowAnonymous] async Task<IResult>
+            ([FromServices] IAccountService accountService, [FromRoute] string userId, [FromRoute] string token) =>
         {
-            if (userId == null || token == null)
-            {
-                return TypedResults.BadRequest(MessageApi.UserIdTokenRequired);
-            }
-
-            var user = await userManager.FindByIdAsync(userId);
-
-            if (user == null)
-            {
-                return TypedResults.BadRequest(MessageApi.UserNotFound);
-            }
-
-            var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(userId));
-            var result = await userManager.ConfirmEmailAsync(user, code);
-
-            //if (!result.Succeeded)
-            //{
-            //    return TypedResults.BadRequest(MessageApi.ErrorConfirmEmail);
-            //}
-
-            //return TypedResults.Ok(MessageApi.ConfirmingEmail);
-
-            return result.Succeeded ? TypedResults.Ok(MessageApi.ConfirmingEmail) : TypedResults.BadRequest(MessageApi.ErrorConfirmEmail);
+            return await accountService.ConfirmEmailAsync(userId, token);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -64,5 +39,31 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
 
             return opt;
         });
+
+        apiGroup.MapPost(EndpointsApi.EndpointChangeEmail, async Task<IResult> ([FromServices] IAccountService accountService,
+            ChangeEmailModel inputModel) =>
+        {
+            return await accountService.ChangeEmailAsync(inputModel);
+        })
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Change email address";
+            opt.Summary = "Change email address";
+
+            return opt;
+        });
+
+        apiGroup.MapGet(EndpointsApi.EndpointsConfirmEmailChange, [AllowAnonymous] async Task<IResult>
+            ([FromServices] IAccountService accountService, [FromRoute] string userId, [FromRoute] string email,
+            [FromRoute] string token) =>
+        {
+            return await accountService.ConfirmEmailChangeAsync(userId, email, token);
+        })
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .WithOpenApi();
     }
 }

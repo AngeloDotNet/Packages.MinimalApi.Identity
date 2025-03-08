@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
+using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Models;
@@ -27,24 +28,18 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<Results<Ok<List<Permission>>, NotFound<string>>>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<Results<Ok<List<PermissionResponseModel>>, NotFound<string>>>
             (MinimalApiDbContext dbContext) =>
         {
-            var result = await dbContext.Permissions.ToListAsync();
-
-            //if (result == null)
-            //{
-            //    return TypedResults.NotFound(MessageApi.PermissionsNotFound);
-            //}
-
-            //return TypedResults.Ok(result);
+            var query = await dbContext.Permissions.ToListAsync();
+            var result = query.Select(p => new PermissionResponseModel(p.Id, p.Name, p.Default)).ToList();
 
             return result == null ? TypedResults.NotFound(MessageApi.PermissionsNotFound) : TypedResults.Ok(result);
         })
-        .Produces<Ok<List<Permission>>>(StatusCodes.Status200OK)
+        .Produces<Ok<List<PermissionResponseModel>>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.GetPermissions))
+        .RequireAuthorization(nameof(Authorize.GetPermissions))
         .WithOpenApi(opt =>
         {
             opt.Summary = "Get all permissions";
@@ -61,7 +56,7 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .RequireAuthorization(nameof(Authorization.CreatePermission))
+        .RequireAuthorization(nameof(Authorize.CreatePermission))
         .WithOpenApi(opt =>
         {
             opt.Summary = "Create a new permission";
@@ -70,13 +65,13 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
         });
 
         apiGroup.MapPost(EndpointsApi.EndpointsAssignPermission, async Task<Results<Ok<string>, NotFound<string>>>
-            (MinimalApiDbContext dbContext, [FromServices] RoleManager<IdentityRole> roleManager, [FromBody] AssignPermissionModel inputModel) =>
+            (MinimalApiDbContext dbContext, [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignPermissionModel inputModel) =>
         {
-            var role = await roleManager.FindByIdAsync(inputModel.RoleId.ToString());
+            var user = await userManager.FindByIdAsync(inputModel.UserId.ToString());
 
-            if (role == null)
+            if (user == null)
             {
-                return TypedResults.NotFound(MessageApi.RoleNotFound);
+                return TypedResults.NotFound(MessageApi.UserNotFound);
             }
 
             var permission = await dbContext.Permissions.FindAsync(inputModel.PermissionId);
@@ -86,13 +81,13 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
                 return TypedResults.NotFound(MessageApi.PermissionNotFound);
             }
 
-            var rolePermission = new RolePermission
+            var userPermission = new UserPermission
             {
-                RoleId = inputModel.RoleId,
+                UserId = inputModel.UserId,
                 PermissionId = inputModel.PermissionId
             };
 
-            dbContext.RolePermissions.Add(rolePermission);
+            dbContext.UserPermissions.Add(userPermission);
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok(MessageApi.PermissionAssigned);
@@ -100,26 +95,26 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.AssignPermission))
+        .RequireAuthorization(nameof(Authorize.AssignPermission))
         .WithOpenApi(opt =>
         {
-            opt.Summary = "Assign a permission to a role";
-            opt.Description = "Assign a permission to a role";
+            opt.Summary = "Assign a permission to a user";
+            opt.Description = "Assign a permission to a user";
             return opt;
         });
 
         apiGroup.MapDelete(EndpointsApi.EndpointsRevokePermission, async Task<Results<Ok<string>, NotFound<string>>>
-            (MinimalApiDbContext dbContext, [FromServices] RoleManager<IdentityRole> roleManager, [FromBody] AssignPermissionModel inputModel) =>
+            (MinimalApiDbContext dbContext, [FromServices] UserManager<ApplicationUser> userManager, [FromBody] RevokePermissionModel inputModel) =>
         {
-            var rolePermission = await dbContext.RolePermissions.SingleOrDefaultAsync(rp
-                => rp.RoleId == inputModel.RoleId && rp.PermissionId == inputModel.PermissionId);
+            var userPermission = await dbContext.UserPermissions.SingleOrDefaultAsync(up
+                => up.UserId == inputModel.UserId && up.PermissionId == inputModel.PermissionId);
 
-            if (rolePermission == null)
+            if (userPermission == null)
             {
                 return TypedResults.NotFound(MessageApi.PermissionNotFound);
             }
 
-            dbContext.RolePermissions.Remove(rolePermission);
+            dbContext.UserPermissions.Remove(userPermission);
             await dbContext.SaveChangesAsync();
 
             return TypedResults.Ok(MessageApi.PermissionCanceled);
@@ -127,11 +122,11 @@ public class PermissionEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.DeletePermission))
+        .RequireAuthorization(nameof(Authorize.DeletePermission))
         .WithOpenApi(opt =>
         {
-            opt.Summary = "Revoke a permission from a role";
-            opt.Description = "Revoke a permission from a role";
+            opt.Summary = "Revoke a permission from a user";
+            opt.Description = "Revoke a permission from a user";
             return opt;
         });
     }

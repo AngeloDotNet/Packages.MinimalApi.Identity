@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
-using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Models;
+using MinimalApi.Identity.API.Services.Interfaces;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -27,24 +25,14 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<Results<Ok<List<Module>>, NotFound<string>>>
-            (MinimalApiDbContext dbContext) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<IResult> ([FromServices] IModuleService moduleService) =>
         {
-            var result = await dbContext.Modules.ToListAsync();
-
-            //if (result == null)
-            //{
-            //    return TypedResults.NotFound(MessageApi.ModulesNotFound);
-            //}
-
-            //return TypedResults.Ok(result);
-
-            return result == null ? TypedResults.NotFound(MessageApi.ModulesNotFound) : TypedResults.Ok(result);
+            return await moduleService.GetAllModulesAsync();
         })
-        .Produces<Ok<List<Module>>>(StatusCodes.Status200OK)
+        .Produces<Ok<List<ModuleResponseModel>>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.GetModules))
+        .RequireAuthorization(nameof(Authorize.GetModules))
         .WithOpenApi(opt =>
         {
             opt.Description = "Get all modules";
@@ -52,16 +40,14 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsCreateModule, async (MinimalApiDbContext dbContext, [FromBody] Module inputModel) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsCreateModule, async Task<IResult> ([FromServices] IModuleService moduleService,
+            [FromBody] CreateModuleModel inputModel) =>
         {
-            dbContext.Modules.Add(inputModel);
-            await dbContext.SaveChangesAsync();
-
-            return TypedResults.Ok(MessageApi.ModuleCreated);
+            return await moduleService.CreateModuleAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .RequireAuthorization(nameof(Authorization.CreateModule))
+        .RequireAuthorization(nameof(Authorize.CreateModule))
         .WithOpenApi(opt =>
         {
             opt.Description = "Create a new module";
@@ -69,37 +55,15 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsAssignModule, async Task<Results<Ok<string>, NotFound<string>>> (MinimalApiDbContext dbContext,
-           [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignModuleModel inputModel) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsAssignModule, async Task<IResult> ([FromServices] IModuleService moduleService,
+            [FromBody] AssignModuleModel inputModel) =>
         {
-            var user = await userManager.FindByIdAsync(inputModel.UserId.ToString());
-
-            if (user == null)
-            {
-                return TypedResults.NotFound(MessageApi.UserNotFound);
-            }
-
-            var module = await dbContext.Modules.FindAsync(inputModel.ModuleId);
-            if (module == null)
-            {
-                return TypedResults.NotFound(MessageApi.ModuleNotFound);
-            }
-
-            var userModule = new UserModule
-            {
-                UserId = inputModel.UserId,
-                ModuleId = inputModel.ModuleId
-            };
-
-            dbContext.UserModules.Add(userModule);
-            await dbContext.SaveChangesAsync();
-
-            return TypedResults.Ok(MessageApi.ModuleAssigned);
+            return await moduleService.AssignModuleAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.AssignModule))
+        .RequireAuthorization(nameof(Authorize.AssignModule))
         .WithOpenApi(opt =>
         {
             opt.Description = "Assign a module to a user";
@@ -107,26 +71,15 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeModule, async Task<Results<Ok<string>, NotFound<string>>>
-            (MinimalApiDbContext dbContext, [FromBody] AssignModuleModel inputModel) =>
+        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeModule, async Task<IResult> ([FromServices] IModuleService moduleService,
+            [FromBody] RevokeModuleModel inputModel) =>
         {
-            var userModule = await dbContext.UserModules
-                .SingleOrDefaultAsync(um => um.UserId == inputModel.UserId && um.ModuleId == inputModel.ModuleId);
-
-            if (userModule == null)
-            {
-                return TypedResults.NotFound(MessageApi.ModuleNotFound);
-            }
-
-            dbContext.UserModules.Remove(userModule);
-            await dbContext.SaveChangesAsync();
-
-            return TypedResults.Ok(MessageApi.ModuleCanceled);
+            return await moduleService.RevokeModuleAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.DeleteModule))
+        .RequireAuthorization(nameof(Authorize.DeleteModule))
         .WithOpenApi(opt =>
         {
             opt.Description = "Revoke a module from a user";

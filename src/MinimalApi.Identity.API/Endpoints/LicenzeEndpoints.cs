@@ -1,15 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
-using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Models;
+using MinimalApi.Identity.API.Services.Interfaces;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -27,24 +25,14 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<Results<Ok<List<License>>, NotFound<string>>>
-            (MinimalApiDbContext dbContext) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<IResult> ([FromServices] ILicenseService licenseService) =>
         {
-            var result = await dbContext.Licenses.ToListAsync();
-
-            //if (result == null)
-            //{
-            //    return TypedResults.NotFound(MessageApi.LicensesNotFound);
-            //}
-
-            //return TypedResults.Ok(result);
-
-            return result == null ? TypedResults.NotFound(MessageApi.LicensesNotFound) : TypedResults.Ok(result);
+            return await licenseService.GetAllLicensesAsync();
         })
-        .Produces<Ok<List<License>>>(StatusCodes.Status200OK)
+        .Produces<Ok<List<LicenseResponseModel>>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.GetLicenses))
+        .RequireAuthorization(nameof(Authorize.GetLicenses))
         .WithOpenApi(opt =>
         {
             opt.Description = "Get all licenses";
@@ -52,16 +40,14 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsCreateLicense, async (MinimalApiDbContext dbContext, [FromBody] License inputModel) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsCreateLicense, async Task<IResult> ([FromServices] ILicenseService licenseService,
+            [FromBody] CreateLicenseModel inputModel) =>
         {
-            dbContext.Licenses.Add(inputModel);
-            await dbContext.SaveChangesAsync();
-
-            return TypedResults.Ok(MessageApi.LicenseCreated);
+            return await licenseService.CreateLicenseAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .RequireAuthorization(nameof(Authorization.CreateLicense))
+        .RequireAuthorization(nameof(Authorize.CreateLicense))
         .WithOpenApi(opt =>
         {
             opt.Description = "Create a new license";
@@ -69,38 +55,15 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsAssignLicense, async Task<Results<Ok<string>, NotFound<string>>>
-            (MinimalApiDbContext dbContext, [FromServices] UserManager<ApplicationUser> userManager, [FromBody] AssignLicenseModel inputModel) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsAssignLicense, async Task<IResult> ([FromServices] ILicenseService licenseService,
+            [FromBody] AssignLicenseModel inputModel) =>
         {
-            var user = await userManager.FindByIdAsync(inputModel.UserId.ToString());
-
-            if (user == null)
-            {
-                return TypedResults.NotFound(MessageApi.UserNotFound);
-            }
-
-            var license = await dbContext.Licenses.FindAsync(inputModel.LicenseId);
-
-            if (license == null)
-            {
-                return TypedResults.NotFound(MessageApi.LicenseNotFound);
-            }
-
-            var userLicense = new UserLicense
-            {
-                UserId = inputModel.UserId,
-                LicenseId = inputModel.LicenseId
-            };
-
-            dbContext.UserLicenses.Add(userLicense);
-            await dbContext.SaveChangesAsync();
-
-            return TypedResults.Ok(MessageApi.LicenseAssigned);
+            return await licenseService.AssignLicenseAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.AssignLicense))
+        .RequireAuthorization(nameof(Authorize.AssignLicense))
         .WithOpenApi(opt =>
         {
             opt.Description = "Assign a license to a user";
@@ -108,26 +71,15 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeLicense, async Task<Results<Ok<string>, NotFound<string>>>
-            (MinimalApiDbContext dbContext, [FromBody] AssignLicenseModel inputModel) =>
+        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeLicense, async Task<IResult> ([FromServices] ILicenseService licenseService,
+            [FromBody] RevokeLicenseModel inputModel) =>
         {
-            var userLicense = await dbContext.UserLicenses.SingleOrDefaultAsync(ul
-                => ul.UserId == inputModel.UserId && ul.LicenseId == inputModel.LicenseId);
-
-            if (userLicense == null)
-            {
-                return TypedResults.NotFound(MessageApi.LicenseNotFound);
-            }
-
-            dbContext.UserLicenses.Remove(userLicense);
-            await dbContext.SaveChangesAsync();
-
-            return TypedResults.Ok(MessageApi.LicenseCanceled);
+            return await licenseService.RevokeLicenseAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorization.DeleteLicense))
+        .RequireAuthorization(nameof(Authorize.DeleteLicense))
         .WithOpenApi(opt =>
         {
             opt.Description = "Revoke a license from a user";
