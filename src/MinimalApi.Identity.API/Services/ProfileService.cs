@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Entities;
@@ -10,7 +9,7 @@ namespace MinimalApi.Identity.API.Services;
 
 public class ProfileService(UserManager<ApplicationUser> userManager) : IProfileService
 {
-    public async Task<Results<Ok<UserProfileModel>, NotFound<string>>> GetProfileAsync(string username)
+    public async Task<IResult> GetProfileAsync(string username)
     {
         var user = await userManager.FindByNameAsync(username);
 
@@ -18,7 +17,7 @@ public class ProfileService(UserManager<ApplicationUser> userManager) : IProfile
             : TypedResults.Ok(new UserProfileModel(username, user.Email!, user.FirstName, user.LastName));
     }
 
-    public async Task<Results<Ok<string>, NotFound<string>, BadRequest<IEnumerable<IdentityError>>>> EditProfileAsync(string username, UserProfileEditModel model)
+    public async Task<IResult> EditProfileAsync(string username, UserProfileEditModel model)
     {
         var user = await userManager.FindByNameAsync(username);
 
@@ -36,7 +35,7 @@ public class ProfileService(UserManager<ApplicationUser> userManager) : IProfile
         return result.Succeeded ? TypedResults.Ok(MessageApi.ProfileUpdated) : TypedResults.BadRequest(result.Errors);
     }
 
-    public async Task<Results<Ok<string>, NotFound<string>, BadRequest<IEnumerable<IdentityError>>>> DeleteProfileAsync(string username)
+    public async Task<IResult> DeleteProfileAsync(string username)
     {
         var user = await userManager.FindByNameAsync(username);
 

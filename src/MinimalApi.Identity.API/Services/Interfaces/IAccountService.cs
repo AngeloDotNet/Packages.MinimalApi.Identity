@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http;
 using MinimalApi.Identity.API.Models;
 
 namespace MinimalApi.Identity.API.Services.Interfaces;
 
 public interface IAccountService
 {
-    Task<Results<Ok<string>, BadRequest<string>>> ConfirmEmailAsync(string userId, string token);
-    Task<Results<Ok<string>, BadRequest<string>>> ChangeEmailAsync(ChangeEmailModel inputModel);
-    Task<Results<Ok<string>, BadRequest<string>>> ConfirmEmailChangeAsync(string userId, string email, string token);
+    Task<IResult> ConfirmEmailAsync(string userId, string token);
+    Task<IResult> ChangeEmailAsync(ChangeEmailModel inputModel);
+    Task<IResult> ConfirmEmailChangeAsync(string userId, string email, string token);
 }

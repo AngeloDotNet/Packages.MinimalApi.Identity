@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using MinimalApi.Identity.API.Constants;
@@ -13,7 +12,7 @@ namespace MinimalApi.Identity.API.Services;
 public class AccountService(UserManager<ApplicationUser> userManager, IEmailSenderService emailSender,
     IHttpContextAccessor httpContextAccessor) : IAccountService
 {
-    public async Task<Results<Ok<string>, BadRequest<string>>> ConfirmEmailAsync(string userId, string token)
+    public async Task<IResult> ConfirmEmailAsync(string userId, string token)
     {
         if (userId == null || token == null)
         {
@@ -33,7 +32,7 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
         return result.Succeeded ? TypedResults.Ok(MessageApi.ConfirmingEmail) : TypedResults.BadRequest(MessageApi.ErrorConfirmEmail);
     }
 
-    public async Task<Results<Ok<string>, BadRequest<string>>> ChangeEmailAsync(ChangeEmailModel inputModel)
+    public async Task<IResult> ChangeEmailAsync(ChangeEmailModel inputModel)
     {
         var user = await userManager.FindByEmailAsync(inputModel.Email);
 
@@ -52,18 +51,14 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
 
         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-        var request = httpContextAccessor.HttpContext!.Request;
-        var callbackUrl = $"{request.Scheme}://{request.Host}{EndpointsApi.EndpointsAccountGroup}" +
-        $"{EndpointsApi.EndpointsConfirmEmailChange}".Replace("{userId}", userId).Replace("{email}", inputModel.NewEmail)
-        .Replace("{token}", token);
+        var callbackUrl = await GenerateCallBackUrlAsync(userId, token, inputModel.NewEmail);
 
-        await emailSender.SendEmailAsync(inputModel.NewEmail!, "Confirm your email",
-            $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.", 2);
+        await emailSender.SendEmailTypeAsync(inputModel.NewEmail!, callbackUrl, 2);
 
         return TypedResults.Ok(MessageApi.SendEmailForChangeEmail);
     }
 
-    public async Task<Results<Ok<string>, BadRequest<string>>> ConfirmEmailChangeAsync(string userId, string email, string token)
+    public async Task<IResult> ConfirmEmailChangeAsync(string userId, string email, string token)
     {
         if (userId == null || email == null || token == null)
         {
@@ -86,28 +81,15 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
         return result.Succeeded ? TypedResults.Ok(MessageApi.ConfirmingEmailChanged) : TypedResults.BadRequest(MessageApi.ErrorConfirmEmailChange);
     }
 
-    //public async Task<ApplicationUser> GetUserByEmailAsync(string email)
-    //{
-    //    return await userManager.FindByEmailAsync(email);
-    //}
-    //public async Task<ApplicationUser> GetUserByIdAsync(string userId)
-    //{
-    //    return await userManager.FindByIdAsync(userId);
-    //}
-    //public async Task<ApplicationUser> GetUserByUserNameAsync(string userName)
-    //{
-    //    return await userManager.FindByNameAsync(userName);
-    //}
-    //public async Task<bool> IsEmailConfirmedAsync(ApplicationUser user)
-    //{
-    //    return await userManager.IsEmailConfirmedAsync(user);
-    //}
-    //public async Task<bool> IsUserLockedOutAsync(ApplicationUser user)
-    //{
-    //    return await userManager.IsLockedOutAsync(user);
-    //}
-    //public async Task<bool> IsUserValidAsync(ApplicationUser user, string password)
-    //{
-    //    return await userManager.CheckPasswordAsync(user, password);
-    //}
+    private async Task<string> GenerateCallBackUrlAsync(string userId, string token, string newEmail)
+    {
+        var request = httpContextAccessor.HttpContext!.Request;
+
+        var callbackUrl = $"{request.Scheme}://{request.Host}{EndpointsApi.EndpointsAccountGroup}" +
+            $"{EndpointsApi.EndpointsConfirmEmailChange}".Replace("{userId}", userId)
+            .Replace("{email}", newEmail).Replace("{token}", token);
+
+        await Task.Delay(500);
+        return callbackUrl;
+    }
 }

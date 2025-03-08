@@ -10,7 +10,13 @@ namespace MinimalApi.Identity.API.Services;
 
 public class EmailSenderService(IConfiguration configuration, IEmailSavingService emailSaving) : IEmailSenderService
 {
-    public async Task SendEmailAsync(string emailTo, string emailSubject, string emailMessage, int emailSendingType)
+    public async Task SendEmailTypeAsync(string email, string callbackUrl, int typeSender)
+    {
+        await SendEmailAsync(email, "Confirm your email",
+            $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.", typeSender);
+    }
+
+    private async Task SendEmailAsync(string emailTo, string emailSubject, string emailMessage, int emailSendingType)
     {
         try
         {
