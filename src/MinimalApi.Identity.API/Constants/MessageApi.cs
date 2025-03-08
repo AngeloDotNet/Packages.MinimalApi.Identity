@@ -46,4 +46,9 @@ public static class MessageApi
     public const string RoleExists = "Role already exists";
     public const string RolesNotFound = "Roles not found";
     public const string RoleNotAssigned = "Role not assigned";
+    public const string ClaimsNotAssigned = "Claims not assigned";
+
+    //Message exceptions
+    public const string UserNotAuthenticated = "User is not authenticated";
+    public const string UserNotHavePermission = "User does not have permission";
 }
