@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using MinimalApi.Identity.API.Extensions;
+using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
 
 namespace MinimalApi.Identity.API.Authorization.Handlers;
@@ -9,47 +9,60 @@ public class CombinedPermissionHandler : IAuthorizationHandler
 {
     public async Task HandleAsync(AuthorizationHandlerContext context)
     {
-        var confirmedPolicies = true;
+        var user = context.User;
+
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            if (context.Resource is HttpContext httpContext)
+            {
+                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            }
+
+            context.Fail();
+        }
 
         foreach (var requirement in context.Requirements)
         {
-            if (requirement is MultiPolicyRequirement multiPolicyRequirement)
+            switch (requirement)
             {
-                if (context.User.Identity!.IsAuthenticated == true)
-                {
-                    foreach (var permission in multiPolicyRequirement.Policies)
-                    {
-                        if (!context.User.Claims.Any(claim => claim.Type == CustomClaimTypes.Permission && claim.Value == permission))
-                        {
-                            confirmedPolicies = false;
-                            break;
-                        }
-                    }
+                case MultiPolicyRequirement multiPolicyRequirement:
 
-                    if (confirmedPolicies)
+                    if (multiPolicyRequirement.Policies.All(permission => user.HasClaim(CustomClaimTypes.Permission, permission)))
                     {
                         context.Succeed(multiPolicyRequirement);
                     }
-                }
-            }
-            else if (requirement is AuthorizationRequirement authorizationRequirement)
-            {
-                var permission = authorizationRequirement.Permission;
-
-                if (context.Resource is HttpContext httpContext)
-                {
-                    if (context.User.Identity!.IsAuthenticated == true && !string.IsNullOrWhiteSpace(permission))
+                    else
                     {
-                        if (!context.User.Claims.Any(claim => claim.Type == CustomClaimTypes.Permission && claim.Value == permission))
+                        if (context.Resource is HttpContext httpContext)
                         {
-                            context.Fail();
+                            httpContext.Response.StatusCode = StatusCodes.Status412PreconditionFailed;
                         }
-                        else
+
+                        context.Fail();
+                    }
+
+                    break;
+
+                case AuthorizationRequirement authorizationRequirement:
+
+                    if (context.Resource is HttpContext && !string.IsNullOrWhiteSpace(authorizationRequirement.Permission))
+                    {
+                        if (user.HasClaim(CustomClaimTypes.Permission, authorizationRequirement.Permission))
                         {
                             context.Succeed(authorizationRequirement);
                         }
+                        else
+                        {
+                            if (context.Resource is HttpContext httpContext)
+                            {
+                                httpContext.Response.StatusCode = StatusCodes.Status412PreconditionFailed;
+                            }
+
+                            context.Fail();
+                        }
                     }
-                }
+
+                    break;
             }
         }
 
