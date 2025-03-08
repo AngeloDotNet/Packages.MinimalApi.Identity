@@ -1,11 +1,10 @@
-﻿namespace MinimalApi.Identity.API.Entities;
+﻿using MinimalApi.Identity.API.Entities.Common;
 
-public class Permission
+namespace MinimalApi.Identity.API.Entities;
+
+public class Permission : BaseEntity
 {
-    public int Id { get; set; }
     public string Name { get; set; } = null!;
     public bool Default { get; set; } = false;
-
-    //public ICollection<UserPermission> UserPermissions { get; set; } = [];
-    public ICollection<RolePermission> RolePermissions { get; set; } = [];
+    public ICollection<UserPermission> UserPermissions { get; set; } = [];
 }

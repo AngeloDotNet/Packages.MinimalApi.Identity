@@ -1,10 +1,10 @@
-﻿namespace MinimalApi.Identity.API.Entities;
+﻿using MinimalApi.Identity.API.Entities.Common;
 
-public class License
+namespace MinimalApi.Identity.API.Entities;
+
+public class License : BaseEntity
 {
-    public int Id { get; set; }
     public string Name { get; set; } = null!;
     public DateTime ExpirationDate { get; set; }
-
     public ICollection<UserLicense> UserLicenses { get; set; } = [];
 }
