@@ -70,7 +70,7 @@ Adding this sections in the _appsettings.json_ file:
 
 > **Note**: If SaveEmailSent is false, only emails that failed while sending will be saved, if SaveEmailSent is true, both emails that were sent successfully and emails that failed will be saved
 
-Registering services at startup:
+Registering services at _Program.cs_ file:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -106,6 +106,7 @@ app.UseMapEndpoints();
 app.Run();
 ```
 
+<!--
 ### 📡 API Reference
 
 The library provides a series of endpoints to manage the identity of the application.
@@ -147,7 +148,6 @@ The library provides a series of endpoints to manage the identity of the applica
 | `password` | `string` | Yes |
 | `rememberMe` | `bool` | Yes |
 
-<!--
 - **/api/licenses**: Get all licenses
 - **/api/licenses/create-license**: Create a new license
 - **/api/licenses/assign-license**: Assign a license to a user
@@ -162,7 +162,6 @@ The library provides a series of endpoints to manage the identity of the applica
 - **/api/permissions/create-permission**: Create a new permission
 - **/api/permissions/assign-permission**: Assign a permission to a user
 - **/api/permissions/revoke-permission**: Revoke a permission from a user
--->
 
 #### Get user profile
 
@@ -194,7 +193,6 @@ The library provides a series of endpoints to manage the identity of the applica
 | :-------- | :------- | :------- |
 | `username` | `string` | Yes |
 
-<!--
 - **/api/roles**: Get all roles
 - **/api/roles/create-role**: Create a new role
 - **/api/roles/assign-role**: Assign a role to a user
