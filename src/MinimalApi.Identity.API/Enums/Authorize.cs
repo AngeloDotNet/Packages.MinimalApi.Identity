@@ -1,6 +1,6 @@
 ﻿namespace MinimalApi.Identity.API.Enums;
 
-public enum Authorization
+public enum Authorize
 {
     GetLicenses,
     CreateLicense,
