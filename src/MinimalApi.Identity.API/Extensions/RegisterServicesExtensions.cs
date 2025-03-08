@@ -14,11 +14,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using MinimalApi.Identity.API.Authorization.Handlers;
+using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
-using MinimalApi.Identity.API.Handlers;
 using MinimalApi.Identity.API.Options;
-using MinimalApi.Identity.API.Services;
 using MinimalApi.Identity.API.Services.Interfaces;
 using MinimalApi.Identity.BusinessLayer.Authorization.Provider;
 using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
@@ -36,12 +36,10 @@ public static class RegisterServicesExtensions
         services.AddMinimalApiIdentityOptionsServices(identityOptions);
 
         services
-            .AddTransient<IEmailSender, EmailSender>()
-            .AddTransient<IAuthService, AuthService>()
+            .AddRegisterTransientService<IAuthService>("Service")
 
             .AddScoped<SignInManager<ApplicationUser>>()
-            .AddScoped<IAuthorizationHandler, PermissionHandler>()
-            .AddScoped<IAuthorizationHandler, MultiPermissionHandler>()
+            .AddScoped<IAuthorizationHandler, CombinedPermissionHandler>()
 
             .AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
 
@@ -172,29 +170,29 @@ public static class RegisterServicesExtensions
     {
         var policies = new (string PolicyName, string RequirementName)[]
         {
-            (nameof(Authorization.GetLicenses), nameof(Policy.Licenses)),
-            (nameof(Authorization.CreateLicense), nameof(Policy.Licenses)),
-            (nameof(Authorization.AssignLicense), nameof(Policy.Licenses)),
-            (nameof(Authorization.DeleteLicense), nameof(Policy.Licenses)),
+            (nameof(Authorize.GetLicenses), nameof(Policy.Licenses)),
+            (nameof(Authorize.CreateLicense), nameof(Policy.Licenses)),
+            (nameof(Authorize.AssignLicense), nameof(Policy.Licenses)),
+            (nameof(Authorize.DeleteLicense), nameof(Policy.Licenses)),
 
-            (nameof(Authorization.GetModules), nameof(Policy.Modules)),
-            (nameof(Authorization.CreateModule), nameof(Policy.Modules)),
-            (nameof(Authorization.AssignModule), nameof(Policy.Modules)),
-            (nameof(Authorization.DeleteModule), nameof(Policy.Modules)),
+            (nameof(Authorize.GetModules), nameof(Policy.Modules)),
+            (nameof(Authorize.CreateModule), nameof(Policy.Modules)),
+            (nameof(Authorize.AssignModule), nameof(Policy.Modules)),
+            (nameof(Authorize.DeleteModule), nameof(Policy.Modules)),
 
-            (nameof(Authorization.GetPermissions), nameof(Policy.Permissions)),
-            (nameof(Authorization.CreatePermission), nameof(Policy.Permissions)),
-            (nameof(Authorization.AssignPermission), nameof(Policy.Permissions)),
-            (nameof(Authorization.DeletePermission), nameof(Policy.Permissions)),
+            (nameof(Authorize.GetPermissions), nameof(Policy.Permissions)),
+            (nameof(Authorize.CreatePermission), nameof(Policy.Permissions)),
+            (nameof(Authorize.AssignPermission), nameof(Policy.Permissions)),
+            (nameof(Authorize.DeletePermission), nameof(Policy.Permissions)),
 
-            (nameof(Authorization.GetRoles), nameof(Policy.Roles)),
-            (nameof(Authorization.CreateRole), nameof(Policy.Roles)),
-            (nameof(Authorization.AssignRole), nameof(Policy.Roles)),
-            (nameof(Authorization.DeleteRole), nameof(Policy.Roles)),
+            (nameof(Authorize.GetRoles), nameof(Policy.Roles)),
+            (nameof(Authorize.CreateRole), nameof(Policy.Roles)),
+            (nameof(Authorize.AssignRole), nameof(Policy.Roles)),
+            (nameof(Authorize.DeleteRole), nameof(Policy.Roles)),
 
-            (nameof(Authorization.GetProfile), nameof(Policy.Profiles)),
-            (nameof(Authorization.EditProfile), nameof(Policy.Profiles)),
-            (nameof(Authorization.DeleteProfile), nameof(Policy.Profiles))
+            (nameof(Authorize.GetProfile), nameof(Policy.Profiles)),
+            (nameof(Authorize.EditProfile), nameof(Policy.Profiles)),
+            (nameof(Authorize.DeleteProfile), nameof(Policy.Profiles))
         };
 
         foreach (var (policyName, requirementName) in policies)

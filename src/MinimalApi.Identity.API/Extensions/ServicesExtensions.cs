@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MinimalApi.Identity.API.Extensions;
 
@@ -18,5 +19,16 @@ public static class ServicesExtensions
             ?? throw new ArgumentNullException(nameof(sectionName), "Connection string not found");
 
         return options;
+    }
+
+    public static IServiceCollection AddRegisterTransientService<TAssembly>(this IServiceCollection services, string stringEndsWith) where TAssembly : class
+    {
+        services.Scan(scan =>
+            scan.FromAssemblyOf<TAssembly>()
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith(stringEndsWith)))
+                .AsImplementedInterfaces()
+                .WithTransientLifetime());
+
+        return services;
     }
 }
