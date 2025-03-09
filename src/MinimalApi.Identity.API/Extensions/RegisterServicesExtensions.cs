@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -31,7 +32,7 @@ public static class RegisterServicesExtensions
     public static IServiceCollection AddRegisterServices<TMigrations>(this IServiceCollection services, string connectionString,
         JwtOptions jwtOptions, NetIdentityOptions identityOptions) where TMigrations : class
     {
-        services.AddMinimalApiDbContext(connectionString, typeof(TMigrations).Assembly.FullName!, "MigrationsHistory");
+        services.AddMinimalApiDbContext(connectionString, typeof(TMigrations).Assembly.FullName!);
         services.AddMinimalApiIdentityServices(jwtOptions);
         services.AddMinimalApiIdentityOptionsServices(identityOptions);
 
@@ -96,15 +97,15 @@ public static class RegisterServicesExtensions
             });
     }
 
-    internal static IServiceCollection AddMinimalApiDbContext(this IServiceCollection services, string connectionString,
-        string migrationAssembly, string migrationTableName)
+    internal static IServiceCollection AddMinimalApiDbContext(this IServiceCollection services,
+        string connectionString, string migrationAssembly)
     {
         services.AddDbContext<MinimalApiDbContext>(options =>
         {
             options.UseSqlServer(connectionString, opt =>
             {
                 opt.MigrationsAssembly(migrationAssembly);
-                opt.MigrationsHistoryTable(migrationTableName);
+                opt.MigrationsHistoryTable(HistoryRepository.DefaultTableName);
                 opt.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
         });
