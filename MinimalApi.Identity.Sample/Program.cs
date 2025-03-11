@@ -28,44 +28,12 @@ public class Program
             .AddSwaggerConfiguration()
             .AddRegisterOptions(builder.Configuration);
 
-        //builder.Services.AddProblemDetails(options =>
-        //{
-        //	options.CustomizeProblemDetails = context =>
-        //	{
-        //		var problemDetails = context.ProblemDetails;
-        //		var httpContext = context.HttpContext;
-        //		var response = httpContext.Response;
-
-        //		problemDetails.Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}";
-
-        //		var activity = httpContext.Features.Get<IHttpActivityFeature>()?.Activity;
-
-        //		switch (response.StatusCode)
-        //		{
-        //			case StatusCodes.Status401Unauthorized:
-        //				problemDetails.Extensions.TryAdd("details", MessageApi.UserNotAuthenticated);
-        //				problemDetails.Status = StatusCodes.Status401Unauthorized;
-        //				break;
-        //			case StatusCodes.Status412PreconditionFailed:
-        //				problemDetails.Extensions.TryAdd("details", MessageApi.UserNotHavePermission);
-        //				problemDetails.Status = StatusCodes.Status412PreconditionFailed;
-        //				break;
-        //		}
-
-        //		problemDetails.Extensions.TryAdd("traceId", activity?.Id);
-        //		problemDetails.Extensions.TryAdd("requestId", httpContext.TraceIdentifier);
-        //	};
-        //});
-
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger().UseSwaggerUI();
         }
-
-        //app.UseExceptionHandler();
-        //app.UseStatusCodePages();
 
         app.UseCors("cors");
 
