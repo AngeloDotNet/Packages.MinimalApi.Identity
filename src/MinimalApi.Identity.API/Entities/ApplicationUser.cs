@@ -12,7 +12,7 @@ public class ApplicationUser : IdentityUser<int>
     //public DateTime? RefreshTokenExpirationDate { get; set; }
     public ICollection<ApplicationUserRole> UserRoles { get; set; } = [];
     //public ICollection<IdentityUserClaim<int>> UserClaims { get; set; } = [];
-    public ICollection<UserPermission> UserPermissions { get; set; } = [];
+    public ICollection<ApplicationUserClaim> UserClaims { get; set; } = [];
     public ICollection<UserLicense> UserLicenses { get; set; } = [];
     public ICollection<UserModule> UserModules { get; set; } = [];
 }
