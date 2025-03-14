@@ -45,10 +45,6 @@ public static class EndpointsApi
     public const string EndpointsAssignModule = "/assign-module";
     public const string EndpointsRevokeModule = "/revoke-module";
 
-    public const string EndpointsCreatePermission = "/create-permission";
-    public const string EndpointsAssignPermission = "/assign-permission";
-    public const string EndpointsRevokePermission = "/revoke-permission";
-
     public const string EndpointsCreateRole = "/create-role";
     public const string EndpointsAssignRole = "/assign-role";
     public const string EndpointsRevokeRole = "/revoke-role";
