@@ -58,6 +58,20 @@ namespace MinimalApi.Identity.Sample.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ClaimTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ClaimTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EmailSendingTypes",
                 columns: table => new
                 {
@@ -99,20 +113,6 @@ namespace MinimalApi.Identity.Sample.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Permissions",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Default = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Permissions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -141,11 +141,17 @@ namespace MinimalApi.Identity.Sample.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ApplicationUserId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserClaims_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -230,8 +236,8 @@ namespace MinimalApi.Identity.Sample.Migrations
                     Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Sent = table.Column<bool>(type: "bit", nullable: false),
                     DateSent = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ErrorDetails = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ErrorMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ErrorDetails = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -292,34 +298,22 @@ namespace MinimalApi.Identity.Sample.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "UserPermissions",
-                columns: table => new
-                {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    PermissionId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserPermissions", x => new { x.UserId, x.PermissionId });
-                    table.ForeignKey(
-                        name: "FK_UserPermissions_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserPermissions_Permissions_PermissionId",
-                        column: x => x.PermissionId,
-                        principalTable: "Permissions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Default", "Name", "NormalizedName" },
                 values: new object[] { 1, "52D77FEB-3860-4523-B022-4F5CB859E434", true, "Admin", "ADMIN" });
+
+            migrationBuilder.InsertData(
+                table: "ClaimTypes",
+                columns: new[] { "Id", "Type", "Value" },
+                values: new object[,]
+                {
+                    { 1, "Permission", "Licenses" },
+                    { 2, "Permission", "Modules" },
+                    { 3, "Permission", "Permissions" },
+                    { 4, "Permission", "Roles" },
+                    { 5, "Permission", "Profiles" }
+                });
 
             migrationBuilder.InsertData(
                 table: "EmailSendingTypes",
@@ -328,37 +322,6 @@ namespace MinimalApi.Identity.Sample.Migrations
                 {
                     { 1, "RegisterUser" },
                     { 2, "ChangeEmail" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Permissions",
-                columns: new[] { "Id", "Default", "Name" },
-                values: new object[,]
-                {
-                    { 1, true, "Licenses" },
-                    { 2, true, "Modules" },
-                    { 3, true, "Permissions" },
-                    { 4, true, "Roles" },
-                    { 5, true, "Profiles" },
-                    { 6, true, "GetLicenses" },
-                    { 7, true, "CreateLicense" },
-                    { 8, true, "AssignLicense" },
-                    { 9, true, "DeleteLicense" },
-                    { 10, true, "GetModules" },
-                    { 11, true, "CreateModule" },
-                    { 12, true, "AssignModule" },
-                    { 13, true, "DeleteModule" },
-                    { 14, true, "GetPermissions" },
-                    { 15, true, "CreatePermission" },
-                    { 16, true, "AssignPermission" },
-                    { 17, true, "DeletePermission" },
-                    { 18, true, "GetRoles" },
-                    { 19, true, "CreateRole" },
-                    { 20, true, "AssignRole" },
-                    { 21, true, "DeleteRole" },
-                    { 22, true, "GetProfile" },
-                    { 23, true, "EditProfile" },
-                    { 24, true, "DeleteProfile" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -372,6 +335,11 @@ namespace MinimalApi.Identity.Sample.Migrations
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserClaims_ApplicationUserId",
+                table: "AspNetUserClaims",
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -414,11 +382,6 @@ namespace MinimalApi.Identity.Sample.Migrations
                 name: "IX_UserModules_ModuleId",
                 table: "UserModules",
                 column: "ModuleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserPermissions_PermissionId",
-                table: "UserPermissions",
-                column: "PermissionId");
         }
 
         /// <inheritdoc />
@@ -440,6 +403,9 @@ namespace MinimalApi.Identity.Sample.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ClaimTypes");
+
+            migrationBuilder.DropTable(
                 name: "EmailSendings");
 
             migrationBuilder.DropTable(
@@ -447,9 +413,6 @@ namespace MinimalApi.Identity.Sample.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserModules");
-
-            migrationBuilder.DropTable(
-                name: "UserPermissions");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -461,13 +424,10 @@ namespace MinimalApi.Identity.Sample.Migrations
                 name: "Licenses");
 
             migrationBuilder.DropTable(
-                name: "Modules");
-
-            migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Permissions");
+                name: "Modules");
         }
     }
 }
