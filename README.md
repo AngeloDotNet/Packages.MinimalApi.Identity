@@ -8,10 +8,11 @@
 - [ ] Add endpoint for password change
 - [ ] Add endpoints for two-factor authentication management
 - [ ] Add endpoints for downloading and deleting personal data
-- [ ] Add endpoints to delete license, module, permission and role (possible only if the data is not default)
+- [ ] Add endpoints to manage claims and role (possible only if the data is not default)
 - [ ] Add endpoints to manage users (including one to impersonate the user)
 - [ ] Add validation input models
 - [ ] Add missing documentation
+- [ ] Refactoring code for manage claims (register and login), licenses and modules
 
 ### 🛠️ Installation
 
@@ -76,31 +77,42 @@ Registering services at _Program.cs_ file:
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetDatabaseConnString("DefaultConnection");
 
-//...
-
 var jwtOptions = builder.Configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
 var identityOptions = builder.Configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
 var smtpOptions = builder.Configuration.GetSettingsOptions<SmtpOptions>(nameof(SmtpOptions));
 
-builder.Services.AddRegisterServices<Program>(connectionString, jwtOptions, identityOptions)
-    .AddAuthorization(options =>
-    {
-        options.AddDefaultAuthorizationPolicy(); // Adds default authorization policies
+builder.Services.AddCors(options => options.AddPolicy("cors", builder
+    => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
-        // Here you can add additional authorization policies
-    });
+builder.Services.AddProblemDetails(option =>
+{
+    // Adds default mappings for exceptions to problem details
+    options.AddDefaultProblemDetailsOptions();
 
-builder.Services.AddSwaggerConfiguration()
-    .AddRegisterOptions(builder.Configuration);
+    // Here you can add additional exception mappings
+});
+
+builder.Services.AddRegisterServices<Program>(builder.Configuration, connectionString, jwtOptions, identityOptions);
+builder.Services.AddAuthorization(options =>
+{
+    // Adds default authorization policies
+    options.AddDefaultAuthorizationPolicy();
+
+    // Here you can add additional authorization policies
+});
 
 var app = builder.Build();
+app.UseRegisterAppServices();
 
-//...
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger().UseSwaggerUI();
+}
+
+app.UseCors("cors");
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-//...
 
 app.UseMapEndpoints();
 app.Run();
@@ -148,21 +160,6 @@ The library provides a series of endpoints to manage the identity of the applica
 | `password` | `string` | Yes |
 | `rememberMe` | `bool` | Yes |
 
-- **/api/licenses**: Get all licenses
-- **/api/licenses/create-license**: Create a new license
-- **/api/licenses/assign-license**: Assign a license to a user
-- **/api/licenses/revoke-license**: Revoke a license from a user
-
-- **/api/modules**: Get all modules
-- **/api/modules/create-module**: Create a new module
-- **/api/modules/assign-module**: Assign a module to a user
-- **/api/modules/revoke-module**: Revoke a module from a user
-
-- **/api/permissions**: Get all permissions
-- **/api/permissions/create-permission**: Create a new permission
-- **/api/permissions/assign-permission**: Assign a permission to a user
-- **/api/permissions/revoke-permission**: Revoke a permission from a user
-
 #### Get user profile
 
 ```http
@@ -192,11 +189,6 @@ The library provides a series of endpoints to manage the identity of the applica
 | Parameter | Type     | Required |
 | :-------- | :------- | :------- |
 | `username` | `string` | Yes |
-
-- **/api/roles**: Get all roles
-- **/api/roles/create-role**: Create a new role
-- **/api/roles/assign-role**: Assign a role to a user
-- **/api/roles/revoke-role**: Revoke a role from a user
 -->
 
 ### 📦 Dependencies
@@ -208,6 +200,7 @@ The library provides a series of endpoints to manage the identity of the applica
 - [JWT Bearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer)
 - [MailKit](https://www.nuget.org/packages/MailKit)
 - [Scrutor](https://www.nuget.org/packages/Scrutor)
+- [Hellang Problem Details](https://www.nuget.org/packages/Hellang.Middleware.ProblemDetails)
 
 ### 📝 License
 
