@@ -38,6 +38,7 @@ public static class MessageApi
     public const string RoleNotFound = "Role not found";
     public const string RoleAssigned = "Role assigned successfully";
     public const string RoleCanceled = "Role removed successfully";
+    public const string RoleNotDeleted = "Role not deleted, it is not possible to delete a role created by default";
     public const string RoleExists = "Role already exists";
     public const string RolesNotFound = "Roles not found";
     public const string RoleNotAssigned = "Role not assigned";

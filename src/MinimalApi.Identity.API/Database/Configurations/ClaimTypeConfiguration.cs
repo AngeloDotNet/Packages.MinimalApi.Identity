@@ -55,21 +55,21 @@ public class ClaimTypeConfiguration : IEntityTypeConfiguration<ClaimType>
         {
             Id = 7,
             Type = "Permission",
-            Value = nameof(Permissions.Permesso),
+            Value = nameof(Permissions.Claim),
             Default = true
         },
         new ClaimType
         {
             Id = 8,
             Type = "Permission",
-            Value = nameof(Permissions.PermessoRead),
+            Value = nameof(Permissions.ClaimRead),
             Default = true
         },
         new ClaimType
         {
             Id = 9,
             Type = "Permission",
-            Value = nameof(Permissions.PermessoWrite),
+            Value = nameof(Permissions.ClaimWrite),
             Default = true
         },
         new ClaimType

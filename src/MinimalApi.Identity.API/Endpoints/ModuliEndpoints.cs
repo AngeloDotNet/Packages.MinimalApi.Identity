@@ -8,6 +8,7 @@ using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
+using MinimalApi.Identity.API.Validations.Extensions;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -32,7 +33,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<List<ModuleResponseModel>>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorize.GetModules))
+        .RequireAuthorization(nameof(Permissions.ModuloRead))
         .WithOpenApi(opt =>
         {
             opt.Description = "Get all modules";
@@ -47,7 +48,8 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .RequireAuthorization(nameof(Authorize.CreateModule))
+        .RequireAuthorization(nameof(Permissions.ModuloWrite))
+        .WithValidation<CreateModuleModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Create a new module";
@@ -63,7 +65,8 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorize.AssignModule))
+        .RequireAuthorization(nameof(Permissions.ModuloWrite))
+        .WithValidation<AssignModuleModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Assign a module to a user";
@@ -79,7 +82,8 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorize.DeleteModule))
+        .RequireAuthorization(nameof(Permissions.ModuloWrite))
+        .WithValidation<RevokeModuleModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Revoke a module from a user";

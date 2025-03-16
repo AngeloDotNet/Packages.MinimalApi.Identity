@@ -5,6 +5,7 @@ namespace MinimalApi.Identity.API.Entities;
 public class License : BaseEntity
 {
     public string Name { get; set; } = null!;
-    public DateTime ExpirationDate { get; set; }
+    //public DateTime ExpirationDate { get; set; }
+    public DateOnly ExpirationDate { get; set; }
     public ICollection<UserLicense> UserLicenses { get; set; } = [];
 }

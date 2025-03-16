@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
+using MinimalApi.Identity.API.Validations.Extensions;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -48,6 +49,7 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .WithValidation<ChangeEmailModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Change email address";

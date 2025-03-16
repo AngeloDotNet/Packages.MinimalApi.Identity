@@ -13,14 +13,6 @@ public class PermissionHandler : IAuthorizationHandler
 
         if (user.Identity?.IsAuthenticated != true)
         {
-            //if (context.Resource is HttpContext httpContext)
-            //{
-            //    httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            //}
-
-            //context.Fail();
-            //return;
-
             throw new UserUnknownException();
         }
 
@@ -34,14 +26,6 @@ public class PermissionHandler : IAuthorizationHandler
                 }
                 else
                 {
-                    //if (context.Resource is HttpContext httpContext)
-                    //{
-                    //    httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    //}
-
-                    //context.Fail();
-                    //return;
-
                     throw new UserWithoutPermissionsException();
                 }
             }

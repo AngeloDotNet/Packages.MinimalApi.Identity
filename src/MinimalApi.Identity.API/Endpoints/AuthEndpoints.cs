@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
+using MinimalApi.Identity.API.Validations.Extensions;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -32,6 +33,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
+        .WithValidation<RegisterModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Register new user";
@@ -47,6 +49,8 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
         })
         .Produces<Ok<AuthResponseModel>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .WithValidation<LoginModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Login user";
