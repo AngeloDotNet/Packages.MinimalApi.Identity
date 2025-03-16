@@ -64,7 +64,7 @@ public class ModuleService(MinimalApiDbContext dbContext, UserManager<Applicatio
     public async Task<IResult> RevokeModuleAsync(RevokeModuleModel model)
     {
         var userModule = await dbContext.UserModules
-                .SingleOrDefaultAsync(um => um.UserId == model.UserId && um.ModuleId == model.ModuleId);
+            .SingleOrDefaultAsync(um => um.UserId == model.UserId && um.ModuleId == model.ModuleId);
 
         if (userModule == null)
         {
