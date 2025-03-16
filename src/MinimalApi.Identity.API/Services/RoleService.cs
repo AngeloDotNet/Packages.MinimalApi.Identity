@@ -16,7 +16,7 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, UserManager<A
         var query = await roleManager.Roles.ToListAsync();
         var result = query.Select(r => new RoleResponseModel(r.Id, r.Name!, r.Default)).ToList();
 
-        return result == null ? TypedResults.NotFound(MessageApi.RolesNotFound) : TypedResults.Ok(result);
+        return result.Count == 0 ? TypedResults.NotFound(MessageApi.RolesNotFound) : TypedResults.Ok(result);
     }
 
     public async Task<IResult> CreateRoleAsync(CreateRoleModel model)
