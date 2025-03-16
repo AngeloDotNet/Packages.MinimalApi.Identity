@@ -8,6 +8,7 @@ using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
+using MinimalApi.Identity.API.Validations.Extensions;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -32,7 +33,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<List<LicenseResponseModel>>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorize.GetLicenses))
+        .RequireAuthorization(nameof(Permissions.LicenzaRead))
         .WithOpenApi(opt =>
         {
             opt.Description = "Get all licenses";
@@ -47,7 +48,8 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .RequireAuthorization(nameof(Authorize.CreateLicense))
+        .RequireAuthorization(nameof(Permissions.LicenzaWrite))
+        .WithValidation<CreateLicenseModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Create a new license";
@@ -63,7 +65,8 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorize.AssignLicense))
+        .RequireAuthorization(nameof(Permissions.LicenzaWrite))
+        .WithValidation<AssignLicenseModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Assign a license to a user";
@@ -79,7 +82,8 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequireAuthorization(nameof(Authorize.DeleteLicense))
+        .RequireAuthorization(nameof(Permissions.LicenzaWrite))
+        .WithValidation<RevokeLicenseModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Revoke a license from a user";
