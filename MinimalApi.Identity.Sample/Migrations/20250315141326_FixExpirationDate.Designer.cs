@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MinimalApi.Identity.API.Database;
 
@@ -11,9 +12,11 @@ using MinimalApi.Identity.API.Database;
 namespace MinimalApi.Identity.Sample.Migrations
 {
     [DbContext(typeof(MinimalApiDbContext))]
-    partial class MinimalApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250315141326_FixExpirationDate")]
+    partial class FixExpirationDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

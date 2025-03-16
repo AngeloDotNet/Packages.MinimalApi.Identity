@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MinimalApi.Identity.API.Database;
 
@@ -11,9 +12,11 @@ using MinimalApi.Identity.API.Database;
 namespace MinimalApi.Identity.Sample.Migrations
 {
     [DbContext(typeof(MinimalApiDbContext))]
-    partial class MinimalApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250314163035_AddDefaultValuePermission")]
+    partial class AddDefaultValuePermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -463,8 +466,8 @@ namespace MinimalApi.Identity.Sample.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly>("ExpirationDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()

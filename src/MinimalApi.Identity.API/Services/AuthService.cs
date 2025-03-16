@@ -5,11 +5,9 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MinimalApi.Identity.API.Constants;
-using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Extensions;
@@ -20,8 +18,7 @@ using MinimalApi.Identity.API.Services.Interfaces;
 namespace MinimalApi.Identity.API.Services;
 
 public class AuthService(IConfiguration configuration, UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender, IHttpContextAccessor httpContextAccessor,
-    MinimalApiDbContext dbContext) : IAuthService
+    SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender, IHttpContextAccessor httpContextAccessor) : IAuthService
 {
     public async Task<IResult> LoginAsync(LoginModel model)
     {
@@ -56,21 +53,24 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         await userManager.UpdateSecurityStampAsync(user);
 
         var userRoles = await userManager.GetRolesAsync(user);
-        var userPermissions = await GetPermissionsFromUserAsync(user);
-        //var userClaims = await userManager.GetClaimsAsync(user);
+        var userClaims = await userManager.GetClaimsAsync(user);
 
         var claims = new List<Claim>()
-            {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Name, user.UserName ?? string.Empty),
-                new(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
-                new(ClaimTypes.Surname, user.LastName ?? string.Empty),
-                new(ClaimTypes.Email, user.Email ?? string.Empty),
-                new(ClaimTypes.SerialNumber, user.SecurityStamp!.ToString()),
-            }
-        .Union(userPermissions.Select(permission => new Claim(CustomClaimTypes.Permission, permission)))
-        //.Union(userClaims)
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
+            new(ClaimTypes.Surname, user.LastName ?? string.Empty),
+            new(ClaimTypes.Email, user.Email ?? string.Empty),
+            new(ClaimTypes.SerialNumber, user.SecurityStamp!.ToString()),
+        }
+        .Union(userClaims)
         .Union(userRoles.Select(role => new Claim(ClaimTypes.Role, role))).ToList();
+
+        if (user.FirstName != null && user.LastName != null)
+        {
+            claims.Add(new Claim(CustomClaimTypes.FullName, $"{user.FirstName} {user.LastName}"));
+        }
 
         var loginResponse = CreateToken(claims, configuration);
 
@@ -137,12 +137,12 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
                     return TypedResults.BadRequest(MessageApi.RoleNotAssigned);
                 }
 
-                //var claimsAssingResult = await AddClaimsToAdminUserAsync(user);
+                var claimsAssingResult = await AddClaimsToAdminUserAsync(user);
 
-                //if (!claimsAssingResult.Succeeded)
-                //{
-                //    return TypedResults.BadRequest(MessageApi.ClaimsNotAssigned);
-                //}
+                if (!claimsAssingResult.Succeeded)
+                {
+                    return TypedResults.BadRequest(MessageApi.ClaimsNotAssigned);
+                }
             }
 
             var userId = await userManager.GetUserIdAsync(user);
@@ -177,24 +177,31 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         return callbackUrl;
     }
 
-    private async Task<IList<string>> GetPermissionsFromUserAsync(ApplicationUser user)
+    private async Task<IdentityResult> AddClaimsToAdminUserAsync(ApplicationUser user)
     {
-        var permissions = await dbContext.UserPermissions
-            .Where(up => up.UserId == user.Id)
-            .Select(up => up.Permission.Name)
-            .Distinct()
-            .ToListAsync();
+        //var claims = new List<Claim>
+        //{
+        //    //new(CustomClaimTypes.FullName, $"{user.FirstName} {user.LastName}")
+        //};
 
-        return permissions;
+        var claims = new List<Claim>();
+
+        foreach (var permission in Enum.GetValues<Permissions>())
+        {
+            if (permission.ToString().Contains("Profile"))
+            {
+                var customClaim = new Claim(CustomClaimTypes.Permission, permission.ToString());
+                claims.Add(customClaim);
+            }
+
+            //TODO: To be fixed when the permissions are implemented
+
+            //var customClaim = new Claim(CustomClaimTypes.Permission, permission.ToString());
+            //claims.Add(customClaim);
+        }
+
+        var result = await userManager.AddClaimsAsync(user, claims);
+
+        return result;
     }
-
-    //private async Task<IdentityResult> AddClaimsToAdminUserAsync(ApplicationUser user)
-    //{
-    //    var claims = new List<Claim>
-    //    {
-    //        new(CustomClaimTypes.FullName, $"{user.FirstName} {user.LastName}")
-    //    };
-
-    //    return await userManager.AddClaimsAsync(user, claims);
-    //}
 }

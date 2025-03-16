@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MinimalApi.Identity.API.Database;
 
@@ -11,9 +12,11 @@ using MinimalApi.Identity.API.Database;
 namespace MinimalApi.Identity.Sample.Migrations
 {
     [DbContext(typeof(MinimalApiDbContext))]
-    partial class MinimalApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250314155816_FixPermissionProfile")]
+    partial class FixPermissionProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,9 +264,6 @@ namespace MinimalApi.Identity.Sample.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Default")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -280,107 +280,20 @@ namespace MinimalApi.Identity.Sample.Migrations
                         new
                         {
                             Id = 1,
-                            Default = true,
                             Type = "Permission",
-                            Value = "Profilo"
+                            Value = "Profile"
                         },
                         new
                         {
                             Id = 2,
-                            Default = true,
                             Type = "Permission",
-                            Value = "ProfiloRead"
+                            Value = "ProfileRead"
                         },
                         new
                         {
                             Id = 3,
-                            Default = true,
                             Type = "Permission",
-                            Value = "ProfiloWrite"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "Ruolo"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "RuoloRead"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "RuoloWrite"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "Permesso"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "PermessoRead"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "PermessoWrite"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "Modulo"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "ModuloRead"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "ModuloWrite"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "Licenza"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "LicenzaRead"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            Default = true,
-                            Type = "Permission",
-                            Value = "LicenzaWrite"
+                            Value = "ProfileWrite"
                         });
                 });
 
@@ -463,8 +376,8 @@ namespace MinimalApi.Identity.Sample.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateOnly>("ExpirationDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -64,7 +64,7 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
     public async Task<IResult> RevokeLicenseAsync(RevokeLicenseModel model)
     {
         var userLicense = await dbContext.UserLicenses.SingleOrDefaultAsync(ul
-                => ul.UserId == model.UserId && ul.LicenseId == model.LicenseId);
+            => ul.UserId == model.UserId && ul.LicenseId == model.LicenseId);
 
         if (userLicense == null)
         {
