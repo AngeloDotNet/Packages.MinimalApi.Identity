@@ -1,19 +1,27 @@
 ﻿# Packages MinimalApi Identity API
 
+Library for dynamically managing users, roles, claims, modules and license, using .NET 8 Minimal API, Entity Framework Core and SQL Server.
+
+I created this library in order to avoid duplication of repetitive code whenever I implement Asp.Net Core Identity as an authentication and authorization provider
+
+> [!IMPORTANT]
+> **The MinimalApi.Identity.API library used in this sample project, is still under development of new implementations.**
+
 ### 🏗️ ToDo
 
+- [ ] Add endpoints to manage claims (with possible deletion only if the data is not default)
+- [ ] Add endpoints to manage users
+- [ ] Add endpoints to impersonate the user
+- [ ] Add endpoints to manage user disablement
+- [ ] Add endpoints to handle user password change every X days
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
 - [ ] Add endpoints for two-factor authentication
 - [ ] Add endpoint for forgotten password recovery
 - [ ] Add endpoint for password change
 - [ ] Add endpoints for two-factor authentication management
 - [ ] Add endpoints for downloading and deleting personal data
-- [ ] Add endpoints to manage claims and role (possible only if the data is not default)
-- [ ] Add endpoints to manage users (including one to impersonate the user)
-- [ ] Add validation input models
-- [ ] Add missing documentation
-- [ ] Refactoring code for manage claims (register and login), licenses and modules
-
+- [ ] Add API documentation
+ 
 ### 🛠️ Installation
 
 The library is available on NuGet. Just search for MinimalApi.Identity.API in the Package Manager GUI or run the following command in the .NET CLI:
@@ -84,14 +92,6 @@ var smtpOptions = builder.Configuration.GetSettingsOptions<SmtpOptions>(nameof(S
 builder.Services.AddCors(options => options.AddPolicy("cors", builder
     => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
-builder.Services.AddProblemDetails(option =>
-{
-    // Adds default mappings for exceptions to problem details
-    options.AddDefaultProblemDetailsOptions();
-
-    // Here you can add additional exception mappings
-});
-
 builder.Services.AddRegisterServices<Program>(builder.Configuration, connectionString, jwtOptions, identityOptions);
 builder.Services.AddAuthorization(options =>
 {
@@ -102,7 +102,15 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
-app.UseRegisterAppServices();
+
+//If you need to add more exceptions you need to add the ExtendedExceptionMiddleware middleware.
+//In the demo project, in the Middleware folder, you can find an implementation example.
+app.UseMiddleware<ExtendedExceptionMiddleware>();
+
+//Otherwise you can add this middleware MinimalApiExceptionMiddleware to your pipeline that handles exceptions from this library.
+//app.UseMiddleware<MinimalApiExceptionMiddleware>();
+
+app.UseRouting();
 
 if (app.Environment.IsDevelopment())
 {
@@ -191,6 +199,11 @@ The library provides a series of endpoints to manage the identity of the applica
 | `username` | `string` | Yes |
 -->
 
+
+### 📚 Demo
+
+You can find a sample project in the [example](https://github.com/AngeloDotNet/Packages.MinimalApi.Identity/tree/main/MinimalApi.Identity.Sample) project.
+
 ### 📦 Dependencies
 
 - [.NET8](https://dotnet.microsoft.com/it-it/download/dotnet/8.0)
@@ -200,12 +213,18 @@ The library provides a series of endpoints to manage the identity of the applica
 - [JWT Bearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer)
 - [MailKit](https://www.nuget.org/packages/MailKit)
 - [Scrutor](https://www.nuget.org/packages/Scrutor)
+<!--
 - [Hellang Problem Details](https://www.nuget.org/packages/Hellang.Middleware.ProblemDetails)
+-->
 
 ### 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### 📚 Demo
+### ⭐ Give a Star
 
-You can find a sample project in the [example](https://github.com/AngeloDotNet/IdentityManager) project.
+If you find this project useful, please give it a ⭐ on GitHub to show your support and help others discover it!
+
+### 🤝 Contributing
+
+Suggestions are always welcome! Feel free to open suggestion issues in the repository and we will implement them as possible.
