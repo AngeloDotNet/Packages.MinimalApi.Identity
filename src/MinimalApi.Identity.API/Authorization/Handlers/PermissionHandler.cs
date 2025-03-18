@@ -10,24 +10,27 @@ public class PermissionHandler : IAuthorizationHandler
     public async Task HandleAsync(AuthorizationHandlerContext context)
     {
         var user = context.User;
+        var permissionsRequirements = context.Requirements.OfType<PermissionRequirement>().ToList();
 
         if (user.Identity?.IsAuthenticated != true)
         {
             throw new UserUnknownException();
         }
 
-        foreach (var requirement in context.Requirements)
+        if (!context.Requirements.Any())
         {
-            if (requirement is PermissionRequirement permissionRequirement)
+            throw new UserWithoutPermissionsException();
+        }
+
+        foreach (var permissionRequirement in permissionsRequirements)
+        {
+            if (permissionRequirement.Permissions.All(permission => user.HasClaim(CustomClaimTypes.Permission, permission)))
             {
-                if (permissionRequirement.Permissions.All(permission => user.HasClaim(CustomClaimTypes.Permission, permission)))
-                {
-                    context.Succeed(permissionRequirement);
-                }
-                else
-                {
-                    throw new UserWithoutPermissionsException();
-                }
+                context.Succeed(permissionRequirement);
+            }
+            else
+            {
+                throw new UserWithoutPermissionsException();
             }
         }
 
