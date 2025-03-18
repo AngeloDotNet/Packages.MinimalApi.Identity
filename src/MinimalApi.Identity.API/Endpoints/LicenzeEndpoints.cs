@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Enums;
+using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
-using MinimalApi.Identity.API.Validations.Extensions;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -88,6 +88,24 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
         {
             opt.Description = "Revoke a license from a user";
             opt.Summary = "Revoke a license from a user";
+            return opt;
+        });
+
+        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteLicense, async Task<IResult> ([FromServices] ILicenseService licenseService,
+            [FromBody] DeleteLicenseModel inputModel) =>
+        {
+            return await licenseService.DeleteLicenseAsync(inputModel);
+        })
+        .Produces<string>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .RequireAuthorization(nameof(Permissions.LicenzaWrite))
+        .WithValidation<DeleteLicenseModel>()
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Delete license";
+            opt.Description = "Delete license";
             return opt;
         });
     }
