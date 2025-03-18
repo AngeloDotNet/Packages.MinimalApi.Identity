@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MinimalApi.Identity.API.Database;
 
@@ -11,9 +12,11 @@ using MinimalApi.Identity.API.Database;
 namespace MinimalApi.Identity.Sample.Migrations
 {
     [DbContext(typeof(MinimalApiDbContext))]
-    partial class MinimalApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250316164204_FixClaimsType")]
+    partial class FixClaimsType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -155,26 +158,10 @@ namespace MinimalApi.Identity.Sample.Migrations
                         new
                         {
                             Id = 1,
-                            ConcurrencyStamp = "2F267733-F53E-498F-B91E-C536BCE4AEA3",
+                            ConcurrencyStamp = "52D77FEB-3860-4523-B022-4F5CB859E434",
                             Default = true,
                             Name = "Admin",
                             NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ConcurrencyStamp = "36741E9D-5F55-4994-B9BE-F63F93A81EE0",
-                            Default = true,
-                            Name = "PowerUser",
-                            NormalizedName = "POWERUSER"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ConcurrencyStamp = "4535A9B1-B787-4CA6-ACAD-F2E0DF38AB5B",
-                            Default = true,
-                            Name = "User",
-                            NormalizedName = "USER"
                         });
                 });
 
