@@ -24,16 +24,23 @@ public static class MessageApi
     public const string ProfileUpdated = "Profile updated successfully";
     public const string ProfileNotFound = "Profile not found";
     public const string UserDeleted = "User deleted successfully";
+
     public const string LicenseCreated = "License created successfully";
     public const string LicenseNotFound = "License not found";
     public const string LicenseAssigned = "License assigned successfully";
     public const string LicenseCanceled = "License removed successfully";
     public const string LicensesNotFound = "Licenses not found";
+    public const string LicenseNotDeleted = "License not deleted, it is not possible to delete a license assigned to a user";
+    public const string LicenseNotAssignable = "You cannot assign more than one license to a user. Please check which license the user owns.";
+
     public const string ModuleCreated = "Module created successfully";
     public const string ModuleNotFound = "Module not found";
     public const string ModuleAssigned = "Module assigned successfully";
     public const string ModuleCanceled = "Module removed successfully";
     public const string ModulesNotFound = "Modules not found";
+    public const string ModuleNotDeleted = "Module not deleted, it is not possible to delete a module assigned to a user";
+    public const string ModuleNotAssignable = "You cannot assign this form to the user as they already own it.";
+
     public const string RoleCreated = "Role created successfully";
     public const string RoleNotFound = "Role not found";
     public const string RoleAssigned = "Role assigned successfully";
@@ -42,9 +49,12 @@ public static class MessageApi
     public const string RoleExists = "Role already exists";
     public const string RolesNotFound = "Roles not found";
     public const string RoleNotAssigned = "Role not assigned";
+
     public const string ClaimsNotAssigned = "Claims not assigned";
 
     //Message exceptions
     public const string UserNotAuthenticated = "User is not authenticated";
     public const string UserNotHavePermission = "User does not have permission";
+    public const string ProblemDetailsMessageTitle = "An error occurred while processing your request";
+    public const string UnexpectedError = "An unexpected error occurred!";
 }
