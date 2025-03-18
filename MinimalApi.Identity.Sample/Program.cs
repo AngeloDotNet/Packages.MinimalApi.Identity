@@ -1,5 +1,7 @@
+//using Hellang.Middleware.ProblemDetails;
 using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.API.Options;
+using MinimalApi.Identity.Sample.Middleware;
 
 namespace MinimalApi.Identity.Sample;
 
@@ -10,25 +12,26 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var connectionString = builder.Configuration.GetDatabaseConnString("DefaultConnection");
 
-        builder.Services.AddCors(options => options.AddPolicy("cors", builder
-            => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
-
         var jwtOptions = builder.Configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
         var identityOptions = builder.Configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
         var smtpOptions = builder.Configuration.GetSettingsOptions<SmtpOptions>(nameof(SmtpOptions));
 
-        builder.Services.AddRegisterServices<Program>(connectionString, jwtOptions, identityOptions)
-            .AddAuthorization(options =>
-            {
-                options.AddDefaultAuthorizationPolicy(); // Adds default authorization policies
-                // Here you can add additional authorization policies
-            });
+        builder.Services.AddCors(options => options.AddPolicy("cors", builder
+            => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
-        builder.Services
-            .AddSwaggerConfiguration()
-            .AddRegisterOptions(builder.Configuration);
+        builder.Services.AddRegisterServices<Program>(builder.Configuration, connectionString, jwtOptions, identityOptions);
+        builder.Services.AddAuthorization(options =>
+        {
+            // Adds default authorization policies
+            options.AddDefaultAuthorizationPolicy();
+
+            // Here you can add additional authorization policies
+        });
 
         var app = builder.Build();
+
+        app.UseMiddleware<ExtendedExceptionMiddleware>(); //Or app.UseMiddleware<MinimalApiExceptionMiddleware>();
+        app.UseRouting();
 
         if (app.Environment.IsDevelopment())
         {
