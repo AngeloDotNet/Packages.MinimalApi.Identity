@@ -1,9 +1,11 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -19,9 +21,10 @@ using MinimalApi.Identity.API.Authorization.Handlers;
 using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
+using MinimalApi.Identity.API.Filters;
 using MinimalApi.Identity.API.Options;
 using MinimalApi.Identity.API.Services.Interfaces;
-using MinimalApi.Identity.BusinessLayer.Authorization.Provider;
+using MinimalApi.Identity.API.Validator;
 using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
@@ -29,9 +32,13 @@ namespace MinimalApi.Identity.API.Extensions;
 
 public static class RegisterServicesExtensions
 {
-    public static IServiceCollection AddRegisterServices<TMigrations>(this IServiceCollection services, string connectionString,
-        JwtOptions jwtOptions, NetIdentityOptions identityOptions) where TMigrations : class
+    public static IServiceCollection AddRegisterServices<TMigrations>(this IServiceCollection services, IConfiguration configuration,
+        string connectionString, JwtOptions jwtOptions, NetIdentityOptions identityOptions) where TMigrations : class
     {
+        services
+            .AddProblemDetails()
+            .AddSwaggerConfiguration();
+
         services.AddMinimalApiDbContext(connectionString, typeof(TMigrations).Assembly.FullName!);
         services.AddMinimalApiIdentityServices(jwtOptions);
         services.AddMinimalApiIdentityOptionsServices(identityOptions);
@@ -40,9 +47,11 @@ public static class RegisterServicesExtensions
             .AddRegisterTransientService<IAuthService>("Service")
 
             .AddScoped<SignInManager<ApplicationUser>>()
-            .AddScoped<IAuthorizationHandler, CombinedPermissionHandler>()
+            .AddScoped<IAuthorizationHandler, PermissionHandler>();
 
-            .AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+        services
+            .ConfigureFluentValidation<LoginValidator>()
+            .AddRegisterOptions(configuration);
 
         return services;
     }
@@ -51,18 +60,17 @@ public static class RegisterServicesExtensions
 
     public static IServiceCollection AddRegisterOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        return services
-            .Configure<JsonOptions>(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
-                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-                options.JsonSerializerOptions.WriteIndented = true;
-            })
-            .Configure<RouteOptions>(options => options.LowercaseUrls = true)
-            .Configure<KestrelServerOptions>(configuration.GetSection("Kestrel"));
+        return services.Configure<JsonOptions>(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+            options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+            options.JsonSerializerOptions.WriteIndented = true;
+        })
+        .Configure<RouteOptions>(options => options.LowercaseUrls = true)
+        .Configure<KestrelServerOptions>(configuration.GetSection("Kestrel"));
     }
 
     public static IServiceCollection AddSwaggerConfiguration(this IServiceCollection services)
@@ -169,39 +177,53 @@ public static class RegisterServicesExtensions
 
     public static AuthorizationOptions AddDefaultAuthorizationPolicy(this AuthorizationOptions options)
     {
-        var policies = new (string PolicyName, string RequirementName)[]
-        {
-            (nameof(Authorize.GetLicenses), nameof(Policy.Licenses)),
-            (nameof(Authorize.CreateLicense), nameof(Policy.Licenses)),
-            (nameof(Authorize.AssignLicense), nameof(Policy.Licenses)),
-            (nameof(Authorize.DeleteLicense), nameof(Policy.Licenses)),
+        var permissionReadRequirement = new PermissionRequirement(nameof(Permissions.Claim), nameof(Permissions.ClaimRead));
+        var permissionWriteRequirement = new PermissionRequirement(nameof(Permissions.Claim), nameof(Permissions.ClaimWrite));
 
-            (nameof(Authorize.GetModules), nameof(Policy.Modules)),
-            (nameof(Authorize.CreateModule), nameof(Policy.Modules)),
-            (nameof(Authorize.AssignModule), nameof(Policy.Modules)),
-            (nameof(Authorize.DeleteModule), nameof(Policy.Modules)),
+        options.AddPolicy(nameof(Permissions.ClaimRead), policy => policy.Requirements.Add(permissionReadRequirement));
+        options.AddPolicy(nameof(Permissions.ClaimWrite), policy => policy.Requirements.Add(permissionWriteRequirement));
 
-            (nameof(Authorize.GetPermissions), nameof(Policy.Permissions)),
-            (nameof(Authorize.CreatePermission), nameof(Policy.Permissions)),
-            (nameof(Authorize.AssignPermission), nameof(Policy.Permissions)),
-            (nameof(Authorize.DeletePermission), nameof(Policy.Permissions)),
+        var licenseReadRequirement = new PermissionRequirement(nameof(Permissions.Licenza), nameof(Permissions.LicenzaRead));
+        var licenseWriteRequirement = new PermissionRequirement(nameof(Permissions.Licenza), nameof(Permissions.LicenzaWrite));
 
-            (nameof(Authorize.GetRoles), nameof(Policy.Roles)),
-            (nameof(Authorize.CreateRole), nameof(Policy.Roles)),
-            (nameof(Authorize.AssignRole), nameof(Policy.Roles)),
-            (nameof(Authorize.DeleteRole), nameof(Policy.Roles)),
+        options.AddPolicy(nameof(Permissions.LicenzaRead), policy => policy.Requirements.Add(licenseReadRequirement));
+        options.AddPolicy(nameof(Permissions.LicenzaWrite), policy => policy.Requirements.Add(licenseWriteRequirement));
 
-            (nameof(Authorize.GetProfile), nameof(Policy.Profiles)),
-            (nameof(Authorize.EditProfile), nameof(Policy.Profiles)),
-            (nameof(Authorize.DeleteProfile), nameof(Policy.Profiles))
-        };
+        var moduleReadRequirement = new PermissionRequirement(nameof(Permissions.Modulo), nameof(Permissions.ModuloRead));
+        var moduleWriteRequirement = new PermissionRequirement(nameof(Permissions.Modulo), nameof(Permissions.ModuloWrite));
 
-        foreach (var (policyName, requirementName) in policies)
-        {
-            options.AddPolicy(policyName, policy
-                => policy.Requirements.Add(new MultiPolicyRequirement(requirementName, policyName)));
-        }
+        options.AddPolicy(nameof(Permissions.ModuloRead), policy => policy.Requirements.Add(moduleReadRequirement));
+        options.AddPolicy(nameof(Permissions.ModuloWrite), policy => policy.Requirements.Add(moduleWriteRequirement));
+
+        var profileReadRequirement = new PermissionRequirement(nameof(Permissions.Profilo), nameof(Permissions.ProfiloRead));
+        var profileWriteRequirement = new PermissionRequirement(nameof(Permissions.Profilo), nameof(Permissions.ProfiloWrite));
+
+        options.AddPolicy(nameof(Permissions.ProfiloRead), policy => policy.Requirements.Add(profileReadRequirement));
+        options.AddPolicy(nameof(Permissions.ProfiloWrite), policy => policy.Requirements.Add(profileWriteRequirement));
+
+        var roleReadRequirement = new PermissionRequirement(nameof(Permissions.Ruolo), nameof(Permissions.RuoloRead));
+        var roleWriteRequirement = new PermissionRequirement(nameof(Permissions.Ruolo), nameof(Permissions.RuoloWrite));
+
+        options.AddPolicy(nameof(Permissions.RuoloRead), policy => policy.Requirements.Add(roleReadRequirement));
+        options.AddPolicy(nameof(Permissions.RuoloWrite), policy => policy.Requirements.Add(roleWriteRequirement));
 
         return options;
     }
+
+    public static IServiceCollection AddRegisterTransientService<TAssembly>(this IServiceCollection services, string stringEndsWith) where TAssembly : class
+    {
+        services.Scan(scan =>
+            scan.FromAssemblyOf<TAssembly>()
+                .AddClasses(classes => classes.Where(type => type.Name.EndsWith(stringEndsWith)))
+                .AsImplementedInterfaces()
+                .WithTransientLifetime());
+
+        return services;
+    }
+
+    public static RouteHandlerBuilder WithValidation<T>(this RouteHandlerBuilder builder) where T : class
+        => builder.AddEndpointFilter<ValidatorFilter<T>>().ProducesValidationProblem();
+
+    public static IServiceCollection ConfigureFluentValidation<TValidator>(this IServiceCollection services) where TValidator : IValidator
+        => services.AddValidatorsFromAssemblyContaining<TValidator>();
 }
