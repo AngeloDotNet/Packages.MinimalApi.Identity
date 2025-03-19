@@ -27,9 +27,13 @@ public static class EndpointsApi
     public const string EndpointsForgotPassword = "/forgot-password";
     public const string EndpointsResetPassword = "/reset-password";
     public const string EndpointChangeEmail = "/change-email";
-    public const string EndpointsProfile = "/{username}";
     public const string EndpointsConfirmEmail = "/confirm-email/{userId}/{token}";
     public const string EndpointsConfirmEmailChange = "/confirm-email-change/{userId}/{email}/{token}";
+
+    public const string EndpointsGetProfile = "/{userId}";
+    public const string EndpointsCreateProfile = "/create-profile";
+    public const string EndpointsEditProfile = "/edit-profile";
+    public const string EndpointsDeleteProfile = "/delete-profile";
 
     public const string EndpointsCreateLicense = "/create-license";
     public const string EndpointsAssignLicense = "/assign-license";
