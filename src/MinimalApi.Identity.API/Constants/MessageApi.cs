@@ -39,8 +39,7 @@ public static class MessageApi
     public const string ModuleCanceled = "Module removed successfully";
     public const string ModulesNotFound = "Modules not found";
     public const string ModuleNotDeleted = "Module not deleted, it is not possible to delete a module assigned to a user";
-    public const string ModuleNotAssignable = "You cannot assign this form to the user as they already own it.";
-
+    public const string ModuleNotAssignable = "You cannot assign this module to the user as they already own it.";
     public const string RoleCreated = "Role created successfully";
     public const string RoleNotFound = "Role not found";
     public const string RoleAssigned = "Role assigned successfully";
