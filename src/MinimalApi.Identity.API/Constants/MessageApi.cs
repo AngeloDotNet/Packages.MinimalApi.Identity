@@ -27,8 +27,7 @@ public static class MessageApi
     public const string ProfileNotFound = "Profile not found";
     public const string ProfileNotCreated = "Profile not created";
     public const string ProfileNotUpdated = "Profile not updated";
-    public const string ProfileDeleted = "User deleted successfully";
-
+    public const string ProfileDeleted = "Profile deleted successfully";
     public const string LicenseCreated = "License created successfully";
     public const string LicenseNotFound = "License not found";
     public const string LicenseAssigned = "License assigned successfully";
