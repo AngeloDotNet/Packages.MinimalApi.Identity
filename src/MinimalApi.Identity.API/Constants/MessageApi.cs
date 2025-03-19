@@ -3,6 +3,7 @@
 public static class MessageApi
 {
     public const string InvalidCredentials = "Invalid credentials";
+    public const string UserCreated = "User created successfully";
     public const string UserNotAllowedLogin = "User is not allowed to sign in";
     public const string UserLogOut = "User logged out";
     public const string UserLockedOut = "This account has been locked out, please try again later";
@@ -20,11 +21,13 @@ public static class MessageApi
     public const string SendEmailForChangeEmail = "Confirmation link to change email sent. Please check your email";
     public const string SendEmailResetPassword = "Email sent successfully";
     public const string ResetPassword = "Password reset successfully";
-    public const string UserCreated = "User created successfully";
+
+    public const string ProfileCreated = "Profile created successfully";
     public const string ProfileUpdated = "Profile updated successfully";
     public const string ProfileNotFound = "Profile not found";
-    public const string UserDeleted = "User deleted successfully";
-
+    public const string ProfileNotCreated = "Profile not created";
+    public const string ProfileNotUpdated = "Profile not updated";
+    public const string ProfileDeleted = "Profile deleted successfully";
     public const string LicenseCreated = "License created successfully";
     public const string LicenseNotFound = "License not found";
     public const string LicenseAssigned = "License assigned successfully";

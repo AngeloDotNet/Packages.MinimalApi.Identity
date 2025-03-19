@@ -16,6 +16,7 @@ public class MinimalApiDbContext(DbContextOptions<MinimalApiDbContext> options) 
     public DbSet<EmailSending> EmailSendings { get; set; }
     public DbSet<EmailSendingType> EmailSendingTypes { get; set; }
     public DbSet<ClaimType> ClaimTypes { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
