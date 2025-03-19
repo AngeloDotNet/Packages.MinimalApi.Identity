@@ -63,7 +63,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
         {
             return await authService.LogoutAsync();
         })
-        .Produces<Ok>(StatusCodes.Status200OK)
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
         .WithOpenApi(opt =>
         {
             opt.Description = "Logout user";

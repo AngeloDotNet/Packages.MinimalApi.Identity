@@ -25,10 +25,10 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsProfile, async Task<IResult> ([FromServices] IProfileService profileService,
-            [FromRoute] string username) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsGetProfile, async Task<IResult> ([FromServices] IProfileService profileService,
+            [FromRoute] int userId) =>
         {
-            return await profileService.GetProfileAsync(username);
+            return await profileService.GetProfileAsync(userId);
         })
         .Produces<UserProfileModel>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -42,17 +42,35 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPut(EndpointsApi.EndpointsProfile, async Task<IResult> ([FromServices] IProfileService profileService,
-            [FromRoute] string username, [FromBody] UserProfileEditModel inputModel) =>
+        //apiGroup.MapPost(EndpointsApi.EndpointsCreateProfile, async Task<IResult> ([FromServices] IProfileService profileService,
+        //    [FromBody] CreateUserProfileModel inputModel) =>
+        //{
+        //    return await profileService.CreateProfileAsync(inputModel);
+        //})
+        //.Produces<string>(StatusCodes.Status200OK)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status404NotFound)
+        //.RequireAuthorization(nameof(Permissions.ProfiloWrite))
+        //.WithValidation<CreateUserProfileModel>()
+        //.WithOpenApi(opt =>
+        //{
+        //    opt.Summary = "Create user profile";
+        //    opt.Description = "Create user profile by username";
+        //    return opt;
+        //});
+
+        apiGroup.MapPut(EndpointsApi.EndpointsEditProfile, async Task<IResult> ([FromServices] IProfileService profileService,
+            [FromBody] EditUserProfileModel inputModel) =>
         {
-            return await profileService.EditProfileAsync(username, inputModel);
+            return await profileService.EditProfileAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.ProfiloWrite))
-        .WithValidation<UserProfileEditModel>()
+        .WithValidation<EditUserProfileModel>()
         .WithOpenApi(opt =>
         {
             opt.Summary = "Update user profile";
@@ -60,16 +78,17 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        //apiGroup.MapDelete(EndpointsApi.EndpointsProfile, async Task<IResult> ([FromServices] IProfileService profileService,
-        //    [FromRoute] string username) =>
+        //apiGroup.MapDelete(EndpointsApi.EndpointsDeleteProfile, async Task<IResult> ([FromServices] IProfileService profileService,
+        //    [FromBody] DeleteUserProfileModel inputModel) =>
         //{
-        //    return await profileService.DeleteProfileAsync(username);
+        //    return await profileService.DeleteProfileAsync(inputModel);
         //})
         //.Produces<string>(StatusCodes.Status200OK)
         //.ProducesProblem(StatusCodes.Status401Unauthorized)
         //.ProducesProblem(StatusCodes.Status400BadRequest)
         //.ProducesProblem(StatusCodes.Status404NotFound)
         //.RequireAuthorization(nameof(Permissions.ProfiloWrite))
+        //.WithValidation<DeleteUserProfileModel>()
         //.WithOpenApi(opt =>
         //{
         //    opt.Summary = "Delete user profile";
