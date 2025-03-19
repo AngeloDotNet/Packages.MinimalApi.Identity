@@ -27,35 +27,19 @@ public static class EndpointsApi
     public const string EndpointsForgotPassword = "/forgot-password";
     public const string EndpointsResetPassword = "/reset-password";
     public const string EndpointChangeEmail = "/change-email";
-
-    //public const string EndpointsUsername = "/{username}";
-    //public const string EndpointsProfile = "/profile" + EndpointsUsername;
-
-    //public const string EndpointUserIdToken = "/{userId}/{token}";
-    //public const string EndpointsConfirmEmail = "/confirm-email" + EndpointUserIdToken;
-
-    //public const string EndpointUserIdEmailToken = "/{userId}/{email}/{token}";
-    //public const string EndpointsConfirmEmailChange = "/confirm-email-change" + EndpointUserIdEmailToken;
-
-    //public const string EndpointsUsername = "/{username}";
-    //public const string EndpointsProfile = "/profile/{username}";
     public const string EndpointsProfile = "/{username}";
-
-    //public const string EndpointUserIdToken = "/{userId}/{token}";
     public const string EndpointsConfirmEmail = "/confirm-email/{userId}/{token}";
-
-    //public const string EndpointUserIdEmailToken = "/{userId}/{email}/{token}";
     public const string EndpointsConfirmEmailChange = "/confirm-email-change/{userId}/{email}/{token}";
 
     public const string EndpointsCreateLicense = "/create-license";
     public const string EndpointsAssignLicense = "/assign-license";
     public const string EndpointsRevokeLicense = "/revoke-license";
-    public const string EndpointsDeleteLicense = "/delete-license"; //TODO: Implement delete license
+    public const string EndpointsDeleteLicense = "/delete-license";
 
     public const string EndpointsCreateModule = "/create-module";
     public const string EndpointsAssignModule = "/assign-module";
     public const string EndpointsRevokeModule = "/revoke-module";
-    public const string EndpointsDeleteModule = "/delete-module"; //TODO: Implement delete module
+    public const string EndpointsDeleteModule = "/delete-module";
 
     public const string EndpointsCreateRole = "/create-role";
     public const string EndpointsAssignRole = "/assign-role";

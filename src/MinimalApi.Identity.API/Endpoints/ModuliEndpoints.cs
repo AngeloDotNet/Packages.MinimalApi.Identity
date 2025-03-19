@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Enums;
+using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
-using MinimalApi.Identity.API.Validations.Extensions;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Endpoints;
@@ -88,6 +88,24 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
         {
             opt.Description = "Revoke a module from a user";
             opt.Summary = "Revoke a module from a user";
+            return opt;
+        });
+
+        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteModule, async Task<IResult> ([FromServices] IModuleService moduleService,
+            [FromBody] DeleteModuleModel inputModel) =>
+        {
+            return await moduleService.DeleteModuleAsync(inputModel);
+        })
+        .Produces<string>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .RequireAuthorization(nameof(Permissions.ModuloWrite))
+        .WithValidation<DeleteModuleModel>()
+        .WithOpenApi(opt =>
+        {
+            opt.Summary = "Delete module";
+            opt.Description = "Delete module";
             return opt;
         });
     }
