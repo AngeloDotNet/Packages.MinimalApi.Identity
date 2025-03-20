@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Data;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MinimalApi.Identity.API.Constants;
@@ -49,6 +51,22 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
             return TypedResults.NotFound(MessageApi.LicenseNotFound);
         }
 
+        //var userHasLicenseExpired = await dbContext.UserLicenses.AnyAsync(ul => ul.UserId == model.UserId && ul.License.ExpirationDate < DateOnly.FromDateTime(DateTime.Now));
+        var userHasLicense = await dbContext.UserLicenses
+            .Where(ul => ul.UserId == model.UserId)
+            .Select(ul => ul.LicenseId)
+            .ToListAsync();
+
+        if (userHasLicense.Contains(model.LicenseId))
+        {
+            return TypedResults.BadRequest(MessageApi.LicenseNotAssignable);
+        }
+
+        if (userHasLicense.Any())
+        {
+            return TypedResults.BadRequest(MessageApi.LicenseNotAssignable);
+        }
+
         var userLicense = new UserLicense
         {
             UserId = model.UserId,
@@ -75,5 +93,35 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
         await dbContext.SaveChangesAsync();
 
         return TypedResults.Ok(MessageApi.LicenseCanceled);
+    }
+
+    public async Task<IResult> DeleteLicenseAsync(DeleteLicenseModel model)
+    {
+        var license = await dbContext.Licenses.FindAsync(model.LicenseId);
+
+        if (license == null)
+        {
+            return TypedResults.NotFound(MessageApi.LicenseNotFound);
+        }
+
+        if (await dbContext.UserLicenses.AnyAsync(ul => ul.LicenseId == model.LicenseId))
+        {
+            return TypedResults.BadRequest(MessageApi.LicenseNotDeleted);
+        }
+
+        dbContext.Licenses.Remove(license);
+        await dbContext.SaveChangesAsync();
+
+        return TypedResults.Ok(MessageApi.LicenseCanceled);
+    }
+
+    public async Task<Claim> GetClaimLicenseUserAsync(ApplicationUser user)
+    {
+        var result = await dbContext.UserLicenses
+            .AsNoTracking()
+            .Include(ul => ul.License)
+            .FirstOrDefaultAsync(ul => ul.UserId == user.Id);
+
+        return result != null ? new Claim(CustomClaimTypes.License, result.License.Name) : null!;
     }
 }

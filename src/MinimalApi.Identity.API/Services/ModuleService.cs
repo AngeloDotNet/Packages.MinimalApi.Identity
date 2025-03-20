@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MinimalApi.Identity.API.Constants;
@@ -49,6 +50,16 @@ public class ModuleService(MinimalApiDbContext dbContext, UserManager<Applicatio
             return TypedResults.NotFound(MessageApi.ModuleNotFound);
         }
 
+        var userHasModule = await dbContext.UserModules
+            .Where(um => um.UserId == model.UserId)
+            .Select(um => um.ModuleId)
+            .ToListAsync();
+
+        if (userHasModule.Contains(model.ModuleId))
+        {
+            return TypedResults.BadRequest(MessageApi.ModuleNotAssignable);
+        }
+
         var userModule = new UserModule
         {
             UserId = model.UserId,
@@ -75,5 +86,44 @@ public class ModuleService(MinimalApiDbContext dbContext, UserManager<Applicatio
         await dbContext.SaveChangesAsync();
 
         return TypedResults.Ok(MessageApi.ModuleCanceled);
+    }
+
+    public async Task<IResult> DeleteModuleAsync(DeleteModuleModel model)
+    {
+        var module = await dbContext.Modules.FindAsync(model.ModuleId);
+
+        if (module == null)
+        {
+            return TypedResults.NotFound(MessageApi.ModuleNotFound);
+        }
+
+        if (await dbContext.UserModules.AnyAsync(ul => ul.ModuleId == model.ModuleId))
+        {
+            return TypedResults.BadRequest(MessageApi.ModuleNotDeleted);
+        }
+
+        dbContext.Modules.Remove(module);
+        await dbContext.SaveChangesAsync();
+
+        return TypedResults.Ok(MessageApi.ModuleCanceled);
+    }
+
+    public async Task<IList<Claim>> GetClaimsModuleUserAsync(ApplicationUser user)
+    {
+        var moduleClaims = new List<Claim>();
+
+        var result = await dbContext.UserModules
+            .Where(ul => ul.UserId == user.Id)
+            .Select(ul => ul.Module.Name)
+            .ToListAsync();
+
+        if (result.Any())
+        {
+            moduleClaims.AddRange(result.Select(moduleName => new Claim(CustomClaimTypes.Module, moduleName)));
+
+            return moduleClaims;
+        }
+
+        return moduleClaims;
     }
 }
