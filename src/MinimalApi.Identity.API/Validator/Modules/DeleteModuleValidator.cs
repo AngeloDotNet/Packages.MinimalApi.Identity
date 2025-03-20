@@ -9,6 +9,6 @@ public class DeleteModuleValidator : AbstractValidator<DeleteModuleModel>
     {
         RuleFor(x => x.ModuleId)
             .NotEmpty().WithMessage("ModuleId is required")
-            .GreaterThan(0).WithMessage("The value must be an integer greater than zero.");
+            .GreaterThan(0).WithMessage("ModuleId must be an integer greater than zero");
     }
 }

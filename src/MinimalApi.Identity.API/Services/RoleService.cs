@@ -34,7 +34,6 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, UserManager<A
             Default = false
         };
 
-        //var result = await roleManager.CreateAsync(new ApplicationRole(roleName));
         var result = await roleManager.CreateAsync(newRole);
 
         return result.Succeeded ? TypedResults.Ok(MessageApi.RoleCreated) : TypedResults.BadRequest(result.Errors);

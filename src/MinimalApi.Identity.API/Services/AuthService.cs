@@ -18,7 +18,8 @@ using MinimalApi.Identity.API.Services.Interfaces;
 namespace MinimalApi.Identity.API.Services;
 
 public class AuthService(IConfiguration configuration, UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender, IHttpContextAccessor httpContextAccessor) : IAuthService
+    SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender, IHttpContextAccessor httpContextAccessor,
+    ILicenseService licenseService, IModuleService moduleService, IProfileService profileService) : IAuthService
 {
     public async Task<IResult> LoginAsync(LoginModel model)
     {
@@ -55,22 +56,17 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         var userRoles = await userManager.GetRolesAsync(user);
         var userClaims = await userManager.GetClaimsAsync(user);
 
+        var customClaims = await GetCustomClaimsUserAsync(user);
         var claims = new List<Claim>()
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
-            new(ClaimTypes.Surname, user.LastName ?? string.Empty),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
             new(ClaimTypes.SerialNumber, user.SecurityStamp!.ToString()),
         }
         .Union(userClaims)
+        .Union(customClaims)
         .Union(userRoles.Select(role => new Claim(ClaimTypes.Role, role))).ToList();
-
-        if (user.FirstName != null && user.LastName != null)
-        {
-            claims.Add(new Claim(CustomClaimTypes.FullName, $"{user.FirstName} {user.LastName}"));
-        }
 
         var loginResponse = CreateToken(claims, configuration);
 
@@ -82,44 +78,10 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         return TypedResults.Ok(loginResponse);
     }
 
-    private static AuthResponseModel CreateToken(IList<Claim> claims, IConfiguration configuration)
-    {
-        var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
-
-        var audienceClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud);
-        claims.Remove(audienceClaim!);
-
-        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey));
-        var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
-
-        var jwtSecurityToken = new JwtSecurityToken(jwtOptions.Issuer, jwtOptions.Audience, claims,
-            DateTime.UtcNow, DateTime.UtcNow.AddMinutes(60), signingCredentials);
-
-        var accessToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-
-        var italyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
-        var expiredLocalNow = TimeZoneInfo.ConvertTimeFromUtc(jwtSecurityToken.ValidTo, italyTimeZone);
-
-        var response = new AuthResponseModel(accessToken, GenerateRefreshToken(), expiredLocalNow);
-        return response;
-
-        static string GenerateRefreshToken()
-        {
-            var randomNumber = new byte[256];
-            using var generator = RandomNumberGenerator.Create();
-            generator.GetBytes(randomNumber);
-
-            return Convert.ToBase64String(randomNumber);
-        }
-    }
-
     public async Task<IResult> RegisterAsync(RegisterModel model)
     {
-        var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
         var user = new ApplicationUser
         {
-            FirstName = model.FirstName,
-            LastName = model.LastName,
             UserName = model.Username,
             Email = model.Email
         };
@@ -128,21 +90,21 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
 
         if (result.Succeeded)
         {
-            if (user.Email.Equals(userOptions.AssignAdminRoleOnRegistration, StringComparison.OrdinalIgnoreCase))
+            await profileService.CreateProfileAsync(new CreateUserProfileModel(user.Id, model.FirstName, model.LastName));
+
+            var role = await CheckUserIsAdminDesignedAsync(user.Email) ? DefaultRoles.Admin : DefaultRoles.User;
+            var roleAssignResult = await userManager.AddToRoleAsync(user, role.ToString());
+
+            if (!roleAssignResult.Succeeded)
             {
-                var roleAssignResult = await userManager.AddToRoleAsync(user, nameof(DefaultRoles.Admin));
+                return TypedResults.BadRequest(MessageApi.RoleNotAssigned);
+            }
 
-                if (!roleAssignResult.Succeeded)
-                {
-                    return TypedResults.BadRequest(MessageApi.RoleNotAssigned);
-                }
+            var claimsAssignResult = await AddClaimsToUserAsync(user, role);
 
-                var claimsAssingResult = await AddClaimsToAdminUserAsync(user);
-
-                if (!claimsAssingResult.Succeeded)
-                {
-                    return TypedResults.BadRequest(MessageApi.ClaimsNotAssigned);
-                }
+            if (!claimsAssignResult.Succeeded)
+            {
+                return TypedResults.BadRequest(MessageApi.ClaimsNotAssigned);
             }
 
             var userId = await userManager.GetUserIdAsync(user);
@@ -167,6 +129,37 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         return TypedResults.Ok(MessageApi.UserLogOut);
     }
 
+    private static AuthResponseModel CreateToken(IList<Claim> claims, IConfiguration configuration)
+    {
+        var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
+
+        var audienceClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud);
+        claims.Remove(audienceClaim!);
+
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey));
+        var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+
+        var jwtSecurityToken = new JwtSecurityToken(jwtOptions.Issuer, jwtOptions.Audience, claims,
+            DateTime.UtcNow, DateTime.UtcNow.AddMinutes(jwtOptions.AccessTokenExpirationMinutes), signingCredentials);
+
+        var accessToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+
+        var italyTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+        var expiredLocalNow = TimeZoneInfo.ConvertTimeFromUtc(jwtSecurityToken.ValidTo, italyTimeZone);
+
+        var response = new AuthResponseModel(accessToken, GenerateRefreshToken(), expiredLocalNow);
+        return response;
+
+        static string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[256];
+            using var generator = RandomNumberGenerator.Create();
+            generator.GetBytes(randomNumber);
+
+            return Convert.ToBase64String(randomNumber);
+        }
+    }
+
     private async Task<string> GenerateCallBackUrlAsync(string userId, string token)
     {
         var request = httpContextAccessor.HttpContext!.Request;
@@ -177,31 +170,80 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         return callbackUrl;
     }
 
-    private async Task<IdentityResult> AddClaimsToAdminUserAsync(ApplicationUser user)
+    private async Task<bool> CheckUserIsAdminDesignedAsync(string email)
     {
-        //var claims = new List<Claim>
-        //{
-        //    //new(CustomClaimTypes.FullName, $"{user.FirstName} {user.LastName}")
-        //};
+        var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
+        var user = await userManager.FindByEmailAsync(email);
 
-        var claims = new List<Claim>();
-
-        foreach (var permission in Enum.GetValues<Permissions>())
+        if (user?.Email == null)
         {
-            if (permission.ToString().Contains("Profile"))
-            {
-                var customClaim = new Claim(CustomClaimTypes.Permission, permission.ToString());
-                claims.Add(customClaim);
-            }
-
-            //TODO: To be fixed when the permissions are implemented
-
-            //var customClaim = new Claim(CustomClaimTypes.Permission, permission.ToString());
-            //claims.Add(customClaim);
+            return false;
         }
 
-        var result = await userManager.AddClaimsAsync(user, claims);
+        return user.Email.Equals(userOptions.AssignAdminRoleOnRegistration, StringComparison.InvariantCultureIgnoreCase);
+    }
 
-        return result;
+    private async Task<IdentityResult> AddClaimsToUserAsync(ApplicationUser user, DefaultRoles role)
+    {
+        return role switch
+        {
+            DefaultRoles.Admin => await AddClaimsToAdminUserAsync(user),
+            DefaultRoles.User => await AddClaimsToDefaultUserAsync(user),
+            _ => IdentityResult.Failed()
+        };
+    }
+
+    private async Task<IdentityResult> AddClaimsToAdminUserAsync(ApplicationUser user)
+    {
+        var claims = Enum.GetValues<Permissions>()
+            .Select(claim => new Claim(CustomClaimTypes.Permission, claim.ToString()))
+            .ToList();
+
+        return await userManager.AddClaimsAsync(user, claims);
+    }
+
+    private async Task<IdentityResult> AddClaimsToDefaultUserAsync(ApplicationUser user)
+    {
+        //Assign only read permissions to default user
+        //var claims = Enum.GetValues<Permissions>()
+        //    .Where(claim => !claim.ToString().Contains("write", StringComparison.InvariantCultureIgnoreCase))
+        //    .Select(claim => new Claim(CustomClaimTypes.Permission, claim.ToString()))
+        //    .ToList();
+
+        //Assign only profile permissions to default user
+        var claims = Enum.GetValues<Permissions>()
+            .Where(claim => claim.ToString().Contains("profilo", StringComparison.InvariantCultureIgnoreCase))
+            .Select(claim => new Claim(CustomClaimTypes.Permission, claim.ToString()))
+            .ToList();
+
+        return await userManager.AddClaimsAsync(user, claims);
+    }
+
+    private async Task<IList<Claim>> GetCustomClaimsUserAsync(ApplicationUser user)
+    {
+        var customClaims = new List<Claim>();
+
+        var userProfile = await profileService.GetClaimUserProfileAsync(user);
+
+        if (userProfile != null)
+        {
+            customClaims.AddRange(userProfile);
+        }
+
+        var userClaimLicense = await licenseService.GetClaimLicenseUserAsync(user);
+
+        if (userClaimLicense != null)
+        {
+            customClaims.Add(userClaimLicense);
+        }
+
+        var userClaimModules = await moduleService.GetClaimsModuleUserAsync(user);
+
+        if (userClaimModules?.Count > 0)
+        {
+            customClaims.AddRange(userClaimModules);
+        }
+
+        return customClaims;
     }
 }

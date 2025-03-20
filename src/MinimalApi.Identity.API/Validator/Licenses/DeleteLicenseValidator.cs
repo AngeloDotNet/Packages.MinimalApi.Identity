@@ -9,6 +9,6 @@ public class DeleteLicenseValidator : AbstractValidator<DeleteLicenseModel>
     {
         RuleFor(x => x.LicenseId)
             .NotEmpty().WithMessage("LicenseId is required")
-            .GreaterThan(0).WithMessage("The value must be an integer greater than zero.");
+            .GreaterThan(0).WithMessage("LicenseId must be an integer greater than zero");
     }
 }
