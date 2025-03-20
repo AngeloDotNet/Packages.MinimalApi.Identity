@@ -8,8 +8,6 @@ public class DeleteRoleValidator : AbstractValidator<DeleteRoleModel>
     public DeleteRoleValidator()
     {
         RuleFor(x => x.Role)
-            .NotEmpty().WithMessage("Role is required")
-            //.MaximumLength(50).WithMessage("Role must not exceed 50 characters")
-            ;
+            .NotEmpty().WithMessage("Role is required");
     }
 }

@@ -1,16 +1,21 @@
 ﻿using FluentValidation;
+using Microsoft.Extensions.Configuration;
+using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.API.Models;
+using MinimalApi.Identity.API.Options;
 
 namespace MinimalApi.Identity.API.Validator.Licenses;
 
 public class CreateLicenseValidator : AbstractValidator<CreateLicenseModel>
 {
-    public CreateLicenseValidator()
+    public CreateLicenseValidator(IConfiguration configuration)
     {
+        var applicationOptions = configuration.GetSettingsOptions<ApplicationOptions>(nameof(ApplicationOptions));
+
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required")
-            //.MaximumLength(50).WithMessage("Name must not exceed 50 characters")
-            ;
+            .MinimumLength(applicationOptions.MinLengthLicenseName).WithMessage($"Name must be at least {applicationOptions.MinLengthLicenseName} characters")
+            .MaximumLength(applicationOptions.MaxLengthLicenseName).WithMessage($"Name must not exceed {applicationOptions.MaxLengthLicenseName} characters");
 
         RuleFor(x => x.ExpirationDate)
             .NotEmpty().WithMessage("Expiration date is required")
