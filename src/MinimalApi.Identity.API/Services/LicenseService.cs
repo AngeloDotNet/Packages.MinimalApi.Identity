@@ -62,11 +62,7 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
             return TypedResults.BadRequest(MessageApi.LicenseNotAssignable);
         }
 
-        if (userHasLicense.Any())
-        {
-            return TypedResults.BadRequest(MessageApi.LicenseNotAssignable);
-        }
-
+        // Removed redundant check for any license
         var userLicense = new UserLicense
         {
             UserId = model.UserId,
