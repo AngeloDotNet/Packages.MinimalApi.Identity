@@ -80,6 +80,23 @@ public static class RegisterServicesExtensions
             .AddEndpointsApiExplorer()
             .AddSwaggerGen(options =>
             {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Minimal API Identity",
+                    Version = "v1",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Angelo Pirola",
+                        Email = "angelo@aepserver.it",
+                        Url = new Uri("https://angelo.aepserver.it/")
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "License MIT",
+                        Url = new Uri("https://opensource.org/licenses/MIT")
+                    },
+                });
+
                 options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
@@ -208,17 +225,6 @@ public static class RegisterServicesExtensions
         options.AddPolicy(nameof(Permissions.RuoloWrite), policy => policy.Requirements.Add(roleWriteRequirement));
 
         return options;
-    }
-
-    public static IServiceCollection AddRegisterTransientService<TAssembly>(this IServiceCollection services, string stringEndsWith) where TAssembly : class
-    {
-        services.Scan(scan =>
-            scan.FromAssemblyOf<TAssembly>()
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith(stringEndsWith)))
-                .AsImplementedInterfaces()
-                .WithTransientLifetime());
-
-        return services;
     }
 
     public static RouteHandlerBuilder WithValidation<T>(this RouteHandlerBuilder builder) where T : class
