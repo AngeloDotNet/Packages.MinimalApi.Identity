@@ -10,7 +10,7 @@ using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.Services;
 
-public class ModuleService(MinimalApiDbContext dbContext, UserManager<ApplicationUser> userManager) : IModuleService
+public class ModuleService(MinimalApiAuthDbContext dbContext, UserManager<ApplicationUser> userManager) : IModuleService
 {
     public async Task<IResult> GetAllModulesAsync()
     {

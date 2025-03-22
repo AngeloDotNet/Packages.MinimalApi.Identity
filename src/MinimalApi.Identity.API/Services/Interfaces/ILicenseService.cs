@@ -14,4 +14,5 @@ public interface ILicenseService
     Task<IResult> DeleteLicenseAsync(DeleteLicenseModel model);
 
     Task<Claim> GetClaimLicenseUserAsync(ApplicationUser user);
+    Task<bool> CheckUserLicenseExpiredAsync(ApplicationUser user);
 }
