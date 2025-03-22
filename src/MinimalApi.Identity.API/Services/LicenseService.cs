@@ -124,8 +124,7 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
         var result = await dbContext.UserLicenses
             .AsNoTracking()
             .Include(ul => ul.License)
-            .AnyAsync(ul => ul.UserId == user.Id && ul.License.ExpirationDate < DateOnly.FromDateTime(DateTime.Now));
-
+            .AnyAsync(ul => ul.UserId == user.Id && ul.License.ExpirationDate < DateOnly.FromDateTime(DateTime.UtcNow));
         return result;
     }
 }
