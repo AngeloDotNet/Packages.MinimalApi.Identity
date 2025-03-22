@@ -57,12 +57,11 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
             .Select(ul => ul.LicenseId)
             .ToListAsync();
 
-        if (userHasLicense.Contains(model.LicenseId))
+        if (userHasLicense.Contains(model.LicenseId) || userHasLicense.Count != 0)
         {
             return TypedResults.BadRequest(MessageApi.LicenseNotAssignable);
         }
 
-        // Removed redundant check for any license
         var userLicense = new UserLicense
         {
             UserId = model.UserId,
@@ -108,7 +107,7 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
         dbContext.Licenses.Remove(license);
         await dbContext.SaveChangesAsync();
 
-        return TypedResults.Ok(MessageApi.LicenseCanceled);
+        return TypedResults.Ok(MessageApi.LicenseDeleted);
     }
 
     public async Task<Claim> GetClaimLicenseUserAsync(ApplicationUser user)
