@@ -1,9 +1,11 @@
-﻿namespace MinimalApi.Identity.API.Constants;
+﻿using MinimalApi.Identity.API.Enums;
+
+namespace MinimalApi.Identity.API.Constants;
 
 public static class CustomClaimTypes
 {
-    public static string FullName = nameof(FullName);
-    public static string License = nameof(License);
-    public static string Module = nameof(Module);
-    public static string Permission = nameof(Permission);
+    public const string FullName = nameof(ClaimsType.FullName);
+    public const string License = nameof(ClaimsType.License);
+    public const string Module = nameof(ClaimsType.Module);
+    public const string Permission = nameof(ClaimsType.Permission);
 }

@@ -36,6 +36,7 @@ public static class MessageApi
     public const string LicenseAssigned = "License assigned successfully";
     public const string LicenseCanceled = "License removed successfully";
     public const string LicensesNotFound = "Licenses not found";
+    public const string LicenseDeleted = "License deleted successfully";
     public const string LicenseNotDeleted = "License not deleted, it is not possible to delete a license assigned to a user";
     public const string LicenseNotAssignable = "You cannot assign more than one license to a user. Please check which license the user owns.";
 
@@ -44,17 +45,31 @@ public static class MessageApi
     public const string ModuleAssigned = "Module assigned successfully";
     public const string ModuleCanceled = "Module removed successfully";
     public const string ModulesNotFound = "Modules not found";
+    public const string ModuleDeleted = "Module deleted successfully";
     public const string ModuleNotDeleted = "Module not deleted, it is not possible to delete a module assigned to a user";
     public const string ModuleNotAssignable = "You cannot assign this module to the user as they already own it.";
+
     public const string RoleCreated = "Role created successfully";
     public const string RoleNotFound = "Role not found";
     public const string RoleAssigned = "Role assigned successfully";
     public const string RoleCanceled = "Role removed successfully";
+    public const string RoleDeleted = "Role deleted successfully";
     public const string RoleNotDeleted = "Role not deleted, it is not possible to delete a role created by default";
     public const string RoleExists = "Role already exists";
     public const string RolesNotFound = "Roles not found";
     public const string RoleNotAssigned = "Role not assigned";
 
+    public const string ClaimCreated = "Claim created successfully";
+    public const string ClaimNotFound = "Claim not found";
+    public const string ClaimNotDeleted = "Claim not deleted, it is not possible to delete a claim created by default";
+    public const string ClaimDeleted = "Claim deleted successfully";
+    public const string ClaimTypeInvalid = "Claim type is invalid";
+    public const string ClaimAlreadyAssigned = "Claim already assigned";
+    public const string ClaimAssigned = "Claim assigned successfully";
+    public const string ClaimNotAssigned = "Claim not assigned";
+    public const string ClaimRevoked = "Claim revoked successfully";
+    public const string ClaimNotRevoked = "Claim not revoked";
+    public const string ClaimsNotFound = "Claims not found";
     public const string ClaimsNotAssigned = "Claims not assigned";
 
     //Message exceptions
