@@ -11,7 +11,7 @@ using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.Services;
 
-public class LicenseService(MinimalApiDbContext dbContext, UserManager<ApplicationUser> userManager) : ILicenseService
+public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<ApplicationUser> userManager) : ILicenseService
 {
     public async Task<IResult> GetAllLicensesAsync()
     {
@@ -51,7 +51,6 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
             return TypedResults.NotFound(MessageApi.LicenseNotFound);
         }
 
-        //var userHasLicenseExpired = await dbContext.UserLicenses.AnyAsync(ul => ul.UserId == model.UserId && ul.License.ExpirationDate < DateOnly.FromDateTime(DateTime.Now));
         var userHasLicense = await dbContext.UserLicenses
             .Where(ul => ul.UserId == model.UserId)
             .Select(ul => ul.LicenseId)
@@ -118,5 +117,14 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
             .FirstOrDefaultAsync(ul => ul.UserId == user.Id);
 
         return result != null ? new Claim(CustomClaimTypes.License, result.License.Name) : null!;
+    }
+
+    public async Task<bool> CheckUserLicenseExpiredAsync(ApplicationUser user)
+    {
+        var result = await dbContext.UserLicenses
+            .AsNoTracking()
+            .Include(ul => ul.License)
+            .AnyAsync(ul => ul.UserId == user.Id && ul.License.ExpirationDate < DateOnly.FromDateTime(DateTime.UtcNow));
+        return result;
     }
 }

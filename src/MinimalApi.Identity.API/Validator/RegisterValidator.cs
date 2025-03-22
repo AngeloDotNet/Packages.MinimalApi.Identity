@@ -15,12 +15,12 @@ public class RegisterValidator : AbstractValidator<RegisterModel>
         var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
         var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
 
-        RuleFor(x => x.FirstName)
+        RuleFor(x => x.Firstname)
             .NotEmpty().WithMessage("First name is required")
             .MinimumLength(validationOptions.MinLengthFirstName).WithMessage($"First name must be at least {validationOptions.MinLengthFirstName} characters")
             .MaximumLength(validationOptions.MaxLengthFirstName).WithMessage($"First name must not exceed {validationOptions.MaxLengthFirstName} characters");
 
-        RuleFor(x => x.LastName)
+        RuleFor(x => x.Lastname)
             .NotEmpty().WithMessage("Last name is required")
             .MinimumLength(validationOptions.MinLengthLastName).WithMessage($"Last name must be at least {validationOptions.MinLengthLastName} characters")
             .MaximumLength(validationOptions.MaxLengthLastName).WithMessage($"Last name must not exceed {validationOptions.MaxLengthLastName} characters");

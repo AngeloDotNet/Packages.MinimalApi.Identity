@@ -9,6 +9,9 @@ I created this library in order to avoid duplication of repetitive code whenever
 <!--
 ### 🏗️ ToDo
 
+- [ ] Add verification to avoid duplicates when creating Claim, License and Module
+- [ ] Replace .ProducesProblem with .Produces Default Problem in each endpoints (like Profile Endpoints)
+- [ ] Cleaning up commented code
 - [ ] Add endpoints to manage users and disablement
 - [ ] Add endpoints to handle user password change every X days
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
@@ -106,12 +109,8 @@ Registering services at _Program.cs_ file:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetDatabaseConnString("DefaultConnection");
-
-var jwtOptions = builder.Configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
-var identityOptions = builder.Configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
-var smtpOptions = builder.Configuration.GetSettingsOptions<SmtpOptions>(nameof(SmtpOptions));
-var apiValidationOptions = builder.Configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
+var AuthConnection = builder.Configuration.GetDatabaseConnString("DefaultConnection");
+var formatErrorResponse = ErrorResponseFormat.List; // or ErrorResponseFormat.Default
 
 builder.Services.AddCors(options => options.AddPolicy("cors", builder
     => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
@@ -121,22 +120,15 @@ builder.Services.AddCors(options => options.AddPolicy("cors", builder
 //If there is a need to register additional services(transient, scoped, singleton) in dependency injection,
 //it is possible to use the related extension methods exposed by the library.
 
-//NOTE: Service has already been used within the library to register the necessary services,
-//it is recommended to use a different nomenclature.
+//ATTENTION: Service has already been used within the library to register the necessary services, it is
+//recommended to use a different nomenclature.
 
-//Using an extension method of the Scrutor package, all found services ending with Service
-//will be recorded in the Transient lifecycle.
-//builder.Services.AddRegisterTransientService<IAuthService>("Service");
+//Using an extension method of the Scrutor package, all found services ending with Service will be registered in the
+//Transient lifecycle: builder.Services.AddRegisterTransientService<IAuthService>("Service"); or you can register
+//services with the Scoped lifecycle: builder.Services.AddRegisterScopedService<IAuthService>("Service"); or you can
+//register services with the Singleton lifecycle: builder.Services.AddRegisterSingletonService<IAuthService>("Service");
 
-//Using an extension method of the Scrutor package, all found services ending with Service
-//will be recorded in the Scoped lifecycle.
-//builder.Services.AddRegisterScopedService<IAuthService>("Service");
-
-//Using an extension method of the Scrutor package, all found services ending with Service
-//will be recorded in the Singleton lifecycle.
-//builder.Services.AddRegisterSingletonService<IAuthService>("Service");
-
-builder.Services.AddRegisterServices<Program>(builder.Configuration, connectionString, jwtOptions, identityOptions);
+builder.Services.AddRegisterServices<Program>(builder.Configuration, AuthConnection, formatErrorResponse);
 builder.Services.AddAuthorization(options =>
 {
     // Adds default authorization policies
@@ -177,80 +169,6 @@ app.UseMapEndpoints();
 app.Run();
 ```
 
-<!--
-### 📡 API Reference
-
-The library provides a series of endpoints to manage the identity of the application.
-
-#### Confirm email address
-
-```http
-  GET /api/account/confirm-email/{userId}/{token}
-```
-
-| Parameter | Type     | Required |
-| :-------- | :------- | :------- |
-| `userId` | `string` | Yes |
-| `token` | `string` | Yes |
-
-#### Register a new user
-
-```http
-  POST /api/authentication/register
-```
-
-| Parameter | Type     | Required |
-| :-------- | :------- | :------- |
-| `firstName` | `string` | Yes |
-| `lastName` | `string` | Yes |
-| `username` | `string` | Yes |
-| `email` | `string` | Yes |
-| `password` | `string` | Yes |
-
-#### Login user
-
-```http
-  POST /api/authentication/login
-```
-
-| Parameter | Type     | Required |
-| :-------- | :------- | :------- |
-| `username` | `string` | Yes |
-| `password` | `string` | Yes |
-| `rememberMe` | `bool` | Yes |
-
-#### Get user profile
-
-```http
-  GET /api/profiles/{username}
-```
-
-| Parameter | Type     | Required |
-| :-------- | :------- | :------- |
-| `username` | `string` | Yes |
-
-#### Edit user profile
-
-```http
-  PUT /api/profiles/{username}
-```
-
-| Parameter | Type     | Required |
-| :-------- | :------- | :------- |
-| `username` | `string` | Yes |
-
-#### Delete user profile
-
-```http
-  DELETE /api/profiles/{username}
-```
-
-| Parameter | Type     | Required |
-| :-------- | :------- | :------- |
-| `username` | `string` | Yes |
--->
-
-
 ### 📚 Demo
 
 You can find a sample project in the [example](https://github.com/AngeloDotNet/IdentityManager) project.
@@ -268,12 +186,6 @@ You can find a sample project in the [example](https://github.com/AngeloDotNet/I
 ### 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-<!--
-### ⭐ Give a Star
-
-If you find this project useful, please give it a ⭐ on GitHub to show your support and help others discover it!
--->
 
 ### 🤝 Contributing
 

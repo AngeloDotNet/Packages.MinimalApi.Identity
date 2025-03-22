@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Entities;
+using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
 
@@ -53,7 +54,7 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
 
         var callbackUrl = await GenerateCallBackUrlAsync(userId, token, inputModel.NewEmail);
 
-        await emailSender.SendEmailTypeAsync(inputModel.NewEmail!, callbackUrl, 2);
+        await emailSender.SendEmailTypeAsync(inputModel.NewEmail!, callbackUrl, EmailSendingType.ChangeEmail);
 
         return TypedResults.Ok(MessageApi.SendEmailForChangeEmail);
     }
@@ -85,11 +86,12 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
     {
         var request = httpContextAccessor.HttpContext!.Request;
 
-        var callbackUrl = $"{request.Scheme}://{request.Host}{EndpointsApi.EndpointsAccountGroup}" +
-            $"{EndpointsApi.EndpointsConfirmEmailChange}".Replace("{userId}", userId)
+        var callbackUrl = $"{request.Scheme}://{request.Host}{EndpointsApi.EndpointsAccountGroup}{EndpointsApi.EndpointsConfirmEmailChange}"
+            .Replace("{userId}", userId)
             .Replace("{email}", newEmail).Replace("{token}", token);
 
         await Task.Delay(500);
+
         return callbackUrl;
     }
 }

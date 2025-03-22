@@ -10,7 +10,7 @@ using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.Services;
 
-public class ProfileService(MinimalApiDbContext dbContext, UserManager<ApplicationUser> userManager) : IProfileService
+public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<ApplicationUser> userManager) : IProfileService
 {
     public async Task<IResult> GetProfileAsync(int userId)
     {
@@ -30,12 +30,7 @@ public class ProfileService(MinimalApiDbContext dbContext, UserManager<Applicati
 
     public async Task<IResult> CreateProfileAsync(CreateUserProfileModel model)
     {
-        var profile = new UserProfile
-        {
-            UserId = model.UserId,
-            FirstName = model.FirstName,
-            LastName = model.LastName
-        };
+        var profile = new UserProfile(model.UserId, model.FirstName, model.LastName);
 
         dbContext.UserProfiles.Add(profile);
         var result = await dbContext.SaveChangesAsync();
@@ -53,15 +48,13 @@ public class ProfileService(MinimalApiDbContext dbContext, UserManager<Applicati
             return TypedResults.NotFound(MessageApi.ProfileNotFound);
         }
 
-        profile.FirstName = model.FirstName;
-        profile.LastName = model.LastName;
+        profile.ChangeFirstName(model.FirstName);
+        profile.ChangeLastName(model.LastName);
 
-        //dbContext.Entry(profile).State = EntityState.Modified;
         dbContext.UserProfiles.Update(profile);
         var result = await dbContext.SaveChangesAsync();
 
         return result > 0 ? TypedResults.Ok(MessageApi.ProfileUpdated) : TypedResults.BadRequest(MessageApi.ProfileNotUpdated);
-
     }
 
     public async Task<IResult> DeleteProfileAsync(DeleteUserProfileModel model)
@@ -76,7 +69,6 @@ public class ProfileService(MinimalApiDbContext dbContext, UserManager<Applicati
         var result = await userManager.DeleteAsync(user);
 
         return result.Succeeded ? TypedResults.Ok(MessageApi.ProfileDeleted) : TypedResults.BadRequest(result.Errors.Select(e => e.Description));
-
     }
 
     public async Task<IList<Claim>> GetClaimUserProfileAsync(ApplicationUser user)
@@ -100,6 +92,5 @@ public class ProfileService(MinimalApiDbContext dbContext, UserManager<Applicati
         };
 
         return profileClaims;
-
     }
 }

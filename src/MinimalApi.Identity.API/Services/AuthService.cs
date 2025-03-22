@@ -51,6 +51,15 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
             return TypedResults.BadRequest(MessageApi.UserNotEmailConfirmed);
         }
 
+        //TODO: Verificare che l'utente non sia disabilitato
+
+        //TODO: Verificare che l'utente non abbia la password scaduta (ultimo cambio password minore di 90 giorni)
+
+        if (await licenseService.CheckUserLicenseExpiredAsync(user))
+        {
+            return TypedResults.BadRequest(MessageApi.LicenseExpired);
+        }
+
         await userManager.UpdateSecurityStampAsync(user);
 
         var userRoles = await userManager.GetRolesAsync(user);
@@ -90,7 +99,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
 
         if (result.Succeeded)
         {
-            await profileService.CreateProfileAsync(new CreateUserProfileModel(user.Id, model.FirstName, model.LastName));
+            await profileService.CreateProfileAsync(new CreateUserProfileModel(user.Id, model.Firstname, model.Lastname));
 
             var role = await CheckUserIsAdminDesignedAsync(user.Email) ? DefaultRoles.Admin : DefaultRoles.User;
             var roleAssignResult = await userManager.AddToRoleAsync(user, role.ToString());
@@ -114,7 +123,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
 
             var callbackUrl = await GenerateCallBackUrlAsync(userId, token);
 
-            await emailSender.SendEmailTypeAsync(user.Email, callbackUrl, 1);
+            await emailSender.SendEmailTypeAsync(user.Email, callbackUrl, EmailSendingType.RegisterUser);
 
             return TypedResults.Ok(MessageApi.UserCreated);
         }
