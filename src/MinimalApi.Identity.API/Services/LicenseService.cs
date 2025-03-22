@@ -57,7 +57,7 @@ public class LicenseService(MinimalApiDbContext dbContext, UserManager<Applicati
             .Select(ul => ul.LicenseId)
             .ToListAsync();
 
-        if (userHasLicense.Contains(model.LicenseId) || userHasLicense.Count != 0)
+        if (userHasLicense.Contains(model.LicenseId))
         {
             return TypedResults.BadRequest(MessageApi.LicenseNotAssignable);
         }
