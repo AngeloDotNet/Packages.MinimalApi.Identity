@@ -29,9 +29,15 @@ public record class AssignRoleModel(string Username, string Role);
 public record class RevokeRoleModel(string Username, string Role);
 public record class DeleteRoleModel(string Role);
 
+public record class CreateClaimModel(string Type, string Value);
+public record class AssignClaimModel(int UserId, string Type, string Value);
+public record class RevokeClaimModel(int UserId, string Type, string Value);
+public record class DeleteClaimModel(string Type, string Value);
+
 //RESPONSE RECORD MODEL
 public record class AuthResponseModel(string AccessToken, string RefreshToken, DateTime ExpiredToken);
 public record class LicenseResponseModel(int Id, string Name, DateOnly ExpirationDate);
 public record class ModuleResponseModel(int Id, string Name, string Description);
 public record class PermissionResponseModel(int Id, string Name, bool Default);
 public record class RoleResponseModel(int Id, string Name, bool Default);
+public record class ClaimResponseModel(int Id, string Type, string Value, bool Default);
