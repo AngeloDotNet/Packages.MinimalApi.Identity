@@ -9,7 +9,7 @@ public static class EndpointsApi
     public const string EndpointsAccountGroup = EndpointsDefaultApi + "/account";
     public const string EndpointsLicenzeGroup = EndpointsDefaultApi + "/licenses";
     public const string EndpointsModulesGroup = EndpointsDefaultApi + "/modules";
-    //public const string EndpointsPermissionsGroup = EndpointsDefaultApi + "/permissions"; //TODO: Implement claims endpoints
+    public const string EndpointsClaimsGroup = EndpointsDefaultApi + "/claims";
     public const string EndpointsProfilesGroup = EndpointsDefaultApi + "/profiles";
     public const string EndpointsRolesGroup = EndpointsDefaultApi + "/roles";
 
@@ -17,7 +17,7 @@ public static class EndpointsApi
     public const string EndpointsAccountTag = "Account";
     public const string EndpointsLicenzeTag = "Licenses";
     public const string EndpointsModulesTag = "Modules";
-    //public const string EndpointsPermissionsTag = "Permissions"; //TODO: Implement claims endpoints tag
+    public const string EndpointsClaimsTag = "Claims";
     public const string EndpointsProfilesTag = "Profiles";
     public const string EndpointsRolesTag = "Roles";
 
@@ -49,4 +49,9 @@ public static class EndpointsApi
     public const string EndpointsAssignRole = "/assign-role";
     public const string EndpointsRevokeRole = "/revoke-role";
     public const string EndpointsDeleteRole = "/delete-role";
+
+    public const string EndpointsCreateClaim = "/create-claim";
+    public const string EndpointsAssignClaim = "/assign-claim";
+    public const string EndpointsRevokeClaim = "/revoke-claim";
+    public const string EndpointsDeleteClaim = "/delete-claim";
 }

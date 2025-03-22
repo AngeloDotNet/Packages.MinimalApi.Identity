@@ -10,12 +10,12 @@ public class CreateLicenseValidator : AbstractValidator<CreateLicenseModel>
 {
     public CreateLicenseValidator(IConfiguration configuration)
     {
-        var applicationOptions = configuration.GetSettingsOptions<ApplicationOptions>(nameof(ApplicationOptions));
+        var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
 
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required")
-            .MinimumLength(applicationOptions.MinLengthLicenseName).WithMessage($"Name must be at least {applicationOptions.MinLengthLicenseName} characters")
-            .MaximumLength(applicationOptions.MaxLengthLicenseName).WithMessage($"Name must not exceed {applicationOptions.MaxLengthLicenseName} characters");
+            .MinimumLength(validationOptions.MinLengthLicenseName).WithMessage($"Name must be at least {validationOptions.MinLengthLicenseName} characters")
+            .MaximumLength(validationOptions.MaxLengthLicenseName).WithMessage($"Name must not exceed {validationOptions.MaxLengthLicenseName} characters");
 
         RuleFor(x => x.ExpirationDate)
             .NotEmpty().WithMessage("Expiration date is required")

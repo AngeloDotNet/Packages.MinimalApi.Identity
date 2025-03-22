@@ -105,7 +105,7 @@ public class ModuleService(MinimalApiDbContext dbContext, UserManager<Applicatio
         dbContext.Modules.Remove(module);
         await dbContext.SaveChangesAsync();
 
-        return TypedResults.Ok(MessageApi.ModuleCanceled);
+        return TypedResults.Ok(MessageApi.ModuleDeleted);
     }
 
     public async Task<IList<Claim>> GetClaimsModuleUserAsync(ApplicationUser user)

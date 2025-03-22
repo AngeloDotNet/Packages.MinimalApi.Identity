@@ -90,6 +90,6 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, UserManager<A
 
         var result = await roleManager.DeleteAsync(role);
 
-        return result.Succeeded ? TypedResults.Ok(MessageApi.RoleCanceled) : TypedResults.BadRequest(result.Errors);
+        return result.Succeeded ? TypedResults.Ok(MessageApi.RoleDeleted) : TypedResults.BadRequest(result.Errors);
     }
 }

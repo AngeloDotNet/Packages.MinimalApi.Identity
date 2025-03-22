@@ -10,7 +10,7 @@ public class CreateRoleValidator : AbstractValidator<CreateRoleModel>
 {
     public CreateRoleValidator(IConfiguration configuration)
     {
-        var applicationOptions = configuration.GetSettingsOptions<ApplicationOptions>(nameof(ApplicationOptions));
+        var applicationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
 
         RuleFor(x => x.Role)
             .NotEmpty().WithMessage("Role is required")

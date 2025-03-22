@@ -1,6 +1,6 @@
 ﻿namespace MinimalApi.Identity.API.Options;
 
-public class ApplicationOptions
+public class ApiValidationOptions
 {
     public int MinLengthFirstName { get; init; }
     public int MaxLengthFirstName { get; init; }
@@ -16,4 +16,6 @@ public class ApplicationOptions
     public int MaxLengthModuleDescription { get; init; }
     public int MinLengthLicenseName { get; init; }
     public int MaxLengthLicenseName { get; init; }
+    public int MinLengthClaimValue { get; init; }
+    public int MaxLengthClaimValue { get; init; }
 }
