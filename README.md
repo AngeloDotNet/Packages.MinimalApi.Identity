@@ -9,9 +9,12 @@ I created this library in order to avoid duplication of repetitive code whenever
 <!--
 ### 🏗️ ToDo
 
-- [ ] Add verification to avoid duplicates when creating Claim, License and Module
-- [ ] Replace .ProducesProblem with .Produces Default Problem in each endpoints (like Profile Endpoints)
-- [ ] Cleaning up commented code
+- [ ] Add endpoints to manage AuthPolicy data - If INSERT and/or UPDATE fails, throw ConstraintViolationException
+- [ ] Add endpoints to manage AuthPolicyRoles data - If INSERT and/or UPDATE fails, throw ConstraintViolationException
+- [ ] Add policies to the AuthPolicyRoles table  (https://github.com/ItalyDotNet/MyCourse/blob/master/src/MyCourse/Models/Services/Application/Courses/EfCoreCourseService.cs#L317)
+- [ ] Resolve ToDo on line 206 of RegisterServicesExtensions
+- [ ] Force automatic policy reload using Coravel (https://github.com/copilot/c/cd6ad08b-f6c8-4881-b40e-31b42c37183e)
+- [ ] Verify the IResults of each service so that you have the XML documentation of the endpoints updated
 - [ ] Add endpoints to manage users and disablement
 - [ ] Add endpoints to handle user password change every X days
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
@@ -20,6 +23,7 @@ I created this library in order to avoid duplication of repetitive code whenever
 - [ ] Add endpoint for password change
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
+- [ ] Cleaning up commented code
 - [ ] Add API documentation
 -->
 
