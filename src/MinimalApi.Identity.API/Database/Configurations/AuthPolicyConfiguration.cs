@@ -28,7 +28,7 @@ public class AuthPolicyConfiguration : IEntityTypeConfiguration<AuthPolicy>
             Id = 1,
             PolicyName = nameof(Permissions.ClaimRead),
             PolicyDescription = "ClaimRead",
-            PolicyPermissions = [nameof(Permissions.Claim), nameof(Permissions.ClaimRead)],
+            PolicyPermissions = new[] { nameof(Permissions.Claim), nameof(Permissions.ClaimRead) },
             IsDefault = true,
             IsActive = true
         },
