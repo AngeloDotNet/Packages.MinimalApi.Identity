@@ -39,6 +39,8 @@ public static class MessageApi
     public const string LicenseDeleted = "License deleted successfully";
     public const string LicenseNotDeleted = "License not deleted, it is not possible to delete a license assigned to a user";
     public const string LicenseNotAssignable = "You cannot assign more than one license to a user. Please check which license the user owns.";
+    public const string LicenseExpired = "License expired. Without a valid license you cannot use the software.";
+    public const string LicenseAlreadyExist = "License already exists";
 
     public const string ModuleCreated = "Module created successfully";
     public const string ModuleNotFound = "Module not found";
@@ -48,6 +50,7 @@ public static class MessageApi
     public const string ModuleDeleted = "Module deleted successfully";
     public const string ModuleNotDeleted = "Module not deleted, it is not possible to delete a module assigned to a user";
     public const string ModuleNotAssignable = "You cannot assign this module to the user as they already own it.";
+    public const string ModuleAlreadyExist = "Module already exists";
 
     public const string RoleCreated = "Role created successfully";
     public const string RoleNotFound = "Role not found";
@@ -71,10 +74,12 @@ public static class MessageApi
     public const string ClaimNotRevoked = "Claim not revoked";
     public const string ClaimsNotFound = "Claims not found";
     public const string ClaimsNotAssigned = "Claims not assigned";
+    public const string ClaimAlreadyExist = "Claim already exists";
 
     //Message exceptions
     public const string UserNotAuthenticated = "User is not authenticated";
     public const string UserNotHavePermission = "User does not have permission";
     public const string ProblemDetailsMessageTitle = "An error occurred while processing your request";
     public const string UnexpectedError = "An unexpected error occurred!";
+    public const string ConstraintViolation = "A violation occurred for a database constraint";
 }

@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Exceptions;
 using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
 
 namespace MinimalApi.Identity.API.Authorization.Handlers;
 
-public class PermissionHandler : IAuthorizationHandler
+public class PermissionHandler(ILogger<PermissionHandler> logger) : IAuthorizationHandler
 {
     public async Task HandleAsync(AuthorizationHandlerContext context)
     {
@@ -14,11 +15,13 @@ public class PermissionHandler : IAuthorizationHandler
 
         if (user.Identity?.IsAuthenticated != true)
         {
+            logger.LogWarning("User is not authenticated");
             throw new UserUnknownException();
         }
 
         if (!context.Requirements.Any())
         {
+            logger.LogWarning("User {UserName} does not have permissions", user?.Identity?.Name);
             throw new UserWithoutPermissionsException();
         }
 
@@ -30,6 +33,7 @@ public class PermissionHandler : IAuthorizationHandler
             }
             else
             {
+                logger.LogWarning("User {UserName} does not have the required permissions", user?.Identity?.Name);
                 throw new UserWithoutPermissionsException();
             }
         }
