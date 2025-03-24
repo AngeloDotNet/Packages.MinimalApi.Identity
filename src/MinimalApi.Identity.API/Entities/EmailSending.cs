@@ -1,11 +1,11 @@
 ﻿using MinimalApi.Identity.API.Entities.Common;
+using MinimalApi.Identity.API.Enums;
 
 namespace MinimalApi.Identity.API.Entities;
 
 public class EmailSending : BaseEntity
 {
-    public int EmailSendingTypeId { get; set; }
-    public EmailSendingType EmailSendingType { get; set; } = null!;
+    public EmailSendingType EmailSendingType { get; set; }
     public string EmailTo { get; set; } = null!;
     public string Subject { get; set; } = null!;
     public string Body { get; set; } = null!;
