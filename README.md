@@ -2,18 +2,13 @@
 
 Library for dynamically managing users, roles, claims, modules and license, using .NET 8 Minimal API, Entity Framework Core and SQL Server.
 
-I created this library in order to avoid duplication of repetitive code whenever I implement Asp.Net Core Identity as an authentication and authorization provider
-
-> **This library is still under development of new implementations.**
+> [!IMPORTANT]
+> **The MinimalApi.Identity.API library used in this sample project, is still under development of new implementations.**
 
 <!--
 ### 🏗️ ToDo
 
-- [ ] Add endpoints to manage AuthPolicy data - If INSERT and/or UPDATE fails, throw ConstraintViolationException
-- [ ] Add endpoints to manage AuthPolicyRoles data - If INSERT and/or UPDATE fails, throw ConstraintViolationException
-- [ ] Add policies to the AuthPolicyRoles table  (https://github.com/ItalyDotNet/MyCourse/blob/master/src/MyCourse/Models/Services/Application/Courses/EfCoreCourseService.cs#L317)
-- [ ] Resolve ToDo on line 206 of RegisterServicesExtensions
-- [ ] Force automatic policy reload using Coravel (https://github.com/copilot/c/cd6ad08b-f6c8-4881-b40e-31b42c37183e)
+- [ ] Add endpoints to manage AuthPolicy data
 - [ ] Verify the IResults of each service so that you have the XML documentation of the endpoints updated
 - [ ] Add endpoints to manage users and disablement
 - [ ] Add endpoints to handle user password change every X days
@@ -100,6 +95,9 @@ Adding this sections in the _appsettings.json_ file:
         "MinLengthClaimValue": 5,
         "MaxLengthClaimValue": 20
     },
+    "HostedServiceOptions": {
+        "IntervalAuthPolicyUpdaterMinutes": 5
+    },
     "ConnectionStrings": {
         "DefaultConnection": "Data Source=[HOSTNAME];Initial Catalog=[DATABASE];User ID=[USERNAME];Password=[PASSWORD];Encrypt=False"
     },
@@ -107,7 +105,9 @@ Adding this sections in the _appsettings.json_ file:
 }
 ```
 
-> **Note**: If SaveEmailSent is false, only emails that failed while sending will be saved, if SaveEmailSent is true, both emails that were sent successfully and emails that failed will be saved
+### 📒 Notes
+
+> If SaveEmailSent is false, only emails that failed while sending will be saved, if SaveEmailSent is true, both emails that were sent successfully and emails that failed will be saved
 
 Registering services at _Program.cs_ file:
 
@@ -186,6 +186,10 @@ You can find a sample project in the [example](https://github.com/AngeloDotNet/I
 - [JWT Bearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer)
 - [MailKit](https://www.nuget.org/packages/MailKit)
 - [Scrutor](https://www.nuget.org/packages/Scrutor)
+
+### 🔜 Future implementations
+
+- [ ] Replacing the hostedService AuthorizationPolicyUpdater using Coravel jobs
 
 ### 📝 License
 
