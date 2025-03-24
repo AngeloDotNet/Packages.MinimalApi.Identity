@@ -13,63 +13,64 @@ public class ClaimTypeConfiguration : IEntityTypeConfiguration<ClaimType>
         {
             Id = 1,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.Profilo),
+            Value = nameof(Permissions.AuthPolicy),
             Default = true
         },
         new ClaimType
         {
             Id = 2,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.ProfiloRead),
+            Value = nameof(Permissions.AuthPolicyRead),
             Default = true
         },
         new ClaimType
         {
             Id = 3,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.ProfiloWrite),
+            Value = nameof(Permissions.AuthPolicyWrite),
             Default = true
         },
         new ClaimType
         {
             Id = 4,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.Ruolo),
+            Value = nameof(Permissions.Claim),
             Default = true
         },
         new ClaimType
         {
             Id = 5,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.RuoloRead),
+            Value = nameof(Permissions.ClaimRead),
             Default = true
         },
         new ClaimType
         {
             Id = 6,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.RuoloWrite),
+            Value = nameof(Permissions.ClaimWrite),
             Default = true
         },
+
         new ClaimType
         {
             Id = 7,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.Claim),
+            Value = nameof(Permissions.Licenza),
             Default = true
         },
         new ClaimType
         {
             Id = 8,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.ClaimRead),
+            Value = nameof(Permissions.LicenzaRead),
             Default = true
         },
         new ClaimType
         {
             Id = 9,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.ClaimWrite),
+            Value = nameof(Permissions.LicenzaWrite),
             Default = true
         },
         new ClaimType
@@ -97,21 +98,42 @@ public class ClaimTypeConfiguration : IEntityTypeConfiguration<ClaimType>
         {
             Id = 13,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.Licenza),
+            Value = nameof(Permissions.Profilo),
             Default = true
         },
         new ClaimType
         {
             Id = 14,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.LicenzaRead),
+            Value = nameof(Permissions.ProfiloRead),
             Default = true
         },
         new ClaimType
         {
             Id = 15,
             Type = nameof(ClaimsType.Permission),
-            Value = nameof(Permissions.LicenzaWrite),
+            Value = nameof(Permissions.ProfiloWrite),
+            Default = true
+        },
+        new ClaimType
+        {
+            Id = 16,
+            Type = nameof(ClaimsType.Permission),
+            Value = nameof(Permissions.Ruolo),
+            Default = true
+        },
+        new ClaimType
+        {
+            Id = 17,
+            Type = nameof(ClaimsType.Permission),
+            Value = nameof(Permissions.RuoloRead),
+            Default = true
+        },
+        new ClaimType
+        {
+            Id = 18,
+            Type = nameof(ClaimsType.Permission),
+            Value = nameof(Permissions.RuoloWrite),
             Default = true
         });
     }
