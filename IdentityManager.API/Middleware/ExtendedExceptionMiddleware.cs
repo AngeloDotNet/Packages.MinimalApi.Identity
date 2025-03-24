@@ -1,11 +1,13 @@
 ﻿using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using MinimalApi.Identity.API.Middleware;
+using MinimalApi.Identity.API.Options;
+namespace IdentityManager.API.Middleware;
 
-namespace MinimalApi.Identity.Sample.Middleware;
-
-public class ExtendedExceptionMiddleware(RequestDelegate next) : MinimalApiExceptionMiddleware(next)
+public class ExtendedExceptionMiddleware(RequestDelegate next, IOptions<ValidationOptions> options)
+    : MinimalApiExceptionMiddleware(next, options)
 {
     public static Task HandleExceptionAsync(HttpContext context, Exception exception)
     {

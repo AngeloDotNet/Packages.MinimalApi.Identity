@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>MinimalApi.Identity.Sample</UserSecretsId>
+    <UserSecretsId>MinimalApi.Identity.API</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +12,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <!--<PackageReference Include="MinimalApi.Identity.API" Version="1.0.94" />-->
   </ItemGroup>
 
   <ItemGroup>
