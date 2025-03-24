@@ -76,6 +76,12 @@ public static class MessageApi
     public const string ClaimsNotAssigned = "Claims not assigned";
     public const string ClaimAlreadyExist = "Claim already exists";
 
+    public const string PolicyNotFound = "Policy not found";
+    public const string PolicyAlreadyExist = "Policy already exists";
+    public const string PolicyCreated = "Policy created successfully";
+    public const string PolicyNotDeleted = "Policy not deleted, it is not possible to delete a policy created by default";
+    public const string PolicyDeleted = "Policy deleted successfully";
+
     //Message exceptions
     public const string UserNotAuthenticated = "User is not authenticated";
     public const string UserNotHavePermission = "User does not have permission";
