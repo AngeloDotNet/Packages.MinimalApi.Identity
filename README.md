@@ -3,22 +3,20 @@
 Library for dynamically managing users, roles, claims, modules and license, using .NET 8 Minimal API, Entity Framework Core and SQL Server.
 
 > [!IMPORTANT]
-> **The MinimalApi.Identity.API library used in this sample project, is still under development of new implementations.**
+> **This library is still under development of new implementations.**
 
 <!--
 ### 🏗️ ToDo
 
-- [ ] Add endpoints to manage AuthPolicy data
-- [ ] Verify the IResults of each service so that you have the XML documentation of the endpoints updated
-- [ ] Add endpoints to manage users and disablement
-- [ ] Add endpoints to handle user password change every X days
+- [ ] Replacing generic IResults with specific ones for each service of each services
+- [ ] Replacing generic IResults with specific ones for each service of each endpoint, in order to have updated XML documentation
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
+- [ ] Add endpoints to manage users
 - [ ] Add endpoints to impersonate the user
 - [ ] Add endpoint for forgotten password recovery
 - [ ] Add endpoint for password change
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
-- [ ] Cleaning up commented code
 - [ ] Add API documentation
 -->
 
@@ -93,7 +91,11 @@ Adding this sections in the _appsettings.json_ file:
         "MinLengthLicenseName": 5,
         "MaxLengthLicenseName": 20,
         "MinLengthClaimValue": 5,
-        "MaxLengthClaimValue": 20
+        "MaxLengthClaimValue": 20,
+        "MinLengthPolicyName": 5,
+        "MaxLengthPolicyName": 20,
+        "MinLengthPolicyDescription": 5,
+        "MaxLengthPolicyDescription": 100
     },
     "HostedServiceOptions": {
         "IntervalAuthPolicyUpdaterMinutes": 5
@@ -105,15 +107,14 @@ Adding this sections in the _appsettings.json_ file:
 }
 ```
 
-### 📒 Notes
-
+> [!IMPORTANT]
 > If SaveEmailSent is false, only emails that failed while sending will be saved, if SaveEmailSent is true, both emails that were sent successfully and emails that failed will be saved
 
 Registering services at _Program.cs_ file:
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
-var AuthConnection = builder.Configuration.GetDatabaseConnString("DefaultConnection");
+var authConnection = builder.Configuration.GetDatabaseConnString("DefaultConnection");
 var formatErrorResponse = ErrorResponseFormat.List; // or ErrorResponseFormat.Default
 
 builder.Services.AddCors(options => options.AddPolicy("cors", builder
@@ -121,23 +122,20 @@ builder.Services.AddCors(options => options.AddPolicy("cors", builder
 
 //...
 
-//If there is a need to register additional services(transient, scoped, singleton) in dependency injection,
-//it is possible to use the related extension methods exposed by the library.
+//If you need to register additional services(transient, scoped, singleton) in dependency injection,
+//you can use the related extension methods exposed by the library.
 
-//ATTENTION: Service has already been used within the library to register the necessary services, it is
+//NOTE: Service has already been used within the library to register the necessary services, it is
 //recommended to use a different nomenclature.
 
-//Using an extension method of the Scrutor package, all found services ending with Service will be registered in the
-//Transient lifecycle: builder.Services.AddRegisterTransientService<IAuthService>("Service"); or you can register
-//services with the Scoped lifecycle: builder.Services.AddRegisterScopedService<IAuthService>("Service"); or you can
-//register services with the Singleton lifecycle: builder.Services.AddRegisterSingletonService<IAuthService>("Service");
+//The library exposes the following extension methods that leverage the Scrutor package:
+//- Transient lifecycle => builder.Services.AddRegisterTransientService<IAuthService>("Service");
+//- Scoped lifecycle => builder.Services.AddRegisterScopedService<IAuthService>("Service");
+//- Singleton lifecycle => builder.Services.AddRegisterSingletonService<IAuthService>("Service");
 
-builder.Services.AddRegisterServices<Program>(builder.Configuration, AuthConnection, formatErrorResponse);
+builder.Services.AddRegisterServices<Program>(builder.Configuration, authConnection, formatErrorResponse);
 builder.Services.AddAuthorization(options =>
 {
-    // Adds default authorization policies
-    options.AddDefaultAuthorizationPolicy();
-
     // Here you can add additional authorization policies
 });
 
@@ -145,13 +143,13 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-//If you need to add more exceptions you need to add the ExtendedExceptionMiddleware middleware.
-//In the demo project, in the Middleware folder, you can find an implementation example.
-app.UseMiddleware<ExtendedExceptionMiddleware>();
+//Use this MinimalApiExceptionMiddleware in your pipeline if you don't need to add new exceptions.
+app.UseMiddleware<MinimalApiExceptionMiddleware>();
 
-//Otherwise you can add this middleware MinimalApiExceptionMiddleware to your pipeline
-//that handles exceptions from this library.
-//app.UseMiddleware<MinimalApiExceptionMiddleware>();
+//If you need to add more exceptions, you need to add the ExtendedExceptionMiddleware middleware to your pipeline.
+//In the demo project, in the Middleware folder, you can find an example implementation, which you can use to add
+//the exceptions you need.
+//app.UseMiddleware<ExtendedExceptionMiddleware>();
 
 app.UseRouting();
 app.UseStatusCodePages();
@@ -189,7 +187,7 @@ You can find a sample project in the [example](https://github.com/AngeloDotNet/I
 
 ### 🔜 Future implementations
 
-- [ ] Replacing the hostedService AuthorizationPolicyUpdater using Coravel jobs
+- [ ] Replacing the Hosted Service AuthorizationPolicyUpdater using Coravel jobs
 
 ### 📝 License
 
