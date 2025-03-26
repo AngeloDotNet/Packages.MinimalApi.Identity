@@ -2,6 +2,14 @@
 
 public enum Permissions
 {
+    AuthPolicy,
+    AuthPolicyRead,
+    AuthPolicyWrite,
+
+    Claim,
+    ClaimRead,
+    ClaimWrite,
+
     Licenza,
     LicenzaRead,
     LicenzaWrite,
@@ -10,15 +18,11 @@ public enum Permissions
     ModuloRead,
     ModuloWrite,
 
-    Claim,
-    ClaimRead,
-    ClaimWrite,
+    Profilo,
+    ProfiloRead,
+    ProfiloWrite,
 
     Ruolo,
     RuoloRead,
-    RuoloWrite,
-
-    Profilo,
-    ProfiloRead,
-    ProfiloWrite
+    RuoloWrite
 }
