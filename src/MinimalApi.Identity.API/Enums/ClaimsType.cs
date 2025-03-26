@@ -2,6 +2,7 @@
 
 internal enum ClaimsType
 {
+    AuthPolicy,
     FullName,
     License,
     Module,
