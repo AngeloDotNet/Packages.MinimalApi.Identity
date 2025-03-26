@@ -11,18 +11,12 @@ public class PermissionHandler(ILogger<PermissionHandler> logger) : IAuthorizati
     public async Task HandleAsync(AuthorizationHandlerContext context)
     {
         var user = context.User;
-        var permissionsRequirements = context.Requirements.OfType<PermissionRequirement>().ToList();
+        var permissionsRequirements = context.Requirements.OfType<PermissionRequirement>();
 
         if (user.Identity?.IsAuthenticated != true)
         {
             logger.LogWarning("User is not authenticated");
             throw new UserUnknownException();
-        }
-
-        if (!context.Requirements.Any())
-        {
-            logger.LogWarning("User {UserName} does not have permissions", user?.Identity?.Name);
-            throw new UserWithoutPermissionsException();
         }
 
         foreach (var permissionRequirement in permissionsRequirements)
