@@ -11,7 +11,6 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 - [ ] Replacing generic IResults with specific ones for each service of each services
 - [ ] Replacing generic IResults with specific ones for each service of each endpoint, in order to have updated XML documentation
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
-- [ ] Add endpoints to manage users
 - [ ] Add endpoints to impersonate the user
 - [ ] Add endpoint for forgotten password recovery
 - [ ] Add endpoint for password change
@@ -102,15 +101,14 @@ Adding this sections in the _appsettings.json_ file:
     },
     "ConnectionStrings": {
         "DefaultConnection": "Data Source=[HOSTNAME];Initial Catalog=[DATABASE];User ID=[USERNAME];Password=[PASSWORD];Encrypt=False"
-    },
-    "AllowedHosts": "*"
+    }
 }
 ```
 
 > [!IMPORTANT]
 > If SaveEmailSent is false, only emails that failed while sending will be saved, if SaveEmailSent is true, both emails that were sent successfully and emails that failed will be saved
 
-Registering services at _Program.cs_ file:
+**Registering services at _Program.cs_ file**
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -170,6 +168,10 @@ app.UseAuthorization();
 app.UseMapEndpoints();
 app.Run();
 ```
+
+### 📡 API Reference
+
+See the [documentation](https://github.com/AngeloDotNet/Packages.MinimalApi.Identity/tree/main/docs) for a list of all available API endpoints.
 
 ### 📚 Demo
 
