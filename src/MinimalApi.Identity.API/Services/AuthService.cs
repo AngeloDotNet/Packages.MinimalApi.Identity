@@ -67,7 +67,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         {
             var lastDateChangePassword = profileUser.LastDateChangePassword;
 
-            if (lastDateChangePassword.Value.AddDays(90) >= DateOnly.FromDateTime(DateTime.UtcNow))
+            if (lastDateChangePassword.Value.AddDays(90) <= DateOnly.FromDateTime(DateTime.UtcNow))
             {
                 return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
             }
