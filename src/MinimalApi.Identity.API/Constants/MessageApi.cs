@@ -23,6 +23,8 @@ public static class MessageApi
     public const string UserIdTokenRequired = "UserId and Token are required";
     public const string UserIdEmailTokenRequired = "UserId, Email and Token are required";
     public const string UserNotFound = "User not found";
+    public const string UserNotEnableLogin = "User is not allowed to sign in";
+    public const string UserForcedChangePassword = "The user must change the password, otherwise it will not be possible to sign in.";
 
     public const string ProfileCreated = "Profile created successfully";
     public const string ProfileUpdated = "Profile updated successfully";
@@ -30,6 +32,11 @@ public static class MessageApi
     public const string ProfileNotCreated = "Profile not created";
     public const string ProfileNotUpdated = "Profile not updated";
     public const string ProfileDeleted = "Profile deleted successfully";
+    public const string ProfileDisabled = "Profile disabled successfully";
+    public const string ProfileEnabled = "Profile enabled successfully";
+    public const string ProfileNotDisabled = "Profile not disabled";
+    public const string ProfileNotEnabled = "Profile not enabled";
+    public const string ProfilesNotFound = "Profiles not found";
 
     public const string LicenseCreated = "License created successfully";
     public const string LicenseNotFound = "License not found";

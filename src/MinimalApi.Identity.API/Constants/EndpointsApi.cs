@@ -33,9 +33,8 @@ public static class EndpointsApi
     public const string EndpointsConfirmEmailChange = "/confirm-email-change/{userId}/{email}/{token}";
 
     public const string EndpointsGetProfile = "/{userId}";
-    public const string EndpointsCreateProfile = "/create-profile";
     public const string EndpointsEditProfile = "/edit-profile";
-    public const string EndpointsDeleteProfile = "/delete-profile";
+    public const string EndpointsChangeEnableProfile = "/change-enable-profile";
 
     public const string EndpointsCreateLicense = "/create-license";
     public const string EndpointsAssignLicense = "/assign-license";
