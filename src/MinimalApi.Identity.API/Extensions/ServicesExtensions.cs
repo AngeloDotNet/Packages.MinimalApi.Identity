@@ -21,34 +21,33 @@ public static class ServicesExtensions
         return options;
     }
 
-    public static IServiceCollection AddRegisterTransientService<TAssembly>(this IServiceCollection services, string stringEndsWith) where TAssembly : class
+    public static IServiceCollection AddRegisterService<TAssembly>(this IServiceCollection services, string stringEndsWith, ServiceLifetime lifetime)
+        where TAssembly : class
     {
         services.Scan(scan =>
             scan.FromAssemblyOf<TAssembly>()
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith(stringEndsWith)))
                 .AsImplementedInterfaces()
-                .WithTransientLifetime());
+                .WithLifetime(lifetime));
 
         return services;
     }
 
-    public static IServiceCollection AddRegisterScopedService<TAssembly>(this IServiceCollection services, string stringEndsWith) where TAssembly : class
+    public static IServiceCollection AddRegisterTransientService<TAssembly>(this IServiceCollection services, string stringEndsWith)
+        where TAssembly : class
     {
-        services.Scan(scan =>
-            scan.FromAssemblyOf<TAssembly>()
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith(stringEndsWith)))
-                .AsImplementedInterfaces()
-                .WithScopedLifetime());
-        return services;
+        return services.AddRegisterService<TAssembly>(stringEndsWith, ServiceLifetime.Transient);
     }
 
-    public static IServiceCollection AddRegisterSingletonService<TAssembly>(this IServiceCollection services, string stringEndsWith) where TAssembly : class
+    public static IServiceCollection AddRegisterScopedService<TAssembly>(this IServiceCollection services, string stringEndsWith)
+        where TAssembly : class
     {
-        services.Scan(scan =>
-            scan.FromAssemblyOf<TAssembly>()
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith(stringEndsWith)))
-                .AsImplementedInterfaces()
-                .WithSingletonLifetime());
-        return services;
+        return services.AddRegisterService<TAssembly>(stringEndsWith, ServiceLifetime.Scoped);
+    }
+
+    public static IServiceCollection AddRegisterSingletonService<TAssembly>(this IServiceCollection services, string stringEndsWith)
+        where TAssembly : class
+    {
+        return services.AddRegisterService<TAssembly>(stringEndsWith, ServiceLifetime.Singleton);
     }
 }

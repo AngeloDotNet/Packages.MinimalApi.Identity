@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
@@ -22,10 +23,10 @@ using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Filters;
+using MinimalApi.Identity.API.HostedServices;
 using MinimalApi.Identity.API.Options;
 using MinimalApi.Identity.API.Services.Interfaces;
 using MinimalApi.Identity.API.Validator;
-using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
 using MinimalApi.Identity.Common.Extensions.Interfaces;
 
 namespace MinimalApi.Identity.API.Extensions;
@@ -33,54 +34,53 @@ namespace MinimalApi.Identity.API.Extensions;
 public static class RegisterServicesExtensions
 {
     public static IServiceCollection AddRegisterServices<TMigrations>(this IServiceCollection services, IConfiguration configuration,
-        string connectionString, JwtOptions jwtOptions, NetIdentityOptions identityOptions) where TMigrations : class
+        string dbConnString, ErrorResponseFormat formatErrorResponse) where TMigrations : class
     {
+        var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
+        var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
+
         services
             .AddProblemDetails()
-            .AddSwaggerConfiguration();
+            .AddHttpContextAccessor()
 
-        services.AddMinimalApiDbContext(connectionString, typeof(TMigrations).Assembly.FullName!);
-        services.AddMinimalApiIdentityServices(jwtOptions);
-        services.AddMinimalApiIdentityOptionsServices(identityOptions);
+            .AddSwaggerConfiguration()
+            .AddMinimalApiDbContext<MinimalApiAuthDbContext>(dbConnString, typeof(TMigrations).Assembly.FullName!)
+            .AddMinimalApiIdentityServices<MinimalApiAuthDbContext>(jwtOptions)
+            .AddMinimalApiIdentityOptionsServices(identityOptions)
 
-        services
+            .AddSingleton<IHostedService, AuthorizationPolicyGeneration>()
             .AddRegisterTransientService<IAuthService>("Service")
-
             .AddScoped<SignInManager<ApplicationUser>>()
-            .AddScoped<IAuthorizationHandler, PermissionHandler>();
+            .AddScoped<IAuthorizationHandler, PermissionHandler>()
 
-        services
+            .AddHostedService<AuthorizationPolicyUpdater>()
+
+            .ConfigureValidation(options => options.ErrorResponseFormat = formatErrorResponse)
             .ConfigureFluentValidation<LoginValidator>()
-            .AddRegisterOptions(configuration);
+            .Configure<JsonOptions>(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+                options.JsonSerializerOptions.WriteIndented = true;
+            })
+            .Configure<RouteOptions>(options => options.LowercaseUrls = true)
+            .Configure<KestrelServerOptions>(configuration.GetSection("Kestrel"));
 
         return services;
     }
 
     public static void UseMapEndpoints(this WebApplication app) => app.MapEndpoints();
 
-    public static IServiceCollection AddRegisterOptions(this IServiceCollection services, IConfiguration configuration)
-    {
-        return services.Configure<JsonOptions>(options =>
-        {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
-            options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-            options.JsonSerializerOptions.WriteIndented = true;
-        })
-        .Configure<RouteOptions>(options => options.LowercaseUrls = true)
-        .Configure<KestrelServerOptions>(configuration.GetSection("Kestrel"));
-    }
-
     public static IServiceCollection AddSwaggerConfiguration(this IServiceCollection services)
     {
         return services
-            .AddHttpContextAccessor()
             .AddEndpointsApiExplorer()
             .AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo
+                var openApiInfo = new OpenApiInfo
                 {
                     Title = "Minimal API Identity",
                     Version = "v1",
@@ -95,62 +95,63 @@ public static class RegisterServicesExtensions
                         Name = "License MIT",
                         Url = new Uri("https://opensource.org/licenses/MIT")
                     },
-                });
+                };
+                options.SwaggerDoc("v1", openApiInfo);
 
-                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                var securityScheme = new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
                     Description = "Insert the Bearer Token",
                     Name = HeaderNames.Authorization,
-                    Type = SecuritySchemeType.ApiKey
-                });
-
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                    Type = SecuritySchemeType.ApiKey,
+                    Reference = new OpenApiReference
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference= new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = JwtBearerDefaults.AuthenticationScheme
-                            }
-                        },
-                        Array.Empty<string>()
+                        Type = ReferenceType.SecurityScheme,
+                        Id = JwtBearerDefaults.AuthenticationScheme
                     }
-                });
+                };
+                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
+
+                var securityRequirement = new OpenApiSecurityRequirement
+                {
+                    { securityScheme, Array.Empty<string>() }
+                };
+                options.AddSecurityRequirement(securityRequirement);
             });
     }
 
-    internal static IServiceCollection AddMinimalApiDbContext(this IServiceCollection services,
-        string connectionString, string migrationAssembly)
+    public static RouteHandlerBuilder WithValidation<T>(this RouteHandlerBuilder builder) where T : class
+        => builder.AddEndpointFilter<ValidatorFilter<T>>().ProducesValidationProblem();
+
+    public static IServiceCollection ConfigureFluentValidation<TValidator>(this IServiceCollection services) where TValidator : IValidator
+        => services.AddValidatorsFromAssemblyContaining<TValidator>();
+
+    internal static IServiceCollection AddMinimalApiDbContext<TDbContext>(this IServiceCollection services, string dbConnString, string migrationAssembly)
+        where TDbContext : DbContext
     {
-        services.AddDbContext<MinimalApiDbContext>(options =>
-        {
-            options.UseSqlServer(connectionString, opt =>
+        services.AddDbContext<TDbContext>(options =>
+            options.UseSqlServer(dbConnString, opt =>
             {
                 opt.MigrationsAssembly(migrationAssembly);
                 opt.MigrationsHistoryTable(HistoryRepository.DefaultTableName);
                 opt.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
-        });
+            })
+        );
 
         return services;
     }
 
-    internal static IServiceCollection AddMinimalApiIdentityServices(this IServiceCollection services, JwtOptions jwtOptions)
+    internal static IServiceCollection AddMinimalApiIdentityServices<TDbContext>(this IServiceCollection services, JwtOptions jwtOptions)
+        where TDbContext : DbContext
     {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey));
+
         services.AddIdentity<ApplicationUser, ApplicationRole>()
-            .AddEntityFrameworkStores<MinimalApiDbContext>()
+            .AddEntityFrameworkStores<TDbContext>()
             .AddDefaultTokenProviders();
 
-        services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer("Bearer", options =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
                 options.SaveToken = true;
                 options.RequireHttpsMetadata = false;
@@ -162,7 +163,7 @@ public static class RegisterServicesExtensions
                     ValidAudience = jwtOptions.Audience,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey)),
+                    IssuerSigningKey = key,
                     RequireExpirationTime = true,
                     ClockSkew = TimeSpan.Zero
                 };
@@ -173,63 +174,71 @@ public static class RegisterServicesExtensions
 
     internal static IServiceCollection AddMinimalApiIdentityOptionsServices(this IServiceCollection services, NetIdentityOptions identityOptions)
     {
-        return services.Configure<IdentityOptions>(options =>
+        services.Configure<IdentityOptions>(options =>
         {
             options.User.RequireUniqueEmail = identityOptions.RequireUniqueEmail;
 
-            options.Password.RequireDigit = identityOptions.RequireDigit;
-            options.Password.RequiredLength = identityOptions.RequiredLength;
-            options.Password.RequireUppercase = identityOptions.RequireUppercase;
-            options.Password.RequireLowercase = identityOptions.RequireLowercase;
-            options.Password.RequireNonAlphanumeric = identityOptions.RequireNonAlphanumeric;
-            options.Password.RequiredUniqueChars = identityOptions.RequiredUniqueChars;
+            options.Password = new PasswordOptions
+            {
+                RequireDigit = identityOptions.RequireDigit,
+                RequiredLength = identityOptions.RequiredLength,
+                RequireUppercase = identityOptions.RequireUppercase,
+                RequireLowercase = identityOptions.RequireLowercase,
+                RequireNonAlphanumeric = identityOptions.RequireNonAlphanumeric,
+                RequiredUniqueChars = identityOptions.RequiredUniqueChars
+            };
 
             options.SignIn.RequireConfirmedEmail = identityOptions.RequireConfirmedEmail;
 
-            options.Lockout.MaxFailedAccessAttempts = identityOptions.MaxFailedAccessAttempts;
-            options.Lockout.AllowedForNewUsers = identityOptions.AllowedForNewUsers;
-            options.Lockout.DefaultLockoutTimeSpan = identityOptions.DefaultLockoutTimeSpan;
+            options.Lockout = new LockoutOptions
+            {
+                MaxFailedAccessAttempts = identityOptions.MaxFailedAccessAttempts,
+                AllowedForNewUsers = identityOptions.AllowedForNewUsers,
+                DefaultLockoutTimeSpan = identityOptions.DefaultLockoutTimeSpan
+            };
         });
+
+        return services;
     }
 
-    public static AuthorizationOptions AddDefaultAuthorizationPolicy(this AuthorizationOptions options)
+    //public static AuthorizationOptions AddDefaultAuthorizationPolicy(this AuthorizationOptions options)
+    //{
+    //    var permissionReadRequirement = new PermissionRequirement(nameof(Permissions.Claim), nameof(Permissions.ClaimRead));
+    //    var permissionWriteRequirement = new PermissionRequirement(nameof(Permissions.Claim), nameof(Permissions.ClaimWrite));
+
+    //    options.AddPolicy(nameof(Permissions.ClaimRead), policy => policy.Requirements.Add(permissionReadRequirement));
+    //    options.AddPolicy(nameof(Permissions.ClaimWrite), policy => policy.Requirements.Add(permissionWriteRequirement));
+
+    //    var licenseReadRequirement = new PermissionRequirement(nameof(Permissions.Licenza), nameof(Permissions.LicenzaRead));
+    //    var licenseWriteRequirement = new PermissionRequirement(nameof(Permissions.Licenza), nameof(Permissions.LicenzaWrite));
+
+    //    options.AddPolicy(nameof(Permissions.LicenzaRead), policy => policy.Requirements.Add(licenseReadRequirement));
+    //    options.AddPolicy(nameof(Permissions.LicenzaWrite), policy => policy.Requirements.Add(licenseWriteRequirement));
+
+    //    var moduleReadRequirement = new PermissionRequirement(nameof(Permissions.Modulo), nameof(Permissions.ModuloRead));
+    //    var moduleWriteRequirement = new PermissionRequirement(nameof(Permissions.Modulo), nameof(Permissions.ModuloWrite));
+
+    //    options.AddPolicy(nameof(Permissions.ModuloRead), policy => policy.Requirements.Add(moduleReadRequirement));
+    //    options.AddPolicy(nameof(Permissions.ModuloWrite), policy => policy.Requirements.Add(moduleWriteRequirement));
+
+    //    var profileReadRequirement = new PermissionRequirement(nameof(Permissions.Profilo), nameof(Permissions.ProfiloRead));
+    //    var profileWriteRequirement = new PermissionRequirement(nameof(Permissions.Profilo), nameof(Permissions.ProfiloWrite));
+
+    //    options.AddPolicy(nameof(Permissions.ProfiloRead), policy => policy.Requirements.Add(profileReadRequirement));
+    //    options.AddPolicy(nameof(Permissions.ProfiloWrite), policy => policy.Requirements.Add(profileWriteRequirement));
+
+    //    var roleReadRequirement = new PermissionRequirement(nameof(Permissions.Ruolo), nameof(Permissions.RuoloRead));
+    //    var roleWriteRequirement = new PermissionRequirement(nameof(Permissions.Ruolo), nameof(Permissions.RuoloWrite));
+
+    //    options.AddPolicy(nameof(Permissions.RuoloRead), policy => policy.Requirements.Add(roleReadRequirement));
+    //    options.AddPolicy(nameof(Permissions.RuoloWrite), policy => policy.Requirements.Add(roleWriteRequirement));
+
+    //    return options;
+    //}
+
+    internal static IServiceCollection ConfigureValidation(this IServiceCollection services, Action<ValidationOptions> configureOptions)
     {
-        var permissionReadRequirement = new PermissionRequirement(nameof(Permissions.Claim), nameof(Permissions.ClaimRead));
-        var permissionWriteRequirement = new PermissionRequirement(nameof(Permissions.Claim), nameof(Permissions.ClaimWrite));
-
-        options.AddPolicy(nameof(Permissions.ClaimRead), policy => policy.Requirements.Add(permissionReadRequirement));
-        options.AddPolicy(nameof(Permissions.ClaimWrite), policy => policy.Requirements.Add(permissionWriteRequirement));
-
-        var licenseReadRequirement = new PermissionRequirement(nameof(Permissions.Licenza), nameof(Permissions.LicenzaRead));
-        var licenseWriteRequirement = new PermissionRequirement(nameof(Permissions.Licenza), nameof(Permissions.LicenzaWrite));
-
-        options.AddPolicy(nameof(Permissions.LicenzaRead), policy => policy.Requirements.Add(licenseReadRequirement));
-        options.AddPolicy(nameof(Permissions.LicenzaWrite), policy => policy.Requirements.Add(licenseWriteRequirement));
-
-        var moduleReadRequirement = new PermissionRequirement(nameof(Permissions.Modulo), nameof(Permissions.ModuloRead));
-        var moduleWriteRequirement = new PermissionRequirement(nameof(Permissions.Modulo), nameof(Permissions.ModuloWrite));
-
-        options.AddPolicy(nameof(Permissions.ModuloRead), policy => policy.Requirements.Add(moduleReadRequirement));
-        options.AddPolicy(nameof(Permissions.ModuloWrite), policy => policy.Requirements.Add(moduleWriteRequirement));
-
-        var profileReadRequirement = new PermissionRequirement(nameof(Permissions.Profilo), nameof(Permissions.ProfiloRead));
-        var profileWriteRequirement = new PermissionRequirement(nameof(Permissions.Profilo), nameof(Permissions.ProfiloWrite));
-
-        options.AddPolicy(nameof(Permissions.ProfiloRead), policy => policy.Requirements.Add(profileReadRequirement));
-        options.AddPolicy(nameof(Permissions.ProfiloWrite), policy => policy.Requirements.Add(profileWriteRequirement));
-
-        var roleReadRequirement = new PermissionRequirement(nameof(Permissions.Ruolo), nameof(Permissions.RuoloRead));
-        var roleWriteRequirement = new PermissionRequirement(nameof(Permissions.Ruolo), nameof(Permissions.RuoloWrite));
-
-        options.AddPolicy(nameof(Permissions.RuoloRead), policy => policy.Requirements.Add(roleReadRequirement));
-        options.AddPolicy(nameof(Permissions.RuoloWrite), policy => policy.Requirements.Add(roleWriteRequirement));
-
-        return options;
+        services.Configure(configureOptions);
+        return services;
     }
-
-    public static RouteHandlerBuilder WithValidation<T>(this RouteHandlerBuilder builder) where T : class
-        => builder.AddEndpointFilter<ValidatorFilter<T>>().ProducesValidationProblem();
-
-    public static IServiceCollection ConfigureFluentValidation<TValidator>(this IServiceCollection services) where TValidator : IValidator
-        => services.AddValidatorsFromAssemblyContaining<TValidator>();
 }
