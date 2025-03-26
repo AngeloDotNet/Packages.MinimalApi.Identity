@@ -1,6 +1,6 @@
-using IdentityManager.API.Middleware;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Extensions;
+using MinimalApi.Identity.API.Middleware;
 
 namespace IdentityManager.API;
 
@@ -9,7 +9,7 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        var AuthConnection = builder.Configuration.GetDatabaseConnString("DefaultConnection");
+        var authConnection = builder.Configuration.GetDatabaseConnString("DefaultConnection");
         var formatErrorResponse = ErrorResponseFormat.List; // or ErrorResponseFormat.Default
 
         builder.Services.AddCors(options => options.AddPolicy("cors", builder
@@ -17,45 +17,34 @@ public class Program
 
         //...
 
-        //If there is a need to register additional services(transient, scoped, singleton) in dependency injection,
-        //it is possible to use the related extension methods exposed by the library.
+        //If you need to register additional services(transient, scoped, singleton) in dependency injection,
+        //you can use the related extension methods exposed by the library.
 
-        //NOTE: Service has already been used within the library to register the necessary services,
-        //it is recommended to use a different nomenclature.
+        //NOTE: Service has already been used within the library to register the necessary services, it is
+        //recommended to use a different nomenclature.
 
-        //Using an extension method of the Scrutor package, all found services ending with Service
-        //will be recorded in the Transient lifecycle.
-        //builder.Services.AddRegisterTransientService<IAuthService>("Service");
+        //The library exposes the following extension methods that leverage the Scrutor package:
+        //- Transient lifecycle => builder.Services.AddRegisterTransientService<IAuthService>("Service");
+        //- Scoped lifecycle => builder.Services.AddRegisterScopedService<IAuthService>("Service");
+        //- Singleton lifecycle => builder.Services.AddRegisterSingletonService<IAuthService>("Service");
 
-        //Using an extension method of the Scrutor package, all found services ending with Service
-        //will be recorded in the Scoped lifecycle.
-        //builder.Services.AddRegisterScopedService<IAuthService>("Service");
-
-        //Using an extension method of the Scrutor package, all found services ending with Service
-        //will be recorded in the Singleton lifecycle.
-        //builder.Services.AddRegisterSingletonService<IAuthService>("Service");
-
-        builder.Services.AddRegisterServices<Program>(builder.Configuration, AuthConnection, formatErrorResponse);
-        builder.Services.AddAuthorization();
-        //builder.Services.AddAuthorization(options =>
-        //{
-        //    // Adds default authorization policies
-        //    options.AddDefaultAuthorizationPolicy();
-
-        //    // Here you can add additional authorization policies
-        //});
+        builder.Services.AddRegisterServices<Program>(builder.Configuration, authConnection, formatErrorResponse);
+        builder.Services.AddAuthorization(options =>
+        {
+            // Here you can add additional authorization policies
+        });
 
         //...
 
         var app = builder.Build();
 
-        //If you need to add more exceptions you need to add the ExtendedExceptionMiddleware middleware.
-        //In the demo project, in the Middleware folder, you can find an implementation example.
-        app.UseMiddleware<ExtendedExceptionMiddleware>();
+        //Use this MinimalApiExceptionMiddleware in your pipeline if you don't need to add new exceptions.
+        app.UseMiddleware<MinimalApiExceptionMiddleware>();
 
-        //Otherwise you can add this middleware MinimalApiExceptionMiddleware to your pipeline
-        //that handles exceptions from this library.
-        //app.UseMiddleware<MinimalApiExceptionMiddleware>();
+        //If you need to add more exceptions, you need to add the ExtendedExceptionMiddleware middleware to your pipeline.
+        //In the demo project, in the Middleware folder, you can find an example implementation, which you can use to add
+        //the exceptions you need.
+        //app.UseMiddleware<ExtendedExceptionMiddleware>();
 
         app.UseRouting();
         app.UseStatusCodePages();
