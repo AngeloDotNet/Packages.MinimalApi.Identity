@@ -29,6 +29,11 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
             ExpirationDate = model.ExpirationDate
         };
 
+        if (await CheckLicenseExistAsync(model))
+        {
+            return TypedResults.Conflict(MessageApi.LicenseAlreadyExist);
+        }
+
         dbContext.Licenses.Add(license);
         await dbContext.SaveChangesAsync();
 
@@ -126,5 +131,10 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
             .Include(ul => ul.License)
             .AnyAsync(ul => ul.UserId == user.Id && ul.License.ExpirationDate < DateOnly.FromDateTime(DateTime.UtcNow));
         return result;
+    }
+
+    private async Task<bool> CheckLicenseExistAsync(CreateLicenseModel model)
+    {
+        return await dbContext.Licenses.AnyAsync(l => l.Name.Equals(model.Name, StringComparison.InvariantCultureIgnoreCase));
     }
 }

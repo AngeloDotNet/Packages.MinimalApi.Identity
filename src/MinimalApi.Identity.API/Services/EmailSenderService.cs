@@ -11,12 +11,10 @@ namespace MinimalApi.Identity.API.Services;
 
 public class EmailSenderService(IConfiguration configuration, IEmailSavingService emailSaving) : IEmailSenderService
 {
-    //public async Task SendEmailTypeAsync(string email, string callbackUrl, int typeSender)
     public async Task SendEmailTypeAsync(string email, string callbackUrl, EmailSendingType typeSender)
         => await SendEmailAsync(email, "Confirm your email",
             $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.", typeSender);
 
-    //private async Task SendEmailAsync(string emailTo, string emailSubject, string emailMessage, int emailSendingType)
     private async Task SendEmailAsync(string emailTo, string emailSubject, string emailMessage, EmailSendingType emailSendingType)
     {
         try
@@ -49,7 +47,6 @@ public class EmailSenderService(IConfiguration configuration, IEmailSavingServic
             {
                 var emailSending = new EmailSending
                 {
-                    //EmailSendingTypeId = emailSendingType,
                     EmailSendingType = emailSendingType,
                     EmailTo = emailTo,
                     Subject = emailSubject,
@@ -65,7 +62,6 @@ public class EmailSenderService(IConfiguration configuration, IEmailSavingServic
         {
             var emailError = new EmailSending
             {
-                //EmailSendingTypeId = emailSendingType,
                 EmailSendingType = emailSendingType,
                 EmailTo = emailTo,
                 Subject = emailSubject,

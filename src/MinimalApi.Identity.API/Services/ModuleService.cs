@@ -28,6 +28,11 @@ public class ModuleService(MinimalApiAuthDbContext dbContext, UserManager<Applic
             Description = model.Description
         };
 
+        if (await CheckModuleExistAsync(model))
+        {
+            return TypedResults.Conflict(MessageApi.ModuleAlreadyExist);
+        }
+
         dbContext.Modules.Add(module);
         await dbContext.SaveChangesAsync();
 
@@ -125,5 +130,10 @@ public class ModuleService(MinimalApiAuthDbContext dbContext, UserManager<Applic
         }
 
         return moduleClaims;
+    }
+
+    private async Task<bool> CheckModuleExistAsync(CreateModuleModel inputModel)
+    {
+        return await dbContext.Modules.AnyAsync(m => m.Name.Equals(inputModel.Name, StringComparison.InvariantCultureIgnoreCase));
     }
 }

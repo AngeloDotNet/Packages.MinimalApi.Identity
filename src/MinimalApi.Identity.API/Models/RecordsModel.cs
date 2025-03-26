@@ -8,8 +8,9 @@ public record class ChangeEmailModel(string Email, string NewEmail);
 
 public record class CreateUserProfileModel(int UserId, string FirstName, string LastName);
 public record class EditUserProfileModel(int UserId, string FirstName, string LastName);
-public record class DeleteUserProfileModel(int UserId);
-public record class UserProfileModel(int UserId, string Email, string FirstName, string LastName)
+//public record class DeleteUserProfileModel(int UserId);
+public record class ChangeEnableProfileModel(int UserId, bool IsEnabled);
+public record class UserProfileModel(int UserId, string Email, string FirstName, string LastName, bool IsEnabled, DateOnly? LastDateChangePassword)
 {
     public string FullName => $"{FirstName} {LastName}";
 }
@@ -33,3 +34,6 @@ public record class CreateClaimModel(string Type, string Value);
 public record class AssignClaimModel(int UserId, string Type, string Value);
 public record class RevokeClaimModel(int UserId, string Type, string Value);
 public record class DeleteClaimModel(string Type, string Value);
+
+public record class CreatePolicyModel(string PolicyName, string PolicyDescription, string[] PolicyPermissions);
+public record class DeletePolicyModel(int Id, string PolicyName);
