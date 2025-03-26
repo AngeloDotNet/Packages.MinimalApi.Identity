@@ -41,6 +41,11 @@ public class ClaimsService(MinimalApiAuthDbContext dbContext, UserManager<Applic
             Default = false
         };
 
+        if (await CheckClaimExistAsync(model))
+        {
+            return TypedResults.Conflict(MessageApi.ClaimAlreadyExist);
+        }
+
         dbContext.ClaimTypes.Add(claimType);
         await dbContext.SaveChangesAsync();
 
@@ -131,4 +136,9 @@ public class ClaimsService(MinimalApiAuthDbContext dbContext, UserManager<Applic
 
     private static bool CheckClaimTypeIsValid(string claimType)
         => !string.IsNullOrWhiteSpace(claimType) && Enum.TryParse<ClaimsType>(claimType, true, out _);
+
+    private async Task<bool> CheckClaimExistAsync(CreateClaimModel model)
+        => await dbContext.ClaimTypes.AnyAsync(c
+            => c.Type.Equals(model.Type, StringComparison.InvariantCultureIgnoreCase)
+            && c.Value.Equals(model.Value, StringComparison.InvariantCultureIgnoreCase));
 }

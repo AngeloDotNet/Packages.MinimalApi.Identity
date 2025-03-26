@@ -51,9 +51,31 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
             return TypedResults.BadRequest(MessageApi.UserNotEmailConfirmed);
         }
 
-        //TODO: Verificare che l'utente non sia disabilitato
+        var profileUser = await profileService.GetProfileAsync(user.Id);
 
-        //TODO: Verificare che l'utente non abbia la password scaduta (ultimo cambio password minore di 90 giorni)
+        if (profileUser == null)
+        {
+            return TypedResults.NotFound(MessageApi.ProfileNotFound);
+        }
+
+        if (profileUser.IsEnabled == false)
+        {
+            return TypedResults.BadRequest(MessageApi.UserNotEnableLogin);
+        }
+
+        if (profileUser.LastDateChangePassword != null)
+        {
+            var lastDateChangePassword = profileUser.LastDateChangePassword;
+
+            if (lastDateChangePassword.Value.AddDays(90) >= DateOnly.FromDateTime(DateTime.UtcNow))
+            {
+                return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
+            }
+        }
+        else
+        {
+            return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
+        }
 
         if (await licenseService.CheckUserLicenseExpiredAsync(user))
         {
@@ -213,13 +235,6 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
 
     private async Task<IdentityResult> AddClaimsToDefaultUserAsync(ApplicationUser user)
     {
-        //Assign only read permissions to default user
-        //var claims = Enum.GetValues<Permissions>()
-        //    .Where(claim => !claim.ToString().Contains("write", StringComparison.InvariantCultureIgnoreCase))
-        //    .Select(claim => new Claim(CustomClaimTypes.Permission, claim.ToString()))
-        //    .ToList();
-
-        //Assign only profile permissions to default user
         var claims = Enum.GetValues<Permissions>()
             .Where(claim => claim.ToString().Contains("profilo", StringComparison.InvariantCultureIgnoreCase))
             .Select(claim => new Claim(CustomClaimTypes.Permission, claim.ToString()))
