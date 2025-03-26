@@ -18,4 +18,8 @@ public class ApiValidationOptions
     public int MaxLengthLicenseName { get; init; }
     public int MinLengthClaimValue { get; init; }
     public int MaxLengthClaimValue { get; init; }
+    public int MinLengthPolicyName { get; init; }
+    public int MaxLengthPolicyName { get; init; }
+    public int MinLengthPolicyDescription { get; init; }
+    public int MaxLengthPolicyDescription { get; init; }
 }
