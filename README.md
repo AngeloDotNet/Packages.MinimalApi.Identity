@@ -47,7 +47,9 @@ Adding this sections in the _appsettings.json_ file:
     "JwtOptions": {
         "Issuer": "[ISSUER]",
         "Audience": "[AUDIENCE]",
-        "SecurityKey": "[SECURITY-KEY-512-CHAR]"
+        "SecurityKey": "[SECURITY-KEY-512-CHAR]",
+        "AccessTokenExpirationMinutes": "60",
+        "RefreshTokenExpirationMinutes": "60"
     },
     "NetIdentityOptions": {
         "RequireUniqueEmail": true,
@@ -72,7 +74,8 @@ Adding this sections in the _appsettings.json_ file:
         "SaveEmailSent": true
     },
     "UsersOptions": {
-        "AssignAdminRoleOnRegistration": "admin@example.org"
+        "AssignAdminRoleOnRegistration": "admin@example.org",
+        "PasswordExpirationDays": 90
     },
     "ApiValidationOptions": {
         "MinLengthFirstName": 3,
@@ -175,21 +178,22 @@ See the [documentation](https://github.com/AngeloDotNet/Packages.MinimalApi.Iden
 
 ### 📚 Demo
 
-You can find a sample project in the [example](https://github.com/AngeloDotNet/IdentityManager) project.
+You can find a sample project in the [example](https://github.com/AngeloDotNet/Packages.MinimalApi.Identity/tree/main/IdentityManager.API) project.
 
 ### 📦 Dependencies
 
-- [.NET8](https://dotnet.microsoft.com/it-it/download/dotnet/8.0)
+- [.NET 8](https://dotnet.microsoft.com/it-it/download/dotnet/8.0)
 - [ASP.NET Core Identity](https://www.nuget.org/packages/Microsoft.AspNetCore.Identity.EntityFrameworkCore)
 - [Entity Framework Core](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore)
 - [Entity Framework Core for SQL Server](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.SqlServer)
-- [JWT Bearer](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer)
+- [JWT Bearer Token](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer)
 - [MailKit](https://www.nuget.org/packages/MailKit)
 - [Scrutor](https://www.nuget.org/packages/Scrutor)
 
 ### 🔜 Future implementations
 
-- [ ] Replacing the Hosted Service AuthorizationPolicyUpdater using Coravel jobs
+- [ ] Replacing the hosted service authorization policy updater using Coravel jobs
+- [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
 
 ### 📝 License
 
