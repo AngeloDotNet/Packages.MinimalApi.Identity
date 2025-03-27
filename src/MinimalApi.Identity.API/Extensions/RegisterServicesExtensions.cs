@@ -201,41 +201,6 @@ public static class RegisterServicesExtensions
         return services;
     }
 
-    //public static AuthorizationOptions AddDefaultAuthorizationPolicy(this AuthorizationOptions options)
-    //{
-    //    var permissionReadRequirement = new PermissionRequirement(nameof(Permissions.Claim), nameof(Permissions.ClaimRead));
-    //    var permissionWriteRequirement = new PermissionRequirement(nameof(Permissions.Claim), nameof(Permissions.ClaimWrite));
-
-    //    options.AddPolicy(nameof(Permissions.ClaimRead), policy => policy.Requirements.Add(permissionReadRequirement));
-    //    options.AddPolicy(nameof(Permissions.ClaimWrite), policy => policy.Requirements.Add(permissionWriteRequirement));
-
-    //    var licenseReadRequirement = new PermissionRequirement(nameof(Permissions.Licenza), nameof(Permissions.LicenzaRead));
-    //    var licenseWriteRequirement = new PermissionRequirement(nameof(Permissions.Licenza), nameof(Permissions.LicenzaWrite));
-
-    //    options.AddPolicy(nameof(Permissions.LicenzaRead), policy => policy.Requirements.Add(licenseReadRequirement));
-    //    options.AddPolicy(nameof(Permissions.LicenzaWrite), policy => policy.Requirements.Add(licenseWriteRequirement));
-
-    //    var moduleReadRequirement = new PermissionRequirement(nameof(Permissions.Modulo), nameof(Permissions.ModuloRead));
-    //    var moduleWriteRequirement = new PermissionRequirement(nameof(Permissions.Modulo), nameof(Permissions.ModuloWrite));
-
-    //    options.AddPolicy(nameof(Permissions.ModuloRead), policy => policy.Requirements.Add(moduleReadRequirement));
-    //    options.AddPolicy(nameof(Permissions.ModuloWrite), policy => policy.Requirements.Add(moduleWriteRequirement));
-
-    //    var profileReadRequirement = new PermissionRequirement(nameof(Permissions.Profilo), nameof(Permissions.ProfiloRead));
-    //    var profileWriteRequirement = new PermissionRequirement(nameof(Permissions.Profilo), nameof(Permissions.ProfiloWrite));
-
-    //    options.AddPolicy(nameof(Permissions.ProfiloRead), policy => policy.Requirements.Add(profileReadRequirement));
-    //    options.AddPolicy(nameof(Permissions.ProfiloWrite), policy => policy.Requirements.Add(profileWriteRequirement));
-
-    //    var roleReadRequirement = new PermissionRequirement(nameof(Permissions.Ruolo), nameof(Permissions.RuoloRead));
-    //    var roleWriteRequirement = new PermissionRequirement(nameof(Permissions.Ruolo), nameof(Permissions.RuoloWrite));
-
-    //    options.AddPolicy(nameof(Permissions.RuoloRead), policy => policy.Requirements.Add(roleReadRequirement));
-    //    options.AddPolicy(nameof(Permissions.RuoloWrite), policy => policy.Requirements.Add(roleWriteRequirement));
-
-    //    return options;
-    //}
-
     internal static IServiceCollection ConfigureValidation(this IServiceCollection services, Action<ValidationOptions> configureOptions)
     {
         services.Configure(configureOptions);

@@ -12,24 +12,37 @@ namespace MinimalApi.Identity.API.Services;
 
 public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<ApplicationUser> userManager) : IProfileService
 {
-    //public async Task<IResult> GetProfileAsync(int userId)
+    public async Task<List<UserProfileModel>> GetProfilesAsync()
+    {
+        var profiles = await dbContext.UserProfiles.AsNoTracking()
+            .Select(x => new UserProfileModel(x.UserId, x.User.Email!, x.FirstName, x.LastName, x.IsEnabled, x.LastDateChangePassword))
+            .ToListAsync();
+
+        return profiles.Count > 0 ? profiles : throw new NotFoundProfileException(MessageApi.ProfilesNotFound);
+    }
+
     public async Task<UserProfileModel> GetProfileAsync(int userId)
     {
         var user = await userManager.FindByIdAsync(userId.ToString())
             ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
 
         var profile = await dbContext.UserProfiles.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.UserId == user.Id);
+            .FirstOrDefaultAsync(x => x.UserId == user.Id)
+            ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
 
-        //return profile == null ? TypedResults.NotFound(MessageApi.ProfileNotFound)
-        //    : TypedResults.Ok(new UserProfileModel(profile.UserId, user.Email!, profile.FirstName, profile.LastName));
-        return profile == null ? throw new NotFoundProfileException(MessageApi.ProfileNotFound) :
-            new UserProfileModel(profile.UserId, user.Email!, profile.FirstName, profile.LastName, profile.IsEnabled, profile.LastDateChangePassword);
+        return new UserProfileModel(profile.UserId, user.Email!, profile.FirstName, profile.LastName, profile.IsEnabled, profile.LastDateChangePassword);
     }
 
     public async Task<string> CreateProfileAsync(CreateUserProfileModel model)
     {
         var profile = new UserProfile(model.UserId, model.FirstName, model.LastName);
+        //{
+        //    IsEnabled = true,
+        //    LastDateChangePassword = DateOnly.FromDateTime(DateTime.Now)
+        //};
+
+        profile.ChangeUserEnabled(true);
+        profile.ChangeLastDateChangePassword(DateOnly.FromDateTime(DateTime.Now));
 
         dbContext.UserProfiles.Add(profile);
         var result = await dbContext.SaveChangesAsync();
@@ -39,8 +52,7 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
     public async Task<string> EditProfileAsync(EditUserProfileModel model)
     {
-        var profile = await dbContext.UserProfiles.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.UserId == model.UserId)
+        var profile = await dbContext.UserProfiles.FirstOrDefaultAsync(x => x.UserId == model.UserId)
             ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
 
         profile.ChangeFirstName(model.FirstName);
@@ -52,16 +64,6 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
         return result > 0 ? MessageApi.ProfileUpdated : throw new BadRequestProfileException(MessageApi.ProfileNotUpdated);
     }
 
-    //public async Task<IResult> DeleteProfileAsync(DeleteUserProfileModel model)
-    //{
-    //    var user = await userManager.FindByIdAsync(model.UserId.ToString())
-    //        ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
-
-    //    var result = await userManager.DeleteAsync(user);
-
-    //    return result.Succeeded ? TypedResults.Ok(MessageApi.ProfileDeleted) : TypedResults.BadRequest(result.Errors.Select(e => e.Description));
-    //}
-
     public async Task<IList<Claim>> GetClaimUserProfileAsync(ApplicationUser user)
     {
         var result = await dbContext.UserProfiles
@@ -72,23 +74,21 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
         if (result == null)
         {
-            return null!;
+            return Array.Empty<Claim>();
         }
 
-        var profileClaims = new List<Claim>
-        {
-            new Claim(ClaimTypes.GivenName, result.FirstName ?? string.Empty),
-            new Claim(ClaimTypes.Surname, result.LastName ?? string.Empty),
-            new Claim(CustomClaimTypes.FullName, $"{result.FirstName} {result.LastName}")
-        };
-
-        return profileClaims;
+        return
+            [
+                new Claim(ClaimTypes.GivenName, result.FirstName ?? string.Empty),
+                new Claim(ClaimTypes.Surname, result.LastName ?? string.Empty),
+                new Claim(CustomClaimTypes.FullName, $"{result.FirstName} {result.LastName}")
+            ];
     }
 
     public async Task<string> ChangeEnablementStatusUserProfileAsync(ChangeEnableProfileModel model)
     {
-        var profile = await dbContext.UserProfiles.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.UserId == model.UserId) ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
+        var profile = await dbContext.UserProfiles.FirstOrDefaultAsync(x => x.UserId == model.UserId)
+            ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
 
         profile.ChangeUserEnabled(model.IsEnabled);
 

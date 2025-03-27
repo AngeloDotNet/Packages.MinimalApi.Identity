@@ -8,7 +8,6 @@ public record class ChangeEmailModel(string Email, string NewEmail);
 
 public record class CreateUserProfileModel(int UserId, string FirstName, string LastName);
 public record class EditUserProfileModel(int UserId, string FirstName, string LastName);
-//public record class DeleteUserProfileModel(int UserId);
 public record class ChangeEnableProfileModel(int UserId, bool IsEnabled);
 public record class UserProfileModel(int UserId, string Email, string FirstName, string LastName, bool IsEnabled, DateOnly? LastDateChangePassword)
 {

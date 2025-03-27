@@ -13,8 +13,8 @@ public partial class UserProfile : BaseEntity
 
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
-    //public bool IsEnabled { get; set; }
-    //public DateOnly? LastChangePassword { get; set; }
+    public bool IsEnabled { get; set; }
+    public DateOnly? LastDateChangePassword { get; set; }
     public int UserId { get; private set; }
     public ApplicationUser User { get; private set; }
 
@@ -47,5 +47,22 @@ public partial class UserProfile : BaseEntity
         }
 
         LastName = lastName;
+    }
+
+    public void ChangeUserEnabled(bool isEnabled)
+    {
+        IsEnabled = isEnabled;
+    }
+
+    public void ChangeLastDateChangePassword(DateOnly? lastDateChangePassword)
+    {
+        var utcNow = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        if (lastDateChangePassword >= utcNow)
+        {
+            throw new ArgumentOutOfRangeException(nameof(lastDateChangePassword), "Last date change password cannot be greater than today.");
+        }
+
+        LastDateChangePassword = lastDateChangePassword;
     }
 }

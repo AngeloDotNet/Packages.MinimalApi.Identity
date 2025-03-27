@@ -31,13 +31,19 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimsService.GetAllClaimsAsync();
         })
         .Produces<Ok<List<ClaimResponseModel>>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.ClaimRead))
         .WithOpenApi(opt =>
         {
             opt.Description = "Get all claims";
             opt.Summary = "Get all claims";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Claims retrieved successfully";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+            opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
+
             return opt;
         });
 
@@ -47,14 +53,21 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimsService.CreateClaimAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ClaimWrite))
         .WithValidation<CreateClaimModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Add claim";
             opt.Summary = "Add claim";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Claim added successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+
             return opt;
         });
 
@@ -64,14 +77,21 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimsService.AssignClaimAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ClaimWrite))
         .WithValidation<AssignClaimModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Assign a claim to a user";
             opt.Summary = "Assign a claim to a user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Claim assigned successfully";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+            opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
+
             return opt;
         });
 
@@ -81,14 +101,21 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimService.RevokeClaimAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ClaimWrite))
         .WithValidation<RevokeClaimModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Revoke a claim from a user";
             opt.Summary = "Revoke a claim from a user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Claim revoked successfully";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+            opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
+
             return opt;
         });
 
@@ -98,14 +125,21 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimsService.DeleteClaimAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ClaimWrite))
         .WithValidation<DeleteClaimModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Delete claim";
             opt.Summary = "Delete claim";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Claim deleted successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+
             return opt;
         });
     }

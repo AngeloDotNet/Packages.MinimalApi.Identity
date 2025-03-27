@@ -32,11 +32,15 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             return await accountService.ConfirmEmailAsync(userId, token);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest)
         .WithOpenApi(opt =>
         {
             opt.Description = "Confirm email address";
             opt.Summary = "Confirm email address";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Email address confirmed successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
 
             return opt;
         });
@@ -47,13 +51,19 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             return await accountService.ChangeEmailAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .WithValidation<ChangeEmailModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Change email address";
             opt.Summary = "Change email address";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Email address changed successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
 
             return opt;
         });
@@ -65,7 +75,17 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             return await accountService.ConfirmEmailChangeAsync(userId, email, token);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .WithOpenApi();
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest)
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Confirm email address change";
+            opt.Summary = "Confirm email address change";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Email address change confirmed successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
+
+            return opt;
+        });
     }
 }

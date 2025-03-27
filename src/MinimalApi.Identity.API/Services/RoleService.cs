@@ -13,24 +13,23 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, UserManager<A
 {
     public async Task<IResult> GetAllRolesAsync()
     {
-        var query = await roleManager.Roles.ToListAsync();
-        var result = query.Select(r => new RoleResponseModel(r.Id, r.Name!, r.Default)).ToList();
+        var roles = await roleManager.Roles
+            .Select(r => new RoleResponseModel(r.Id, r.Name!, r.Default))
+            .ToListAsync();
 
-        return result.Count == 0 ? TypedResults.NotFound(MessageApi.RolesNotFound) : TypedResults.Ok(result);
+        return roles.Count == 0 ? TypedResults.NotFound(MessageApi.RolesNotFound) : TypedResults.Ok(roles);
     }
 
     public async Task<IResult> CreateRoleAsync(CreateRoleModel model)
     {
-        var roleName = model.Role;
-
-        if (await roleManager.RoleExistsAsync(roleName))
+        if (await roleManager.RoleExistsAsync(model.Role))
         {
             return TypedResults.Conflict(MessageApi.RoleExists);
         }
 
-        var newRole = new ApplicationRole()
+        var newRole = new ApplicationRole
         {
-            Name = roleName,
+            Name = model.Role,
             Default = false
         };
 
@@ -42,15 +41,12 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, UserManager<A
     public async Task<IResult> AssignRoleAsync(AssignRoleModel model)
     {
         var user = await userManager.FindByNameAsync(model.Username);
-
         if (user == null)
         {
             return TypedResults.NotFound(MessageApi.UserNotFound);
         }
 
-        var roleExists = await roleManager.RoleExistsAsync(model.Role);
-
-        if (!roleExists)
+        if (!await roleManager.RoleExistsAsync(model.Role))
         {
             return TypedResults.NotFound(MessageApi.RoleNotFound);
         }
@@ -63,7 +59,6 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, UserManager<A
     public async Task<IResult> RevokeRoleAsync(RevokeRoleModel model)
     {
         var user = await userManager.FindByNameAsync(model.Username);
-
         if (user == null)
         {
             return TypedResults.NotFound(MessageApi.UserNotFound);
@@ -77,7 +72,6 @@ public class RoleService(RoleManager<ApplicationRole> roleManager, UserManager<A
     public async Task<IResult> DeleteRoleAsync(DeleteRoleModel model)
     {
         var role = await roleManager.FindByNameAsync(model.Role);
-
         if (role == null)
         {
             return TypedResults.NotFound(MessageApi.RoleNotFound);

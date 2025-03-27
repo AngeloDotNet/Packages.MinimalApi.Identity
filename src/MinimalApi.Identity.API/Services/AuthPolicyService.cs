@@ -22,7 +22,7 @@ public class AuthPolicyService(MinimalApiAuthDbContext dbContext, ILogger<AuthPo
     {
         var query = await dbContext.AuthPolicies.AsNoTracking().ToListAsync();
 
-        if (query == null || query.Count == 0)
+        if (query.Count == 0)
         {
             return TypedResults.NotFound(MessageApi.PolicyNotFound);
         }
@@ -35,6 +35,11 @@ public class AuthPolicyService(MinimalApiAuthDbContext dbContext, ILogger<AuthPo
 
     public async Task<IResult> CreatePolicyAsync(CreatePolicyModel model)
     {
+        if (await CheckPolicyExistAsync(model))
+        {
+            return TypedResults.Conflict(MessageApi.PolicyAlreadyExist);
+        }
+
         var authPolicy = new AuthPolicy
         {
             PolicyName = model.PolicyName,
@@ -43,11 +48,6 @@ public class AuthPolicyService(MinimalApiAuthDbContext dbContext, ILogger<AuthPo
             IsDefault = false,
             IsActive = true
         };
-
-        if (await CheckPolicyExistAsync(model))
-        {
-            return TypedResults.Conflict(MessageApi.PolicyAlreadyExist);
-        }
 
         dbContext.AuthPolicies.Add(authPolicy);
         await dbContext.SaveChangesAsync();
@@ -98,7 +98,7 @@ public class AuthPolicyService(MinimalApiAuthDbContext dbContext, ILogger<AuthPo
             var listPolicy = await authorizationPolicyService.GetAllAuthPoliciesAsync(x => x.IsActive);
             var authorizationOptions = serviceProvider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
 
-            if (listPolicy is null || listPolicy.Count == 0)
+            if (listPolicy.Count == 0)
             {
                 logger.LogWarning("No active policies found in the database.");
                 throw new NotFoundActivePoliciesException();
@@ -143,7 +143,7 @@ public class AuthPolicyService(MinimalApiAuthDbContext dbContext, ILogger<AuthPo
             var listPolicy = await authorizationPolicyService.GetAllAuthPoliciesAsync(x => x.IsActive);
             var authorizationOptions = serviceProvider.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
 
-            if (listPolicy is null || listPolicy.Count == 0)
+            if (listPolicy.Count == 0)
             {
                 logger.LogWarning("No active policies found in the database.");
                 throw new NotFoundActivePoliciesException();
