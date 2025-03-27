@@ -22,18 +22,24 @@ public class AuthorizationPolicyUpdater(IServiceProvider serviceProvider, ILogge
 
     private async void UpdateAuthorizationPolicyAsync(object? state)
     {
-        using var scope = serviceProvider.CreateScope();
-
-        var authPolicyService = scope.ServiceProvider.GetRequiredService<IAuthPolicyService>();
-        var result = await authPolicyService.UpdateAuthPoliciesAsync();
-
-        if (result)
+        try
         {
-            logger.LogInformation("Authorization policies updated successfully.");
+            using var scope = serviceProvider.CreateScope();
+            var authPolicyService = scope.ServiceProvider.GetRequiredService<IAuthPolicyService>();
+            var result = await authPolicyService.UpdateAuthPoliciesAsync();
+
+            if (result)
+            {
+                logger.LogInformation("Authorization policies updated successfully.");
+            }
+            else
+            {
+                logger.LogWarning("An error occurred while generating authorization policies.");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            logger.LogWarning("An error occurred while generating authorization policies.");
+            logger.LogError(ex, "An exception occurred while updating authorization policies.");
         }
     }
 

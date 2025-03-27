@@ -9,7 +9,7 @@ public class AuthorizationPolicyGeneration(IServiceProvider serviceProvider, ILo
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        using var scope = serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateAsyncScope();
 
         var authPolicyService = scope.ServiceProvider.GetRequiredService<IAuthPolicyService>();
         var result = await authPolicyService.GenerateAuthPoliciesAsync();
