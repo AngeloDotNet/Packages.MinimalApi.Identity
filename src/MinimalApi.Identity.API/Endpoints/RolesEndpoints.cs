@@ -30,13 +30,19 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.GetAllRolesAsync();
         })
         .Produces<List<RoleResponseModel>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.RuoloRead))
         .WithOpenApi(opt =>
         {
             opt.Summary = "Get all roles";
             opt.Description = "Get all roles";
+
+            opt.Response(StatusCodes.Status200OK).Description = "List of roles";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+            opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
+
             return opt;
         });
 
@@ -46,15 +52,23 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.CreateRoleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status409Conflict)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status409Conflict)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status409Conflict, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.RuoloWrite))
         .WithValidation<CreateRoleModel>()
         .WithOpenApi(opt =>
         {
             opt.Summary = "Create role";
             opt.Description = "Create role";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Role created";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad request";
+            opt.Response(StatusCodes.Status409Conflict).Description = "Conflict";
+
             return opt;
         });
 
@@ -64,15 +78,23 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.AssignRoleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.RuoloWrite))
         .WithValidation<AssignRoleModel>()
         .WithOpenApi(opt =>
         {
             opt.Summary = "Assign role";
             opt.Description = "Assign role to user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Role assigned";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad request";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+            opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
+
             return opt;
         });
 
@@ -82,15 +104,23 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.RevokeRoleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.RuoloWrite))
         .WithValidation<RevokeRoleModel>()
         .WithOpenApi(opt =>
         {
             opt.Summary = "Revoke role";
             opt.Description = "Revoke role from user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Role revoked";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad request";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+            opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
+
             return opt;
         });
 
@@ -100,15 +130,23 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.DeleteRoleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status401Unauthorized)
-        .ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status401Unauthorized)
+        //.ProducesProblem(StatusCodes.Status404NotFound)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.RuoloWrite))
         .WithValidation<DeleteRoleModel>()
         .WithOpenApi(opt =>
         {
             opt.Summary = "Delete role";
             opt.Description = "Delete role";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Role deleted";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad request";
+            opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
+            opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
+
             return opt;
         });
     }

@@ -32,12 +32,17 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             return await authService.RegisterAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
         .WithValidation<RegisterModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Register new user";
             opt.Summary = "Register new user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "User registered successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
 
             return opt;
         });
@@ -48,13 +53,17 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             return await authService.LoginAsync(inputModel);
         })
         .Produces<Ok<AuthResponseModel>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status400BadRequest)
-        .ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        //.ProducesProblem(StatusCodes.Status400BadRequest)
+        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
         .WithValidation<LoginModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Login user";
             opt.Summary = "Login user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "User logged in successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
 
             return opt;
         });
@@ -68,6 +77,8 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
         {
             opt.Description = "Logout user";
             opt.Summary = "Logout user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "User logged out successfully";
 
             return opt;
         });
