@@ -17,7 +17,7 @@ public class ClaimsService(MinimalApiAuthDbContext dbContext, UserManager<Applic
     {
         var query = await dbContext.ClaimTypes.AsNoTracking().ToListAsync();
 
-        if (query == null || query.Count == 0)
+        if (query.Count == 0)
         {
             return TypedResults.NotFound(MessageApi.ClaimsNotFound);
         }
@@ -34,17 +34,17 @@ public class ClaimsService(MinimalApiAuthDbContext dbContext, UserManager<Applic
             return TypedResults.BadRequest(MessageApi.ClaimTypeInvalid);
         }
 
+        if (await CheckClaimExistAsync(model))
+        {
+            return TypedResults.Conflict(MessageApi.ClaimAlreadyExist);
+        }
+
         var claimType = new ClaimType
         {
             Type = model.Type,
             Value = model.Value,
             Default = false
         };
-
-        if (await CheckClaimExistAsync(model))
-        {
-            return TypedResults.Conflict(MessageApi.ClaimAlreadyExist);
-        }
 
         dbContext.ClaimTypes.Add(claimType);
         await dbContext.SaveChangesAsync();

@@ -17,12 +17,13 @@ public class EmailSenderService(IConfiguration configuration, IEmailSavingServic
 
     private async Task SendEmailAsync(string emailTo, string emailSubject, string emailMessage, EmailSendingType emailSendingType)
     {
+        var options = configuration.GetSettingsOptions<SmtpOptions>(nameof(SmtpOptions));
+
+        using SmtpClient client = new();
+        MimeMessage message = new();
+
         try
         {
-            var options = configuration.GetSettingsOptions<SmtpOptions>(nameof(SmtpOptions));
-
-            using SmtpClient client = new();
-
             await client.ConnectAsync(options.Host, options.Port, options.Security);
 
             if (!string.IsNullOrEmpty(options.Username))
@@ -30,49 +31,39 @@ public class EmailSenderService(IConfiguration configuration, IEmailSavingServic
                 await client.AuthenticateAsync(options.Username, options.Password);
             }
 
-            MimeMessage message = new();
-
             message.From.Add(MailboxAddress.Parse(options.Sender));
             message.To.Add(MailboxAddress.Parse(emailTo));
             message.Subject = emailSubject;
-            message.Body = new TextPart("html")
-            {
-                Text = emailMessage
-            };
+            message.Body = new TextPart("html") { Text = emailMessage };
 
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
 
             if (options.SaveEmailSent)
             {
-                var emailSending = new EmailSending
-                {
-                    EmailSendingType = emailSendingType,
-                    EmailTo = emailTo,
-                    Subject = emailSubject,
-                    Body = emailMessage,
-                    Sent = true,
-                    DateSent = DateTime.UtcNow
-                };
-
-                await emailSaving.SaveEmailAsync(emailSending);
+                await SaveEmailAsync(emailTo, emailSubject, emailMessage, emailSendingType, true, null, null);
             }
         }
         catch (Exception ex)
         {
-            var emailError = new EmailSending
-            {
-                EmailSendingType = emailSendingType,
-                EmailTo = emailTo,
-                Subject = emailSubject,
-                Body = emailMessage,
-                Sent = false,
-                DateSent = DateTime.UtcNow,
-                ErrorMessage = "Error sending email",
-                ErrorDetails = ex.Message
-            };
-
-            await emailSaving.SaveEmailAsync(emailError);
+            await SaveEmailAsync(emailTo, emailSubject, emailMessage, emailSendingType, false, "Error sending email", ex.Message);
         }
+    }
+
+    private async Task SaveEmailAsync(string emailTo, string emailSubject, string emailMessage, EmailSendingType emailSendingType, bool sent, string? errorMessage, string? errorDetails)
+    {
+        var emailSending = new EmailSending
+        {
+            EmailSendingType = emailSendingType,
+            EmailTo = emailTo,
+            Subject = emailSubject,
+            Body = emailMessage,
+            Sent = sent,
+            DateSent = DateTime.UtcNow,
+            ErrorMessage = errorMessage,
+            ErrorDetails = errorDetails
+        };
+
+        await emailSaving.SaveEmailAsync(emailSending);
     }
 }

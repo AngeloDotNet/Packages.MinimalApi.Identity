@@ -15,13 +15,12 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
 {
     public async Task<IResult> ConfirmEmailAsync(string userId, string token)
     {
-        if (userId == null || token == null)
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
         {
             return TypedResults.BadRequest(MessageApi.UserIdTokenRequired);
         }
 
         var user = await userManager.FindByIdAsync(userId);
-
         if (user == null)
         {
             return TypedResults.BadRequest(MessageApi.UserNotFound);
@@ -35,39 +34,35 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
 
     public async Task<IResult> ChangeEmailAsync(ChangeEmailModel inputModel)
     {
-        var user = await userManager.FindByEmailAsync(inputModel.Email);
-
-        if (user == null)
-        {
-            return TypedResults.BadRequest(MessageApi.UserNotFound);
-        }
-
         if (inputModel.NewEmail == null)
         {
             return TypedResults.BadRequest(MessageApi.EmailUnchanged);
         }
 
-        var userId = await userManager.GetUserIdAsync(user);
-        var token = await userManager.GenerateChangeEmailTokenAsync(user, inputModel.Email);
+        var user = await userManager.FindByEmailAsync(inputModel.Email);
+        if (user == null)
+        {
+            return TypedResults.BadRequest(MessageApi.UserNotFound);
+        }
 
+        var userId = await userManager.GetUserIdAsync(user);
+        var token = await userManager.GenerateChangeEmailTokenAsync(user, inputModel.NewEmail);
         token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
         var callbackUrl = await GenerateCallBackUrlAsync(userId, token, inputModel.NewEmail);
-
-        await emailSender.SendEmailTypeAsync(inputModel.NewEmail!, callbackUrl, EmailSendingType.ChangeEmail);
+        await emailSender.SendEmailTypeAsync(inputModel.NewEmail, callbackUrl, EmailSendingType.ChangeEmail);
 
         return TypedResults.Ok(MessageApi.SendEmailForChangeEmail);
     }
 
     public async Task<IResult> ConfirmEmailChangeAsync(string userId, string email, string token)
     {
-        if (userId == null || email == null || token == null)
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
         {
             return TypedResults.BadRequest(MessageApi.UserIdEmailTokenRequired);
         }
 
         var user = await userManager.FindByIdAsync(userId);
-
         if (user == null)
         {
             return TypedResults.BadRequest(MessageApi.UserNotFound);
@@ -85,13 +80,11 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
     private async Task<string> GenerateCallBackUrlAsync(string userId, string token, string newEmail)
     {
         var request = httpContextAccessor.HttpContext!.Request;
-
         var callbackUrl = $"{request.Scheme}://{request.Host}{EndpointsApi.EndpointsAccountGroup}{EndpointsApi.EndpointsConfirmEmailChange}"
             .Replace("{userId}", userId)
-            .Replace("{email}", newEmail).Replace("{token}", token);
+            .Replace("{email}", newEmail)
+            .Replace("{token}", token);
 
-        await Task.Delay(500);
-
-        return callbackUrl;
+        return await Task.FromResult(callbackUrl);
     }
 }

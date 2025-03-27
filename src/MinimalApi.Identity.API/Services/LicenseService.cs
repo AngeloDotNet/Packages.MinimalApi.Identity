@@ -15,24 +15,25 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 {
     public async Task<IResult> GetAllLicensesAsync()
     {
-        var query = await dbContext.Licenses.ToListAsync();
-        var result = query.Select(l => new LicenseResponseModel(l.Id, l.Name, l.ExpirationDate)).ToList();
+        var licenses = await dbContext.Licenses
+            .Select(l => new LicenseResponseModel(l.Id, l.Name, l.ExpirationDate))
+            .ToListAsync();
 
-        return result == null ? TypedResults.NotFound(MessageApi.LicensesNotFound) : TypedResults.Ok(result);
+        return licenses.Count == 0 ? TypedResults.NotFound(MessageApi.LicensesNotFound) : TypedResults.Ok(licenses);
     }
 
     public async Task<IResult> CreateLicenseAsync(CreateLicenseModel model)
     {
+        if (await CheckLicenseExistAsync(model))
+        {
+            return TypedResults.Conflict(MessageApi.LicenseAlreadyExist);
+        }
+
         var license = new License
         {
             Name = model.Name,
             ExpirationDate = model.ExpirationDate
         };
-
-        if (await CheckLicenseExistAsync(model))
-        {
-            return TypedResults.Conflict(MessageApi.LicenseAlreadyExist);
-        }
 
         dbContext.Licenses.Add(license);
         await dbContext.SaveChangesAsync();
@@ -43,25 +44,21 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
     public async Task<IResult> AssignLicenseAsync(AssignLicenseModel model)
     {
         var user = await userManager.FindByIdAsync(model.UserId.ToString());
-
         if (user == null)
         {
             return TypedResults.NotFound(MessageApi.UserNotFound);
         }
 
         var license = await dbContext.Licenses.FindAsync(model.LicenseId);
-
         if (license == null)
         {
             return TypedResults.NotFound(MessageApi.LicenseNotFound);
         }
 
         var userHasLicense = await dbContext.UserLicenses
-            .Where(ul => ul.UserId == model.UserId)
-            .Select(ul => ul.LicenseId)
-            .ToListAsync();
+            .AnyAsync(ul => ul.UserId == model.UserId && ul.LicenseId == model.LicenseId);
 
-        if (userHasLicense.Contains(model.LicenseId))
+        if (userHasLicense)
         {
             return TypedResults.BadRequest(MessageApi.LicenseNotAssignable);
         }
@@ -80,8 +77,8 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
     public async Task<IResult> RevokeLicenseAsync(RevokeLicenseModel model)
     {
-        var userLicense = await dbContext.UserLicenses.SingleOrDefaultAsync(ul
-            => ul.UserId == model.UserId && ul.LicenseId == model.LicenseId);
+        var userLicense = await dbContext.UserLicenses
+            .SingleOrDefaultAsync(ul => ul.UserId == model.UserId && ul.LicenseId == model.LicenseId);
 
         if (userLicense == null)
         {
@@ -97,7 +94,6 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
     public async Task<IResult> DeleteLicenseAsync(DeleteLicenseModel model)
     {
         var license = await dbContext.Licenses.FindAsync(model.LicenseId);
-
         if (license == null)
         {
             return TypedResults.NotFound(MessageApi.LicenseNotFound);
@@ -126,15 +122,15 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
     public async Task<bool> CheckUserLicenseExpiredAsync(ApplicationUser user)
     {
-        var result = await dbContext.UserLicenses
+        return await dbContext.UserLicenses
             .AsNoTracking()
             .Include(ul => ul.License)
             .AnyAsync(ul => ul.UserId == user.Id && ul.License.ExpirationDate < DateOnly.FromDateTime(DateTime.UtcNow));
-        return result;
     }
 
     private async Task<bool> CheckLicenseExistAsync(CreateLicenseModel model)
     {
-        return await dbContext.Licenses.AnyAsync(l => l.Name.Equals(model.Name, StringComparison.InvariantCultureIgnoreCase));
+        return await dbContext.Licenses
+            .AnyAsync(l => l.Name.Equals(model.Name, StringComparison.InvariantCultureIgnoreCase));
     }
 }

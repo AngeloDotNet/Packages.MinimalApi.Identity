@@ -24,6 +24,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
     public async Task<IResult> LoginAsync(LoginModel model)
     {
         var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
+        var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
 
         var signInResult = await signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe,
             identityOptions.AllowedForNewUsers);
@@ -99,7 +100,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         .Union(customClaims)
         .Union(userRoles.Select(role => new Claim(ClaimTypes.Role, role))).ToList();
 
-        var loginResponse = CreateToken(claims, configuration);
+        var loginResponse = CreateToken(claims, jwtOptions);
 
         //user.RefreshToken = loginResponse.RefreshToken;
         //user.RefreshTokenExpirationDate = DateTime.UtcNow.AddMinutes(60);
@@ -160,10 +161,8 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         return TypedResults.Ok(MessageApi.UserLogOut);
     }
 
-    private static AuthResponseModel CreateToken(IList<Claim> claims, IConfiguration configuration)
+    private static AuthResponseModel CreateToken(IList<Claim> claims, JwtOptions jwtOptions)
     {
-        var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
-
         var audienceClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud);
         claims.Remove(audienceClaim!);
 

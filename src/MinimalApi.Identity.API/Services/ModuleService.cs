@@ -14,24 +14,25 @@ public class ModuleService(MinimalApiAuthDbContext dbContext, UserManager<Applic
 {
     public async Task<IResult> GetAllModulesAsync()
     {
-        var query = await dbContext.Modules.ToListAsync();
-        var result = query.Select(m => new ModuleResponseModel(m.Id, m.Name, m.Description)).ToList();
+        var result = await dbContext.Modules
+            .Select(m => new ModuleResponseModel(m.Id, m.Name, m.Description))
+            .ToListAsync();
 
-        return result == null ? TypedResults.NotFound(MessageApi.ModulesNotFound) : TypedResults.Ok(result);
+        return result.Count == 0 ? TypedResults.NotFound(MessageApi.ModulesNotFound) : TypedResults.Ok(result);
     }
 
     public async Task<IResult> CreateModuleAsync(CreateModuleModel model)
     {
+        if (await CheckModuleExistAsync(model))
+        {
+            return TypedResults.Conflict(MessageApi.ModuleAlreadyExist);
+        }
+
         var module = new Module
         {
             Name = model.Name,
             Description = model.Description
         };
-
-        if (await CheckModuleExistAsync(model))
-        {
-            return TypedResults.Conflict(MessageApi.ModuleAlreadyExist);
-        }
 
         dbContext.Modules.Add(module);
         await dbContext.SaveChangesAsync();
@@ -42,25 +43,21 @@ public class ModuleService(MinimalApiAuthDbContext dbContext, UserManager<Applic
     public async Task<IResult> AssignModuleAsync(AssignModuleModel model)
     {
         var user = await userManager.FindByIdAsync(model.UserId.ToString());
-
         if (user == null)
         {
             return TypedResults.NotFound(MessageApi.UserNotFound);
         }
 
         var module = await dbContext.Modules.FindAsync(model.ModuleId);
-
         if (module == null)
         {
             return TypedResults.NotFound(MessageApi.ModuleNotFound);
         }
 
         var userHasModule = await dbContext.UserModules
-            .Where(um => um.UserId == model.UserId)
-            .Select(um => um.ModuleId)
-            .ToListAsync();
+            .AnyAsync(um => um.UserId == model.UserId && um.ModuleId == model.ModuleId);
 
-        if (userHasModule.Contains(model.ModuleId))
+        if (userHasModule)
         {
             return TypedResults.BadRequest(MessageApi.ModuleNotAssignable);
         }
@@ -96,7 +93,6 @@ public class ModuleService(MinimalApiAuthDbContext dbContext, UserManager<Applic
     public async Task<IResult> DeleteModuleAsync(DeleteModuleModel model)
     {
         var module = await dbContext.Modules.FindAsync(model.ModuleId);
-
         if (module == null)
         {
             return TypedResults.NotFound(MessageApi.ModuleNotFound);
@@ -115,21 +111,12 @@ public class ModuleService(MinimalApiAuthDbContext dbContext, UserManager<Applic
 
     public async Task<IList<Claim>> GetClaimsModuleUserAsync(ApplicationUser user)
     {
-        var moduleClaims = new List<Claim>();
-
         var result = await dbContext.UserModules
             .Where(ul => ul.UserId == user.Id)
             .Select(ul => ul.Module.Name)
             .ToListAsync();
 
-        if (result.Any())
-        {
-            moduleClaims.AddRange(result.Select(moduleName => new Claim(CustomClaimTypes.Module, moduleName)));
-
-            return moduleClaims;
-        }
-
-        return moduleClaims;
+        return result.Select(moduleName => new Claim(CustomClaimTypes.Module, moduleName)).ToList();
     }
 
     private async Task<bool> CheckModuleExistAsync(CreateModuleModel inputModel)
