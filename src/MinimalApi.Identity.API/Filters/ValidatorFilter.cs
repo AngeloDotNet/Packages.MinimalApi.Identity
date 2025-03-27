@@ -8,7 +8,7 @@ internal class ValidatorFilter<T>(IValidator<T> validator) : IEndpointFilter whe
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        if (context.Arguments.FirstOrDefault(a => a?.GetType() == typeof(T)) is not T input)
+        if (context.Arguments.FirstOrDefault(a => a is T) is not T input)
         {
             return TypedResults.UnprocessableEntity();
         }
