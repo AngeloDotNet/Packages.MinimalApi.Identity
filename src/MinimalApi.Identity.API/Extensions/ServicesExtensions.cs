@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace MinimalApi.Identity.API.Extensions;
 
@@ -9,6 +10,16 @@ public static class ServicesExtensions
     {
         var options = configuration.GetSection(sectionName).Get<T>()
             ?? throw new ArgumentNullException(nameof(sectionName), $"{sectionName} not found");
+
+        return options;
+    }
+
+    public static TOptions AddOptionValidate<TOptions>(this IServiceCollection services, string sectionName) where TOptions : class
+    {
+        services.AddOptions<TOptions>().BindConfiguration(sectionName).ValidateDataAnnotations().ValidateOnStart();
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var options = serviceProvider.GetRequiredService<IOptions<TOptions>>().Value;
 
         return options;
     }
