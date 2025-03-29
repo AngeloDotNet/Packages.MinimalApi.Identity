@@ -199,6 +199,10 @@ You can find a sample project in the [example](https://github.com/AngeloDotNet/P
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+### ⭐ Give a Star
+
+Don't forget that if you find this project useful, put a ⭐ on GitHub to show your support and help others discover it.
+
 ### 🤝 Contributing
 
-Suggestions are always welcome! Feel free to open suggestion issues in the repository and we will implement them as possible.
+The project is constantly evolving. Contributions are always welcome. Feel free to report issues and pull requests on the repository.
