@@ -30,7 +30,7 @@ public class AuthPolicyEndpoints : IEndpointRouteHandlerBuilder
         {
             return await authPolicyService.GetAllPoliciesAsync();
         })
-        .Produces<Ok<List<ClaimResponseModel>>>(StatusCodes.Status200OK)
+        .Produces<Ok<List<PolicyResponseModel>>>(StatusCodes.Status200OK)
         //.ProducesProblem(StatusCodes.Status401Unauthorized)
         //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)

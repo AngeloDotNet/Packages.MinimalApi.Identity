@@ -32,66 +32,6 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         }
     }
 
-    //private static Task HandleExceptionAsync(HttpContext context, Exception exception, ValidationOptions validationOptions)
-    //{
-    //    ProblemDetails problemDetails;
-
-    //    switch (exception)
-    //    {
-    //        case BadRequestProfileException badRequestProfileException:
-    //            problemDetails = CreateProblemDetails(context, HttpStatusCode.BadRequest, badRequestProfileException.Message);
-    //            problemDetails.Status = (int)HttpStatusCode.BadRequest;
-    //            break;
-    //        case NotFoundProfileException notFoundProfileException:
-    //            problemDetails = CreateProblemDetails(context, HttpStatusCode.NotFound, notFoundProfileException.Message);
-    //            problemDetails.Status = (int)HttpStatusCode.NotFound;
-    //            break;
-    //        case ArgumentOutOfRangeException argumentOutOfRangeException:
-    //            problemDetails = CreateProblemDetails(context, HttpStatusCode.BadRequest, argumentOutOfRangeException.Message);
-    //            problemDetails.Status = (int)HttpStatusCode.BadRequest;
-    //            break;
-    //        case ArgumentNullException argumentNullException:
-    //            problemDetails = CreateProblemDetails(context, HttpStatusCode.BadRequest, argumentNullException.Message);
-    //            problemDetails.Status = (int)HttpStatusCode.BadRequest;
-    //            break;
-    //        case UserUnknownException userUnknownException:
-    //            problemDetails = CreateProblemDetails(context, HttpStatusCode.Unauthorized, MessageApi.UserNotAuthenticated);
-    //            problemDetails.Status = (int)HttpStatusCode.Unauthorized;
-    //            break;
-    //        case UserWithoutPermissionsException userWithoutPermissionsException:
-    //            problemDetails = CreateProblemDetails(context, HttpStatusCode.Unauthorized, MessageApi.UserNotHavePermission);
-    //            problemDetails.Status = (int)HttpStatusCode.Unauthorized;
-    //            break;
-    //        case ValidationModelException validationException:
-    //            problemDetails = CreateProblemDetails(context, HttpStatusCode.UnprocessableEntity, validationException.Message);
-    //            problemDetails.Status = (int)HttpStatusCode.UnprocessableEntity;
-
-    //            switch (validationOptions.ErrorResponseFormat)
-    //            {
-    //                case ErrorResponseFormat.Default:
-    //                    problemDetails.Extensions["errors"] = validationException.Errors;
-    //                    break;
-    //                case ErrorResponseFormat.List:
-    //                    problemDetails.Extensions["errors"] = validationException.Errors
-    //                        .SelectMany(e => e.Value.Select(m => new { Name = e.Key, Message = m }))
-    //                        .ToArray();
-    //                    break;
-    //            }
-
-    //            break;
-    //        default:
-    //            problemDetails = CreateProblemDetails(context, HttpStatusCode.InternalServerError, MessageApi.UnexpectedError);
-    //            problemDetails.Status = (int)HttpStatusCode.InternalServerError;
-    //            break;
-    //    }
-
-    //    context.Response.ContentType = "application/json";
-    //    context.Response.StatusCode = problemDetails.Status ?? (int)HttpStatusCode.InternalServerError;
-
-    //    var json = JsonSerializer.Serialize(problemDetails);
-    //    return context.Response.WriteAsync(json);
-    //}
-
     private static Task HandleExceptionAsync(HttpContext context, Exception exception, ValidationOptions validationOptions)
     {
         var statusCode = exception switch

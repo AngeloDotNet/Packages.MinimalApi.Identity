@@ -24,7 +24,9 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
     public async Task<IResult> LoginAsync(LoginModel model)
     {
         var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
-        var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
+        //var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
+        var jwtOptions = ApplicationConstants.jwtOptions;
+        var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
 
         var signInResult = await signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe,
             identityOptions.AllowedForNewUsers);
@@ -68,7 +70,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         {
             var lastDateChangePassword = profileUser.LastDateChangePassword;
 
-            if (lastDateChangePassword.Value.AddDays(90) <= DateOnly.FromDateTime(DateTime.UtcNow))
+            if (lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
             {
                 return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
             }

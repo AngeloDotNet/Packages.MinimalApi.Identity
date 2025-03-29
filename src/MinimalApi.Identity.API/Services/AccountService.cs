@@ -36,7 +36,7 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
     {
         if (inputModel.NewEmail == null)
         {
-            return TypedResults.BadRequest(MessageApi.EmailUnchanged);
+            return TypedResults.BadRequest(MessageApi.NewEmailIsRequired);
         }
 
         var user = await userManager.FindByEmailAsync(inputModel.Email);
