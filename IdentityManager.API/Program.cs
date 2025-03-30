@@ -37,6 +37,7 @@ public class Program
         //...
 
         var app = builder.Build();
+        app.UseHttpsRedirection();
 
         //Use this MinimalApiExceptionMiddleware in your pipeline if you don't need to add new exceptions.
         app.UseMiddleware<MinimalApiExceptionMiddleware>();
@@ -46,16 +47,17 @@ public class Program
         //the exceptions you need.
         //app.UseMiddleware<ExtendedExceptionMiddleware>();
 
-        app.UseRouting();
-        app.UseStatusCodePages();
-
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger().UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", builder.Environment.ApplicationName);
-            });
+            app.UseSwagger()
+                .UseSwaggerUI(options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", builder.Environment.ApplicationName);
+                });
         }
+
+        app.UseStatusCodePages();
+        app.UseRouting();
 
         app.UseCors("cors");
 
