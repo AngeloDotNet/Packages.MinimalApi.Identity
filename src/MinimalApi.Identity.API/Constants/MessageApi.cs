@@ -10,7 +10,6 @@ public static class MessageApi
     public const string ErrorConfirmEmail = "Error confirming your email";
     public const string ErrorConfirmEmailChange = "Error changing email";
     public const string ErrorChangeUsername = "Error changing username";
-    //public const string EmailUnchanged = "Your email is unchanged";
     public const string NewEmailIsRequired = "New email is required";
     public const string SendEmailForChangeEmail = "Confirmation link to change email sent. Please check your email";
     public const string SendEmailResetPassword = "Email sent successfully";
