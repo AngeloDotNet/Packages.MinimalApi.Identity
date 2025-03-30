@@ -30,8 +30,6 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.GetAllRolesAsync();
         })
         .Produces<List<RoleResponseModel>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.RuoloRead))
         .WithOpenApi(opt =>
@@ -52,10 +50,6 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.CreateRoleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status409Conflict)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status409Conflict, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.RuoloWrite))
         .WithValidation<CreateRoleModel>()
@@ -78,10 +72,6 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.AssignRoleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.RuoloWrite))
         .WithValidation<AssignRoleModel>()
@@ -104,10 +94,6 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.RevokeRoleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.RuoloWrite))
         .WithValidation<RevokeRoleModel>()
@@ -130,10 +116,6 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return await roleService.DeleteRoleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.RuoloWrite))
         .WithValidation<DeleteRoleModel>()

@@ -32,8 +32,6 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             return await authService.RegisterAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
         .WithValidation<RegisterModel>()
         .WithOpenApi(opt =>
@@ -53,8 +51,6 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             return await authService.LoginAsync(inputModel);
         })
         .Produces<Ok<AuthResponseModel>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
         .WithValidation<LoginModel>()
         .WithOpenApi(opt =>
