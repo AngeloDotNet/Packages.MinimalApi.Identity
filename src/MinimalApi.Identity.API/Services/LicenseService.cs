@@ -130,7 +130,6 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
     private async Task<bool> CheckLicenseExistAsync(CreateLicenseModel model)
     {
-        return await dbContext.Licenses
-            .AnyAsync(l => l.Name.Equals(model.Name, StringComparison.InvariantCultureIgnoreCase));
+        return await dbContext.Licenses.AnyAsync(l => l.Name.Equals(model.Name, StringComparison.InvariantCultureIgnoreCase));
     }
 }

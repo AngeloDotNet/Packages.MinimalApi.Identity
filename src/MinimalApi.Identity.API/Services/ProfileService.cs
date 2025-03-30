@@ -36,10 +36,6 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
     public async Task<string> CreateProfileAsync(CreateUserProfileModel model)
     {
         var profile = new UserProfile(model.UserId, model.FirstName, model.LastName);
-        //{
-        //    IsEnabled = true,
-        //    LastDateChangePassword = DateOnly.FromDateTime(DateTime.Now)
-        //};
 
         profile.ChangeUserEnabled(true);
         profile.ChangeLastDateChangePassword(DateOnly.FromDateTime(DateTime.Now));
