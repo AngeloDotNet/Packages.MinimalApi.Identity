@@ -32,7 +32,6 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             return await accountService.ConfirmEmailAsync(userId, token);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest)
         .WithOpenApi(opt =>
         {
@@ -51,9 +50,6 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             return await accountService.ChangeEmailAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .WithValidation<ChangeEmailModel>()
         .WithOpenApi(opt =>
@@ -75,7 +71,6 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             return await accountService.ConfirmEmailChangeAsync(userId, email, token);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest)
         .WithOpenApi(opt =>
         {

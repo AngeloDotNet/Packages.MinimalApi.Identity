@@ -48,8 +48,8 @@ Adding this sections in the _appsettings.json_ file:
         "Issuer": "[ISSUER]",
         "Audience": "[AUDIENCE]",
         "SecurityKey": "[SECURITY-KEY-512-CHAR]",
-        "AccessTokenExpirationMinutes": "60",
-        "RefreshTokenExpirationMinutes": "60"
+        "AccessTokenExpirationMinutes": 60,
+        "RefreshTokenExpirationMinutes": 60
     },
     "NetIdentityOptions": {
         "RequireUniqueEmail": true,

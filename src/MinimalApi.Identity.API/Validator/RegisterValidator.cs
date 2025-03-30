@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
-using Microsoft.Extensions.Configuration;
-using MinimalApi.Identity.API.Extensions;
+using Microsoft.Extensions.Options;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Options;
 
@@ -10,10 +9,13 @@ public class RegisterValidator : AbstractValidator<RegisterModel>
 {
     private static int requiredUniqueChars;
 
-    public RegisterValidator(IConfiguration configuration)
+    //public RegisterValidator(IConfiguration configuration)
+    public RegisterValidator(IOptions<NetIdentityOptions> iOptions, IOptions<ApiValidationOptions> vOptions)
     {
-        var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
-        var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
+        //var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
+        var identityOptions = iOptions.Value;
+        //var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
+        var validationOptions = vOptions.Value;
 
         RuleFor(x => x.Firstname)
             .NotEmpty().WithMessage("First name is required")

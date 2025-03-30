@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
-using Microsoft.Extensions.Configuration;
-using MinimalApi.Identity.API.Extensions;
+using Microsoft.Extensions.Options;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Options;
 
@@ -8,9 +7,11 @@ namespace MinimalApi.Identity.API.Validator.Policy;
 
 public class CreatePolicyValidator : AbstractValidator<CreatePolicyModel>
 {
-    public CreatePolicyValidator(IConfiguration configuration)
+    //public CreatePolicyValidator(IConfiguration configuration)
+    public CreatePolicyValidator(IOptions<ApiValidationOptions> options)
     {
-        var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
+        //var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
+        var validationOptions = options.Value;
 
         RuleFor(x => x.PolicyName)
             .NotEmpty().WithMessage("Name is required.")

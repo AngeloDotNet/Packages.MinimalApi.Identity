@@ -1,15 +1,15 @@
 ﻿using MailKit.Net.Smtp;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using MimeKit;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
-using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.API.Options;
 using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.Services;
 
-public class EmailSenderService(IConfiguration configuration, IEmailSavingService emailSaving) : IEmailSenderService
+//public class EmailSenderService(IConfiguration configuration, IEmailSavingService emailSaving) : IEmailSenderService
+public class EmailSenderService(IEmailSavingService emailSaving, IOptions<SmtpOptions> smtpOptions) : IEmailSenderService
 {
     public async Task SendEmailTypeAsync(string email, string callbackUrl, EmailSendingType typeSender)
         => await SendEmailAsync(email, "Confirm your email",
@@ -17,7 +17,8 @@ public class EmailSenderService(IConfiguration configuration, IEmailSavingServic
 
     private async Task SendEmailAsync(string emailTo, string emailSubject, string emailMessage, EmailSendingType emailSendingType)
     {
-        var options = configuration.GetSettingsOptions<SmtpOptions>(nameof(SmtpOptions));
+        //var options = configuration.GetSettingsOptions<SmtpOptions>(nameof(SmtpOptions));
+        var options = smtpOptions.Value;
 
         using SmtpClient client = new();
         MimeMessage message = new();

@@ -6,13 +6,13 @@ namespace MinimalApi.Identity.API.Extensions;
 
 public static class ServicesExtensions
 {
-    public static T GetSettingsOptions<T>(this IConfiguration configuration, string sectionName) where T : class, new()
-    {
-        var options = configuration.GetSection(sectionName).Get<T>()
-            ?? throw new ArgumentNullException(nameof(sectionName), $"{sectionName} not found");
+    //public static T GetSettingsOptions<T>(this IConfiguration configuration, string sectionName) where T : class, new()
+    //{
+    //    var options = configuration.GetSection(sectionName).Get<T>()
+    //        ?? throw new ArgumentNullException(nameof(sectionName), $"{sectionName} not found");
 
-        return options;
-    }
+    //    return options;
+    //}
 
     public static TOptions AddOptionValidate<TOptions>(this IServiceCollection services, string sectionName) where TOptions : class
     {
@@ -32,8 +32,8 @@ public static class ServicesExtensions
         return options;
     }
 
-    public static IServiceCollection AddRegisterService<TAssembly>(this IServiceCollection services, string stringEndsWith, ServiceLifetime lifetime)
-        where TAssembly : class
+    public static IServiceCollection AddRegisterService<TAssembly>(this IServiceCollection services, string stringEndsWith,
+        ServiceLifetime lifetime) where TAssembly : class
     {
         services.Scan(scan =>
             scan.FromAssemblyOf<TAssembly>()

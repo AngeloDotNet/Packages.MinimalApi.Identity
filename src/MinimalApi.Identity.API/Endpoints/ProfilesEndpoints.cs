@@ -30,8 +30,6 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return TypedResults.Ok(await profileService.GetProfilesAsync());
         })
         .Produces<List<UserProfileModel>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.ProfiloRead))
         .WithOpenApi(opt =>
@@ -52,8 +50,6 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return TypedResults.Ok(await profileService.GetProfileAsync(userId));
         })
         .Produces<UserProfileModel>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.ProfiloRead))
         .WithOpenApi(opt =>
@@ -63,7 +59,6 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
 
             opt.Response(StatusCodes.Status200OK).Description = "User profile retrieved successfully";
             opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
-            //opt.Response(StatusCodes.Status403Forbidden).Description = "Forbidden";
             opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
             return opt;
         });
@@ -74,8 +69,6 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return TypedResults.Ok(await profileService.ChangeEnablementStatusUserProfileAsync(inputModel));
         })
         .Produces<UserProfileModel>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.ProfiloRead))
         .WithOpenApi(opt =>
@@ -86,7 +79,6 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             opt.Response(StatusCodes.Status200OK).Description = "User profile retrieved successfully";
             opt.Response(StatusCodes.Status400BadRequest).Description = "Bad request";
             opt.Response(StatusCodes.Status401Unauthorized).Description = "Unauthorized";
-            //opt.Response(StatusCodes.Status403Forbidden).Description = "Forbidden";
             opt.Response(StatusCodes.Status404NotFound).Description = "Not found";
             return opt;
         });
@@ -97,10 +89,6 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return TypedResults.Ok(await profileService.EditProfileAsync(inputModel));
         })
         .Produces<string>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ProfiloWrite))
         .WithValidation<EditUserProfileModel>()

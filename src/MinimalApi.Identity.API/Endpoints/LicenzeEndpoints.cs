@@ -31,8 +31,6 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return await licenseService.GetAllLicensesAsync();
         })
         .Produces<Ok<List<LicenseResponseModel>>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.LicenzaRead))
         .WithOpenApi(opt =>
@@ -53,8 +51,6 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return await licenseService.CreateLicenseAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.LicenzaWrite))
         .WithValidation<CreateLicenseModel>()
@@ -75,9 +71,6 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return await licenseService.AssignLicenseAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.LicenzaWrite))
         .WithValidation<AssignLicenseModel>()
@@ -99,9 +92,6 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return await licenseService.RevokeLicenseAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.LicenzaWrite))
         .WithValidation<RevokeLicenseModel>()
@@ -123,10 +113,6 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return await licenseService.DeleteLicenseAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.LicenzaWrite))
         .WithValidation<DeleteLicenseModel>()

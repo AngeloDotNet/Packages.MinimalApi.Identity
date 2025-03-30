@@ -5,28 +5,33 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
-using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Options;
 using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.Services;
 
-public class AuthService(IConfiguration configuration, UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender, IHttpContextAccessor httpContextAccessor,
-    ILicenseService licenseService, IModuleService moduleService, IProfileService profileService) : IAuthService
+//public class AuthService(IConfiguration configuration, UserManager<ApplicationUser> userManager,
+//    SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender, IHttpContextAccessor httpContextAccessor,
+//    ILicenseService licenseService, IModuleService moduleService, IProfileService profileService) : IAuthService
+public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOptions> iOptions, IOptions<UsersOptions> uOptions,
+    UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender,
+    IHttpContextAccessor httpContextAccessor, ILicenseService licenseService, IModuleService moduleService, IProfileService profileService) : IAuthService
 {
     public async Task<IResult> LoginAsync(LoginModel model)
     {
-        var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
+        //var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
         //var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
-        var jwtOptions = ApplicationConstants.jwtOptions;
-        var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
+        //var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
+
+        var identityOptions = iOptions.Value;
+        var jwtOptions = jOptions.Value;
+        var userOptions = uOptions.Value;
 
         var signInResult = await signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe,
             identityOptions.AllowedForNewUsers);
@@ -41,6 +46,49 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
                 _ => TypedResults.BadRequest(MessageApi.InvalidCredentials)
             };
         }
+
+        //var user = await userManager.FindByNameAsync(model.Username);
+
+        //if (user == null)
+        //{
+        //    return TypedResults.BadRequest(MessageApi.UserNotFound);
+        //}
+
+        //if (!user.EmailConfirmed)
+        //{
+        //    return TypedResults.BadRequest(MessageApi.UserNotEmailConfirmed);
+        //}
+
+        //var profileUser = await profileService.GetProfileAsync(user.Id);
+
+        //if (profileUser == null)
+        //{
+        //    return TypedResults.NotFound(MessageApi.ProfileNotFound);
+        //}
+
+        //if (profileUser.IsEnabled == false)
+        //{
+        //    return TypedResults.BadRequest(MessageApi.UserNotEnableLogin);
+        //}
+
+        //if (profileUser.LastDateChangePassword != null)
+        //{
+        //    var lastDateChangePassword = profileUser.LastDateChangePassword;
+
+        //    if (lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
+        //    {
+        //        return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
+        //    }
+        //}
+        //else
+        //{
+        //    return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
+        //}
+
+        //if (await licenseService.CheckUserLicenseExpiredAsync(user))
+        //{
+        //    return TypedResults.BadRequest(MessageApi.LicenseExpired);
+        //}
 
         var user = await userManager.FindByNameAsync(model.Username);
 
@@ -61,21 +109,14 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
             return TypedResults.NotFound(MessageApi.ProfileNotFound);
         }
 
-        if (profileUser.IsEnabled == false)
+        if (!profileUser.IsEnabled)
         {
             return TypedResults.BadRequest(MessageApi.UserNotEnableLogin);
         }
 
-        if (profileUser.LastDateChangePassword != null)
-        {
-            var lastDateChangePassword = profileUser.LastDateChangePassword;
+        var lastDateChangePassword = profileUser.LastDateChangePassword;
 
-            if (lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
-            {
-                return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
-            }
-        }
-        else
+        if (lastDateChangePassword == null || lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
         {
             return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
         }
@@ -114,6 +155,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
 
     public async Task<IResult> RegisterAsync(RegisterModel model)
     {
+        var usersOptions = uOptions.Value;
         var user = new ApplicationUser
         {
             UserName = model.Username,
@@ -126,7 +168,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         {
             await profileService.CreateProfileAsync(new CreateUserProfileModel(user.Id, model.Firstname, model.Lastname));
 
-            var role = await CheckUserIsAdminDesignedAsync(user.Email) ? DefaultRoles.Admin : DefaultRoles.User;
+            var role = await CheckUserIsAdminDesignedAsync(user.Email, usersOptions) ? DefaultRoles.Admin : DefaultRoles.User;
             var roleAssignResult = await userManager.AddToRoleAsync(user, role.ToString());
 
             if (!roleAssignResult.Succeeded)
@@ -163,7 +205,7 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         return TypedResults.Ok(MessageApi.UserLogOut);
     }
 
-    private static AuthResponseModel CreateToken(IList<Claim> claims, JwtOptions jwtOptions)
+    private static AuthResponseModel CreateToken(List<Claim> claims, JwtOptions jwtOptions)
     {
         var audienceClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud);
         claims.Remove(audienceClaim!);
@@ -202,9 +244,9 @@ public class AuthService(IConfiguration configuration, UserManager<ApplicationUs
         return callbackUrl;
     }
 
-    private async Task<bool> CheckUserIsAdminDesignedAsync(string email)
+    private async Task<bool> CheckUserIsAdminDesignedAsync(string email, UsersOptions userOptions)
     {
-        var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
+        //var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
         var user = await userManager.FindByEmailAsync(email);
 
         if (user?.Email == null)

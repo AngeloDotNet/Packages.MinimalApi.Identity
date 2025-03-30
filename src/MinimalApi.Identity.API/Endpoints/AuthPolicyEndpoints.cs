@@ -31,8 +31,6 @@ public class AuthPolicyEndpoints : IEndpointRouteHandlerBuilder
             return await authPolicyService.GetAllPoliciesAsync();
         })
         .Produces<Ok<List<PolicyResponseModel>>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.AuthPolicyRead))
         .WithOpenApi(opt =>
@@ -53,9 +51,6 @@ public class AuthPolicyEndpoints : IEndpointRouteHandlerBuilder
             return await authPolicyService.CreatePolicyAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.AuthPolicyWrite))
         .WithValidation<CreatePolicyModel>()
@@ -77,9 +72,6 @@ public class AuthPolicyEndpoints : IEndpointRouteHandlerBuilder
             return await authPolicyService.DeletePolicyAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.AuthPolicyWrite))
         .WithValidation<DeletePolicyModel>()

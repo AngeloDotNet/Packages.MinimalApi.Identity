@@ -31,8 +31,6 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimsService.GetAllClaimsAsync();
         })
         .Produces<Ok<List<ClaimResponseModel>>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.ClaimRead))
         .WithOpenApi(opt =>
@@ -53,9 +51,6 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimsService.CreateClaimAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ClaimWrite))
         .WithValidation<CreateClaimModel>()
@@ -77,9 +72,6 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimsService.AssignClaimAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ClaimWrite))
         .WithValidation<AssignClaimModel>()
@@ -101,9 +93,6 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimService.RevokeClaimAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ClaimWrite))
         .WithValidation<RevokeClaimModel>()
@@ -125,9 +114,6 @@ public class ClaimsEndpoints : IEndpointRouteHandlerBuilder
             return await claimsService.DeleteClaimAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ClaimWrite))
         .WithValidation<DeleteClaimModel>()

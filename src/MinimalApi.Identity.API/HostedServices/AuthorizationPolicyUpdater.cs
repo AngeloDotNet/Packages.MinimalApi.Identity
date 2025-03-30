@@ -1,18 +1,19 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MinimalApi.Identity.API.Extensions;
+using Microsoft.Extensions.Options;
 using MinimalApi.Identity.API.Options;
 using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.HostedServices;
 
+//public class AuthorizationPolicyUpdater(IServiceProvider serviceProvider, ILogger<AuthorizationPolicyUpdater> logger, IConfiguration configuration) : IHostedService, IDisposable
 public class AuthorizationPolicyUpdater(IServiceProvider serviceProvider, ILogger<AuthorizationPolicyUpdater> logger,
-    IConfiguration configuration) : IHostedService, IDisposable
+    IOptions<HostedServiceOptions> hostedOptions) : IHostedService, IDisposable
 {
     private Timer? timer;
-    private readonly HostedServiceOptions options = configuration.GetSettingsOptions<HostedServiceOptions>(nameof(HostedServiceOptions));
+    //private readonly HostedServiceOptions options = configuration.GetSettingsOptions<HostedServiceOptions>(nameof(HostedServiceOptions));
+    private readonly HostedServiceOptions options = hostedOptions.Value;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {

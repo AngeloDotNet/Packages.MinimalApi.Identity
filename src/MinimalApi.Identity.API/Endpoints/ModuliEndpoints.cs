@@ -31,8 +31,6 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return await moduleService.GetAllModulesAsync();
         })
         .Produces<Ok<List<ModuleResponseModel>>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound)
         .RequireAuthorization(nameof(Permissions.ModuloRead))
         .WithOpenApi(opt =>
@@ -53,8 +51,6 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return await moduleService.CreateModuleAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ModuloWrite))
         .WithValidation<CreateModuleModel>()
@@ -75,9 +71,6 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return await moduleService.AssignModuleAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ModuloWrite))
         .WithValidation<AssignModuleModel>()
@@ -99,9 +92,6 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return await moduleService.RevokeModuleAsync(inputModel);
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ModuloWrite))
         .WithValidation<RevokeModuleModel>()
@@ -123,10 +113,6 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return await moduleService.DeleteModuleAsync(inputModel);
         })
         .Produces<string>(StatusCodes.Status200OK)
-        //.ProducesProblem(StatusCodes.Status400BadRequest)
-        //.ProducesProblem(StatusCodes.Status401Unauthorized)
-        //.ProducesProblem(StatusCodes.Status404NotFound)
-        //.ProducesProblem(StatusCodes.Status422UnprocessableEntity)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status401Unauthorized, StatusCodes.Status404NotFound, StatusCodes.Status422UnprocessableEntity)
         .RequireAuthorization(nameof(Permissions.ModuloWrite))
         .WithValidation<DeleteModuleModel>()
