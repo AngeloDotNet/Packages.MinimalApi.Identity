@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
-using Microsoft.Extensions.Configuration;
-using MinimalApi.Identity.API.Extensions;
+using Microsoft.Extensions.Options;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Options;
 
@@ -8,9 +7,11 @@ namespace MinimalApi.Identity.API.Validator;
 
 public class EditUserProfileValidator : AbstractValidator<EditUserProfileModel>
 {
-    public EditUserProfileValidator(IConfiguration configuration)
+    //public EditUserProfileValidator(IConfiguration configuration)
+    public EditUserProfileValidator(IOptions<ApiValidationOptions> options)
     {
-        var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
+        //var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
+        var validationOptions = options.Value;
 
         RuleFor(x => x.UserId)
             .NotEmpty().WithMessage("UserId is required")
