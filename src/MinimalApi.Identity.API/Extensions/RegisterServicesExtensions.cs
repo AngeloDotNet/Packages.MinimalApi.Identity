@@ -20,7 +20,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using MinimalApi.Identity.API.Authorization.Handlers;
-using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
@@ -38,18 +37,30 @@ public static class RegisterServicesExtensions
     public static IServiceCollection AddRegisterServices<TMigrations>(this IServiceCollection services, IConfiguration configuration,
         string dbConnString, ErrorResponseFormat formatErrorResponse) where TMigrations : class
     {
-        ApplicationConstants.jwtOptions = ServicesExtensions.AddOptionValidate<JwtOptions>(services, "JwtOptions");
-        ApplicationConstants.identityOptions = ServicesExtensions.AddOptionValidate<NetIdentityOptions>(services, "NetIdentityOptions");
+        var apiValidationOptions = ServicesExtensions.AddOptionValidate<ApiValidationOptions>(services, "ApiValidationOptions");
+        var hostedServiceOptions = ServicesExtensions.AddOptionValidate<HostedServiceOptions>(services, "HostedServiceOptions");
+        var jwtOptions = ServicesExtensions.AddOptionValidate<JwtOptions>(services, "JwtOptions");
+        var identityOptions = ServicesExtensions.AddOptionValidate<NetIdentityOptions>(services, "NetIdentityOptions");
+        var smtpOptions = ServicesExtensions.AddOptionValidate<SmtpOptions>(services, "SmtpOptions");
+        var userOptions = ServicesExtensions.AddOptionValidate<UsersOptions>(services, "UsersOptions");
+        //var validationOptions = ServicesExtensions.AddOptionValidate<ValidationOptions>(services, "ValidationOptions");
 
+        services.AddRegisterExtensionsMethod<TMigrations>(configuration, dbConnString, formatErrorResponse, jwtOptions, identityOptions);
+
+        return services;
+    }
+
+    internal static IServiceCollection AddRegisterExtensionsMethod<TMigrations>(this IServiceCollection services,
+        IConfiguration configuration, string dbConnString, ErrorResponseFormat formatErrorResponse, JwtOptions jwtOptions,
+        NetIdentityOptions identityOptions) where TMigrations : class
+    {
         services
             .AddProblemDetails()
             .AddHttpContextAccessor()
             .AddSwaggerConfiguration()
             .AddMinimalApiDbContext<MinimalApiAuthDbContext>(dbConnString, typeof(TMigrations).Assembly.FullName!)
-            //.AddMinimalApiIdentityServices<MinimalApiAuthDbContext>(jwtOptions)
-            .AddMinimalApiIdentityServices<MinimalApiAuthDbContext>()
-            //.AddMinimalApiIdentityOptionsServices(identityOptions)
-            .AddMinimalApiIdentityOptionsServices()
+            .AddMinimalApiIdentityServices<MinimalApiAuthDbContext>(jwtOptions)
+            .AddMinimalApiIdentityOptionsServices(identityOptions)
             .AddSingleton<IHostedService, AuthorizationPolicyGeneration>()
             .AddRegisterTransientService<IAuthService>("Service")
             .AddScoped<SignInManager<ApplicationUser>>()
@@ -141,11 +152,9 @@ public static class RegisterServicesExtensions
         return services;
     }
 
-    internal static IServiceCollection AddMinimalApiIdentityServices<TDbContext>(this IServiceCollection services
-        //JwtOptions jwtOptions) where TDbContext : DbContext
-        ) where TDbContext : DbContext
+    internal static IServiceCollection AddMinimalApiIdentityServices<TDbContext>(this IServiceCollection services, JwtOptions jwtOptions)
+        where TDbContext : DbContext
     {
-        var jwtOptions = ApplicationConstants.jwtOptions;
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey));
 
         services.AddIdentity<ApplicationUser, ApplicationRole>()
@@ -174,12 +183,8 @@ public static class RegisterServicesExtensions
         return services;
     }
 
-    internal static IServiceCollection AddMinimalApiIdentityOptionsServices(this IServiceCollection services
-        //NetIdentityOptions identityOptions
-        )
+    internal static IServiceCollection AddMinimalApiIdentityOptionsServices(this IServiceCollection services, NetIdentityOptions identityOptions)
     {
-        var identityOptions = ApplicationConstants.identityOptions;
-
         services.Configure<IdentityOptions>(options =>
         {
             options.User.RequireUniqueEmail = identityOptions.RequireUniqueEmail;
