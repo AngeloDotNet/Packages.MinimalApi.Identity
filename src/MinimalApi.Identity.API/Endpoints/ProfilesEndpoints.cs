@@ -25,7 +25,7 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<IResult> ([FromServices] IProfileService profileService) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async ([FromServices] IProfileService profileService) =>
         {
             return TypedResults.Ok(await profileService.GetProfilesAsync());
         })
@@ -44,7 +44,7 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsGetProfile, async Task<IResult> ([FromServices] IProfileService profileService,
+        apiGroup.MapGet(EndpointsApi.EndpointsGetProfile, async ([FromServices] IProfileService profileService,
             [FromRoute] int userId) =>
         {
             return TypedResults.Ok(await profileService.GetProfileAsync(userId));
@@ -63,7 +63,7 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsChangeEnableProfile, async Task<IResult> ([FromServices] IProfileService profileService,
+        apiGroup.MapPost(EndpointsApi.EndpointsChangeEnableProfile, async ([FromServices] IProfileService profileService,
             [FromBody] ChangeEnableProfileModel inputModel) =>
         {
             return TypedResults.Ok(await profileService.ChangeEnablementStatusUserProfileAsync(inputModel));
@@ -83,7 +83,7 @@ public class ProfilesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPut(EndpointsApi.EndpointsEditProfile, async Task<IResult> ([FromServices] IProfileService profileService,
+        apiGroup.MapPut(EndpointsApi.EndpointsEditProfile, async ([FromServices] IProfileService profileService,
             [FromBody] EditUserProfileModel inputModel) =>
         {
             return TypedResults.Ok(await profileService.EditProfileAsync(inputModel));
