@@ -16,19 +16,12 @@ using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.Services;
 
-//public class AuthService(IConfiguration configuration, UserManager<ApplicationUser> userManager,
-//    SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender, IHttpContextAccessor httpContextAccessor,
-//    ILicenseService licenseService, IModuleService moduleService, IProfileService profileService) : IAuthService
 public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOptions> iOptions, IOptions<UsersOptions> uOptions,
     UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender,
     IHttpContextAccessor httpContextAccessor, ILicenseService licenseService, IModuleService moduleService, IProfileService profileService) : IAuthService
 {
     public async Task<IResult> LoginAsync(LoginModel model)
     {
-        //var identityOptions = configuration.GetSettingsOptions<NetIdentityOptions>(nameof(NetIdentityOptions));
-        //var jwtOptions = configuration.GetSettingsOptions<JwtOptions>(nameof(JwtOptions));
-        //var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
-
         var identityOptions = iOptions.Value;
         var jwtOptions = jOptions.Value;
         var userOptions = uOptions.Value;
@@ -46,49 +39,6 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
                 _ => TypedResults.BadRequest(MessageApi.InvalidCredentials)
             };
         }
-
-        //var user = await userManager.FindByNameAsync(model.Username);
-
-        //if (user == null)
-        //{
-        //    return TypedResults.BadRequest(MessageApi.UserNotFound);
-        //}
-
-        //if (!user.EmailConfirmed)
-        //{
-        //    return TypedResults.BadRequest(MessageApi.UserNotEmailConfirmed);
-        //}
-
-        //var profileUser = await profileService.GetProfileAsync(user.Id);
-
-        //if (profileUser == null)
-        //{
-        //    return TypedResults.NotFound(MessageApi.ProfileNotFound);
-        //}
-
-        //if (profileUser.IsEnabled == false)
-        //{
-        //    return TypedResults.BadRequest(MessageApi.UserNotEnableLogin);
-        //}
-
-        //if (profileUser.LastDateChangePassword != null)
-        //{
-        //    var lastDateChangePassword = profileUser.LastDateChangePassword;
-
-        //    if (lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
-        //    {
-        //        return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
-        //    }
-        //}
-        //else
-        //{
-        //    return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
-        //}
-
-        //if (await licenseService.CheckUserLicenseExpiredAsync(user))
-        //{
-        //    return TypedResults.BadRequest(MessageApi.LicenseExpired);
-        //}
 
         var user = await userManager.FindByNameAsync(model.Username);
 
@@ -246,7 +196,6 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
     private async Task<bool> CheckUserIsAdminDesignedAsync(string email, UsersOptions userOptions)
     {
-        //var userOptions = configuration.GetSettingsOptions<UsersOptions>(nameof(UsersOptions));
         var user = await userManager.FindByEmailAsync(email);
 
         if (user?.Email == null)

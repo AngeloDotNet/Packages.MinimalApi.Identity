@@ -8,7 +8,6 @@ using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.Services;
 
-//public class EmailSenderService(IConfiguration configuration, IEmailSavingService emailSaving) : IEmailSenderService
 public class EmailSenderService(IEmailSavingService emailSaving, IOptions<SmtpOptions> smtpOptions) : IEmailSenderService
 {
     public async Task SendEmailTypeAsync(string email, string callbackUrl, EmailSendingType typeSender)
@@ -17,7 +16,6 @@ public class EmailSenderService(IEmailSavingService emailSaving, IOptions<SmtpOp
 
     private async Task SendEmailAsync(string emailTo, string emailSubject, string emailMessage, EmailSendingType emailSendingType)
     {
-        //var options = configuration.GetSettingsOptions<SmtpOptions>(nameof(SmtpOptions));
         var options = smtpOptions.Value;
 
         using SmtpClient client = new();
