@@ -6,14 +6,6 @@ namespace MinimalApi.Identity.API.Extensions;
 
 public static class ServicesExtensions
 {
-    //public static T GetSettingsOptions<T>(this IConfiguration configuration, string sectionName) where T : class, new()
-    //{
-    //    var options = configuration.GetSection(sectionName).Get<T>()
-    //        ?? throw new ArgumentNullException(nameof(sectionName), $"{sectionName} not found");
-
-    //    return options;
-    //}
-
     public static TOptions AddOptionValidate<TOptions>(this IServiceCollection services, string sectionName) where TOptions : class
     {
         services.AddOptions<TOptions>().BindConfiguration(sectionName).ValidateDataAnnotations().ValidateOnStart();
