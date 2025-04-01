@@ -7,10 +7,8 @@ namespace MinimalApi.Identity.API.Validator.Licenses;
 
 public class CreateLicenseValidator : AbstractValidator<CreateLicenseModel>
 {
-    //public CreateLicenseValidator(IConfiguration configuration)
     public CreateLicenseValidator(IOptions<ApiValidationOptions> options)
     {
-        //var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
         var validationOptions = options.Value;
 
         RuleFor(x => x.Name)

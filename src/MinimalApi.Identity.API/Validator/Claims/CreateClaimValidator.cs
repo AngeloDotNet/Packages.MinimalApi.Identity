@@ -7,10 +7,8 @@ namespace MinimalApi.Identity.API.Validator.Claims;
 
 public class CreateClaimValidator : AbstractValidator<CreateClaimModel>
 {
-    //public CreateClaimValidator(IConfiguration configuration)
     public CreateClaimValidator(IOptions<ApiValidationOptions> options)
     {
-        //var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
         var validationOptions = options.Value;
 
         RuleFor(x => x.Type)

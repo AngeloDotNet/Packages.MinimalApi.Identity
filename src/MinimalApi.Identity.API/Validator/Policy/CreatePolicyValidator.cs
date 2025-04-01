@@ -7,10 +7,8 @@ namespace MinimalApi.Identity.API.Validator.Policy;
 
 public class CreatePolicyValidator : AbstractValidator<CreatePolicyModel>
 {
-    //public CreatePolicyValidator(IConfiguration configuration)
     public CreatePolicyValidator(IOptions<ApiValidationOptions> options)
     {
-        //var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
         var validationOptions = options.Value;
 
         RuleFor(x => x.PolicyName)
