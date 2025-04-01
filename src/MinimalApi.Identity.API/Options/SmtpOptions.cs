@@ -9,8 +9,6 @@ public class SmtpOptions
     [Required(ErrorMessage = "Host is required.")]
     public string Host { get; init; } = null!;
 
-    //[Range(1, 65535, ErrorMessage = "Port must be between 1 and 65535.")]
-    //public int Port { get; init; }
     [IntegerInList(25, 587, 465, ErrorMessage = "Port must be one of the following: 25, 587, 465.")]
     public int Port { get; init; }
 
