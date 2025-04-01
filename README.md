@@ -5,11 +5,9 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 > [!IMPORTANT]
 > **This library is still under development of new implementations.**
 
-<!--
 ### 🏗️ ToDo
 
-- [ ] Replacing generic IResults with specific ones for each service of each services
-- [ ] Replacing generic IResults with specific ones for each service of each endpoint, in order to have updated XML documentation
+- [ ] Replacing generic IResults with specific ones for each services
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
 - [ ] Add endpoints to impersonate the user
 - [ ] Add endpoint for forgotten password recovery
@@ -17,7 +15,6 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
 - [ ] Add API documentation
--->
 
 ### 🛠️ Installation
 
@@ -143,6 +140,7 @@ builder.Services.AddAuthorization(options =>
 //...
 
 var app = builder.Build();
+app.UseHttpsRedirection();
 
 //Use this MinimalApiExceptionMiddleware in your pipeline if you don't need to add new exceptions.
 app.UseMiddleware<MinimalApiExceptionMiddleware>();
@@ -152,16 +150,17 @@ app.UseMiddleware<MinimalApiExceptionMiddleware>();
 //the exceptions you need.
 //app.UseMiddleware<ExtendedExceptionMiddleware>();
 
-app.UseRouting();
-app.UseStatusCodePages();
-
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger().UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", builder.Environment.ApplicationName);
-    });
+    app.UseSwagger()
+        .UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/swagger/v1/swagger.json", builder.Environment.ApplicationName);
+        });
 }
+
+app.UseStatusCodePages();
+app.UseRouting();
 
 app.UseCors("cors");
 
