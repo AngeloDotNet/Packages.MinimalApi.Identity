@@ -7,10 +7,8 @@ namespace MinimalApi.Identity.API.Validator.Modules;
 
 public class CreateModuleValidator : AbstractValidator<CreateModuleModel>
 {
-    //public CreateModuleValidator(IConfiguration configuration)
     public CreateModuleValidator(IOptions<ApiValidationOptions> options)
     {
-        //var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
         var validationOptions = options.Value;
 
         RuleFor(x => x.Name)

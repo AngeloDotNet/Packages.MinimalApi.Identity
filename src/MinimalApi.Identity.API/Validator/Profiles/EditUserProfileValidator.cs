@@ -7,10 +7,8 @@ namespace MinimalApi.Identity.API.Validator;
 
 public class EditUserProfileValidator : AbstractValidator<EditUserProfileModel>
 {
-    //public EditUserProfileValidator(IConfiguration configuration)
     public EditUserProfileValidator(IOptions<ApiValidationOptions> options)
     {
-        //var validationOptions = configuration.GetSettingsOptions<ApiValidationOptions>(nameof(ApiValidationOptions));
         var validationOptions = options.Value;
 
         RuleFor(x => x.UserId)

@@ -43,7 +43,6 @@ public static class RegisterServicesExtensions
         var identityOptions = ServicesExtensions.AddOptionValidate<NetIdentityOptions>(services, "NetIdentityOptions");
         var smtpOptions = ServicesExtensions.AddOptionValidate<SmtpOptions>(services, "SmtpOptions");
         var userOptions = ServicesExtensions.AddOptionValidate<UsersOptions>(services, "UsersOptions");
-        //var validationOptions = ServicesExtensions.AddOptionValidate<ValidationOptions>(services, "ValidationOptions");
 
         services.AddRegisterExtensionsMethod<TMigrations>(configuration, dbConnString, formatErrorResponse, jwtOptions, identityOptions);
 
