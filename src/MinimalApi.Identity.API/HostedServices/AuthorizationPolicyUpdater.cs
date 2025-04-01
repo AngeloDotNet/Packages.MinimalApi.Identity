@@ -7,12 +7,10 @@ using MinimalApi.Identity.API.Services.Interfaces;
 
 namespace MinimalApi.Identity.API.HostedServices;
 
-//public class AuthorizationPolicyUpdater(IServiceProvider serviceProvider, ILogger<AuthorizationPolicyUpdater> logger, IConfiguration configuration) : IHostedService, IDisposable
 public class AuthorizationPolicyUpdater(IServiceProvider serviceProvider, ILogger<AuthorizationPolicyUpdater> logger,
     IOptions<HostedServiceOptions> hostedOptions) : IHostedService, IDisposable
 {
     private Timer? timer;
-    //private readonly HostedServiceOptions options = configuration.GetSettingsOptions<HostedServiceOptions>(nameof(HostedServiceOptions));
     private readonly HostedServiceOptions options = hostedOptions.Value;
 
     public Task StartAsync(CancellationToken cancellationToken)
