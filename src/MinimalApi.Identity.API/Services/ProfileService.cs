@@ -60,8 +60,7 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
             ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
 
         profile.ChangeFirstName(model.FirstName);
-        profile.ChangeFirstName(model.LastName);
-
+        profile.ChangeLastName(model.LastName);
         dbContext.UserProfiles.Update(profile);
         var result = await dbContext.SaveChangesAsync();
 
