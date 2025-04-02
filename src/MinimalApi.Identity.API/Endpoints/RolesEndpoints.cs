@@ -25,7 +25,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<IResult> ([FromServices] IRoleService roleService) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async ([FromServices] IRoleService roleService) =>
         {
             return await roleService.GetAllRolesAsync();
         })
@@ -44,7 +44,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsCreateRole, async Task<IResult> ([FromServices] IRoleService roleService,
+        apiGroup.MapPost(EndpointsApi.EndpointsCreateRole, async ([FromServices] IRoleService roleService,
             [FromBody] CreateRoleModel inputModel) =>
         {
             return await roleService.CreateRoleAsync(inputModel);
@@ -66,7 +66,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsAssignRole, async Task<IResult> ([FromServices] IRoleService roleService,
+        apiGroup.MapPost(EndpointsApi.EndpointsAssignRole, async ([FromServices] IRoleService roleService,
             [FromBody] AssignRoleModel inputModel) =>
         {
             return await roleService.AssignRoleAsync(inputModel);
@@ -88,7 +88,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeRole, async Task<IResult> ([FromServices] IRoleService roleService,
+        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeRole, async ([FromServices] IRoleService roleService,
             [FromBody] RevokeRoleModel inputModel) =>
         {
             return await roleService.RevokeRoleAsync(inputModel);
@@ -110,7 +110,7 @@ public class RolesEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteRole, async Task<IResult> ([FromServices] IRoleService roleService,
+        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteRole, async ([FromServices] IRoleService roleService,
             [FromBody] DeleteRoleModel inputModel) =>
         {
             return await roleService.DeleteRoleAsync(inputModel);

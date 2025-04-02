@@ -36,25 +36,57 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
     {
         var statusCode = exception switch
         {
-            BadRequestProfileException => HttpStatusCode.BadRequest,
-            NotFoundProfileException => HttpStatusCode.NotFound,
+            // Error 400 Bad Request
             ArgumentOutOfRangeException => HttpStatusCode.BadRequest,
             ArgumentNullException => HttpStatusCode.BadRequest,
+            BadRequestProfileException => HttpStatusCode.BadRequest,
+            BadRequestRoleException => HttpStatusCode.BadRequest,
+
+            // Error 409 Conflict
+            ConflictRoleException => HttpStatusCode.Conflict,
+
+            // Error 404 Not Found
+            NotFoundActivePoliciesException => HttpStatusCode.NotFound,
+            NotFoundProfileException => HttpStatusCode.NotFound,
+            NotFoundRoleException => HttpStatusCode.NotFound,
+            NotFoundUserException => HttpStatusCode.NotFound,
+
+            // Error 401 Unauthorized
             UserUnknownException => HttpStatusCode.Unauthorized,
             UserWithoutPermissionsException => HttpStatusCode.Unauthorized,
+
+            // Error 422 Unprocessable Entity
             ValidationModelException => HttpStatusCode.UnprocessableEntity,
+
+            // Error 500 Internal Server Error
             _ => HttpStatusCode.InternalServerError
         };
 
         var message = exception switch
         {
-            BadRequestProfileException badRequestProfileException => badRequestProfileException.Message,
-            NotFoundProfileException notFoundProfileException => notFoundProfileException.Message,
+            // Error 400 Bad Request
             ArgumentOutOfRangeException argumentOutOfRangeException => argumentOutOfRangeException.Message,
             ArgumentNullException argumentNullException => argumentNullException.Message,
+            BadRequestProfileException badRequestProfileException => badRequestProfileException.Message,
+            BadRequestRoleException badRequestRoleException => badRequestRoleException.Message,
+
+            // Error 409 Conflict
+            ConflictRoleException conflictRoleException => conflictRoleException.Message,
+
+            // Error 404 Not Found
+            NotFoundActivePoliciesException notFoundActivePoliciesException => notFoundActivePoliciesException.Message,
+            NotFoundProfileException notFoundProfileException => notFoundProfileException.Message,
+            NotFoundRoleException notFoundRoleException => notFoundRoleException.Message,
+            NotFoundUserException notFoundUserException => notFoundUserException.Message,
+
+            // Error 401 Unauthorized
             UserUnknownException => MessageApi.UserNotAuthenticated,
             UserWithoutPermissionsException => MessageApi.UserNotHavePermission,
+
+            // Error 422 Unprocessable Entity
             ValidationModelException validationModelException => validationModelException.Message,
+
+            // Error 500 Internal Server Error
             _ => MessageApi.UnexpectedError
         };
 
