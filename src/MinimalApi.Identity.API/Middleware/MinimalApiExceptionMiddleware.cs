@@ -32,83 +32,24 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         }
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception exception, ValidationOptions validationOptions)
+    private static async Task HandleExceptionAsync(HttpContext context, Exception exception, ValidationOptions validationOptions)
     {
-        var statusCode = exception switch
-        {
-            // Error 400 Bad Request
-            ArgumentOutOfRangeException => HttpStatusCode.BadRequest,
-            ArgumentNullException => HttpStatusCode.BadRequest,
-            BadRequestProfileException => HttpStatusCode.BadRequest,
-            BadRequestRoleException => HttpStatusCode.BadRequest,
-
-            // Error 409 Conflict
-            ConflictRoleException => HttpStatusCode.Conflict,
-
-            // Error 404 Not Found
-            NotFoundActivePoliciesException => HttpStatusCode.NotFound,
-            NotFoundProfileException => HttpStatusCode.NotFound,
-            NotFoundRoleException => HttpStatusCode.NotFound,
-            NotFoundUserException => HttpStatusCode.NotFound,
-
-            // Error 401 Unauthorized
-            UserUnknownException => HttpStatusCode.Unauthorized,
-            UserWithoutPermissionsException => HttpStatusCode.Unauthorized,
-
-            // Error 422 Unprocessable Entity
-            ValidationModelException => HttpStatusCode.UnprocessableEntity,
-
-            // Error 500 Internal Server Error
-            _ => HttpStatusCode.InternalServerError
-        };
-
-        var message = exception switch
-        {
-            // Error 400 Bad Request
-            ArgumentOutOfRangeException argumentOutOfRangeException => argumentOutOfRangeException.Message,
-            ArgumentNullException argumentNullException => argumentNullException.Message,
-            BadRequestProfileException badRequestProfileException => badRequestProfileException.Message,
-            BadRequestRoleException badRequestRoleException => badRequestRoleException.Message,
-
-            // Error 409 Conflict
-            ConflictRoleException conflictRoleException => conflictRoleException.Message,
-
-            // Error 404 Not Found
-            NotFoundActivePoliciesException notFoundActivePoliciesException => notFoundActivePoliciesException.Message,
-            NotFoundProfileException notFoundProfileException => notFoundProfileException.Message,
-            NotFoundRoleException notFoundRoleException => notFoundRoleException.Message,
-            NotFoundUserException notFoundUserException => notFoundUserException.Message,
-
-            // Error 401 Unauthorized
-            UserUnknownException => MessageApi.UserNotAuthenticated,
-            UserWithoutPermissionsException => MessageApi.UserNotHavePermission,
-
-            // Error 422 Unprocessable Entity
-            ValidationModelException validationModelException => validationModelException.Message,
-
-            // Error 500 Internal Server Error
-            _ => MessageApi.UnexpectedError
-        };
-
+        var statusCode = GetStatusCodeFromException(exception);
+        var message = GetMessageFromException(exception);
         var problemDetails = CreateProblemDetails(context, statusCode, message);
-        problemDetails.Status = (int)statusCode;
 
         if (exception is ValidationModelException validationException)
         {
-            problemDetails.Extensions["errors"] = validationOptions.ErrorResponseFormat switch
-            {
-                ErrorResponseFormat.List => validationException.Errors
-                    .SelectMany(e => e.Value.Select(m => new { Name = e.Key, Message = m }))
-                    .ToArray(),
-                _ => validationException.Errors
-            };
+            problemDetails.Extensions["errors"] = validationOptions.ErrorResponseFormat == ErrorResponseFormat.List
+                ? validationException.Errors.SelectMany(e
+                => e.Value.Select(m => new { Name = e.Key, Message = m })).ToArray() : validationException.Errors;
         }
 
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = problemDetails.Status ?? (int)HttpStatusCode.InternalServerError;
+        context.Response.StatusCode = (int)statusCode;
 
         var json = JsonSerializer.Serialize(problemDetails);
-        return context.Response.WriteAsync(json);
+        await context.Response.WriteAsync(json);
     }
 
     public static ProblemDetails CreateProblemDetails(HttpContext context, HttpStatusCode statusCode, string detail)
@@ -124,16 +65,15 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
             Instance = $"{context.Request.Method} {context.Request.Path}",
             Detail = detail,
             Extensions = {
-                ["traceId"] = context.Features.Get<IHttpActivityFeature>()?.Activity.Id,
-                ["requestId"] = context.TraceIdentifier,
-                ["dateTime"] = DateTime.UtcNow
-            }
+                    ["traceId"] = context.Features.Get<IHttpActivityFeature>()?.Activity.Id,
+                    ["requestId"] = context.TraceIdentifier,
+                    ["dateTime"] = DateTime.UtcNow
+                }
         };
 
         if (context.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment())
         {
             var stackTrace = context.Features.Get<IExceptionHandlerFeature>()?.Error?.StackTrace;
-
             if (!string.IsNullOrEmpty(stackTrace))
             {
                 problemDetails.Extensions["stackTrace"] = stackTrace;
@@ -143,12 +83,10 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         if (user?.Identity?.IsAuthenticated == true)
         {
             var claims = user.Claims.ToDictionary(c => c.Type, c => c.Value);
-
             if (claims.TryGetValue(ClaimTypes.NameIdentifier, out var userId))
             {
                 problemDetails.Extensions["userId"] = userId;
             }
-
             if (claims.TryGetValue(ClaimTypes.Name, out var userName))
             {
                 problemDetails.Extensions["userName"] = userName;
@@ -157,4 +95,52 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
 
         return problemDetails;
     }
+
+    private static HttpStatusCode GetStatusCodeFromException(Exception exception) => exception switch
+    {
+        ArgumentOutOfRangeException or
+        ArgumentNullException or
+        BadRequestModuleException or
+        BadRequestProfileException or
+        BadRequestRoleException => HttpStatusCode.BadRequest,
+
+        ConflictModuleException or
+        ConflictRoleException => HttpStatusCode.Conflict,
+
+        NotFoundActivePoliciesException or
+        NotFoundModuleException or
+        NotFoundProfileException or
+        NotFoundRoleException or
+        NotFoundUserException => HttpStatusCode.NotFound,
+
+        UserUnknownException or
+        UserWithoutPermissionsException => HttpStatusCode.Unauthorized,
+
+        ValidationModelException => HttpStatusCode.UnprocessableEntity,
+        _ => HttpStatusCode.InternalServerError
+    };
+
+    private static string GetMessageFromException(Exception exception) => exception switch
+    {
+        ArgumentOutOfRangeException argumentOutOfRangeException => argumentOutOfRangeException.Message,
+        ArgumentNullException argumentNullException => argumentNullException.Message,
+        BadRequestModuleException badRequestModuleException => badRequestModuleException.Message,
+        BadRequestProfileException badRequestProfileException => badRequestProfileException.Message,
+        BadRequestRoleException badRequestRoleException => badRequestRoleException.Message,
+
+        ConflictModuleException conflictModuleException => conflictModuleException.Message,
+        ConflictRoleException conflictRoleException => conflictRoleException.Message,
+
+        NotFoundActivePoliciesException notFoundActivePoliciesException => notFoundActivePoliciesException.Message,
+        NotFoundModuleException notFoundModuleException => notFoundModuleException.Message,
+        NotFoundProfileException notFoundProfileException => notFoundProfileException.Message,
+        NotFoundRoleException notFoundRoleException => notFoundRoleException.Message,
+        NotFoundUserException notFoundUserException => notFoundUserException.Message,
+
+        UserUnknownException => MessageApi.UserNotAuthenticated,
+        UserWithoutPermissionsException => MessageApi.UserNotHavePermission,
+
+        ValidationModelException validationModelException => validationModelException.Message,
+        _ => MessageApi.UnexpectedError
+    };
 }
