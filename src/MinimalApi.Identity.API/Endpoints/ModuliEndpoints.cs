@@ -26,7 +26,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<IResult> ([FromServices] IModuleService moduleService) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async ([FromServices] IModuleService moduleService) =>
         {
             return await moduleService.GetAllModulesAsync();
         })
@@ -45,7 +45,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsCreateModule, async Task<IResult> ([FromServices] IModuleService moduleService,
+        apiGroup.MapPost(EndpointsApi.EndpointsCreateModule, async ([FromServices] IModuleService moduleService,
             [FromBody] CreateModuleModel inputModel) =>
         {
             return await moduleService.CreateModuleAsync(inputModel);
@@ -65,7 +65,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsAssignModule, async Task<IResult> ([FromServices] IModuleService moduleService,
+        apiGroup.MapPost(EndpointsApi.EndpointsAssignModule, async ([FromServices] IModuleService moduleService,
             [FromBody] AssignModuleModel inputModel) =>
         {
             return await moduleService.AssignModuleAsync(inputModel);
@@ -86,7 +86,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeModule, async Task<IResult> ([FromServices] IModuleService moduleService,
+        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeModule, async ([FromServices] IModuleService moduleService,
             [FromBody] RevokeModuleModel inputModel) =>
         {
             return await moduleService.RevokeModuleAsync(inputModel);
@@ -107,7 +107,7 @@ public class ModuliEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteModule, async Task<IResult> ([FromServices] IModuleService moduleService,
+        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteModule, async ([FromServices] IModuleService moduleService,
             [FromBody] DeleteModuleModel inputModel) =>
         {
             return await moduleService.DeleteModuleAsync(inputModel);

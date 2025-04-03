@@ -172,6 +172,7 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         var expiredLocalNow = TimeZoneInfo.ConvertTimeFromUtc(jwtSecurityToken.ValidTo, italyTimeZone);
 
         var response = new AuthResponseModel(accessToken, GenerateRefreshToken(), expiredLocalNow);
+
         return response;
 
         static string GenerateRefreshToken()
@@ -238,22 +239,30 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
     private async Task<IList<Claim>> GetCustomClaimsUserAsync(ApplicationUser user)
     {
         var customClaims = new List<Claim>();
+        //var userProfile = await profileService.GetClaimUserProfileAsync(user);
+        //var userClaimLicense = await licenseService.GetClaimLicenseUserAsync(user);
+        //var userClaimModules = await moduleService.GetClaimsModuleUserAsync(user);
+        var userProfile = new List<Claim>();
+        Claim? userClaimLicense = null;
+        var userClaimModules = new List<Claim>();
 
-        var userProfile = await profileService.GetClaimUserProfileAsync(user);
+        var task = new List<Task> {
+            Task.Run(async () => userProfile = (List<Claim>) await profileService.GetClaimUserProfileAsync(user)),
+            Task.Run(async () => userClaimLicense = await licenseService.GetClaimLicenseUserAsync(user)),
+            Task.Run(async () => userClaimModules = (List<Claim>) await moduleService.GetClaimsModuleUserAsync(user))
+        };
+
+        await Task.WhenAll(task);
 
         if (userProfile != null)
         {
             customClaims.AddRange(userProfile);
         }
 
-        var userClaimLicense = await licenseService.GetClaimLicenseUserAsync(user);
-
         if (userClaimLicense != null)
         {
             customClaims.Add(userClaimLicense);
         }
-
-        var userClaimModules = await moduleService.GetClaimsModuleUserAsync(user);
 
         if (userClaimModules?.Count > 0)
         {
