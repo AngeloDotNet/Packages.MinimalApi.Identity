@@ -61,6 +61,7 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
         profile.ChangeFirstName(model.FirstName);
         profile.ChangeLastName(model.LastName);
+
         dbContext.UserProfiles.Update(profile);
         var result = await dbContext.SaveChangesAsync();
 

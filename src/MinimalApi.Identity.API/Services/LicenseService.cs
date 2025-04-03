@@ -44,12 +44,14 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
     public async Task<IResult> AssignLicenseAsync(AssignLicenseModel model)
     {
         var user = await userManager.FindByIdAsync(model.UserId.ToString());
+
         if (user == null)
         {
             return TypedResults.NotFound(MessageApi.UserNotFound);
         }
 
         var license = await dbContext.Licenses.FindAsync(model.LicenseId);
+
         if (license == null)
         {
             return TypedResults.NotFound(MessageApi.LicenseNotFound);
@@ -94,6 +96,7 @@ public class LicenseService(MinimalApiAuthDbContext dbContext, UserManager<Appli
     public async Task<IResult> DeleteLicenseAsync(DeleteLicenseModel model)
     {
         var license = await dbContext.Licenses.FindAsync(model.LicenseId);
+
         if (license == null)
         {
             return TypedResults.NotFound(MessageApi.LicenseNotFound);

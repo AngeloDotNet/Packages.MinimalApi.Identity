@@ -21,6 +21,7 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
         }
 
         var user = await userManager.FindByIdAsync(userId);
+
         if (user == null)
         {
             return TypedResults.BadRequest(MessageApi.UserNotFound);
@@ -40,6 +41,7 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
         }
 
         var user = await userManager.FindByEmailAsync(inputModel.Email);
+
         if (user == null)
         {
             return TypedResults.BadRequest(MessageApi.UserNotFound);
@@ -63,6 +65,7 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
         }
 
         var user = await userManager.FindByIdAsync(userId);
+
         if (user == null)
         {
             return TypedResults.BadRequest(MessageApi.UserNotFound);
