@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Entities;
 using MinimalApi.Identity.API.Enums;
+using MinimalApi.Identity.API.Exceptions;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Options;
 using MinimalApi.Identity.API.Services.Interfaces;
@@ -33,47 +34,49 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         {
             return signInResult switch
             {
-                { IsNotAllowed: true } => TypedResults.BadRequest(MessageApi.UserNotAllowedLogin),
-                { IsLockedOut: true } => TypedResults.BadRequest(MessageApi.UserLockedOut),
-                { RequiresTwoFactor: true } => TypedResults.BadRequest(MessageApi.RequiredTwoFactor),
-                _ => TypedResults.BadRequest(MessageApi.InvalidCredentials)
+                //{ IsNotAllowed: true } => TypedResults.BadRequest(MessageApi.UserNotAllowedLogin),
+                { IsNotAllowed: true } => throw new BadRequestUserException(MessageApi.UserNotAllowedLogin),
+                //{ IsLockedOut: true } => TypedResults.BadRequest(MessageApi.UserLockedOut),
+                { IsLockedOut: true } => throw new UserIsLockedException(MessageApi.UserLockedOut),
+                //{ RequiresTwoFactor: true } => TypedResults.BadRequest(MessageApi.RequiredTwoFactor),
+                { RequiresTwoFactor: true } => throw new BadRequestUserException(MessageApi.RequiredTwoFactor),
+                //_ => TypedResults.BadRequest(MessageApi.InvalidCredentials)
+                _ => throw new BadRequestUserException(MessageApi.InvalidCredentials)
             };
         }
 
-        var user = await userManager.FindByNameAsync(model.Username);
-
-        if (user == null)
-        {
-            return TypedResults.BadRequest(MessageApi.UserNotFound);
-        }
+        var user = await userManager.FindByNameAsync(model.Username)
+            ?? throw new NotFoundUserException(MessageApi.UserNotFound);
 
         if (!user.EmailConfirmed)
         {
-            return TypedResults.BadRequest(MessageApi.UserNotEmailConfirmed);
+            //return TypedResults.BadRequest(MessageApi.UserNotEmailConfirmed);
+            throw new BadRequestUserException(MessageApi.UserNotEmailConfirmed);
         }
 
-        var profileUser = await profileService.GetProfileAsync(user.Id);
-
-        if (profileUser == null)
-        {
-            return TypedResults.NotFound(MessageApi.ProfileNotFound);
-        }
+        var profileUser = await profileService.GetProfileAsync(user.Id)
+            ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
 
         if (!profileUser.IsEnabled)
         {
-            return TypedResults.BadRequest(MessageApi.UserNotEnableLogin);
+            //return TypedResults.BadRequest(MessageApi.UserNotEnableLogin);
+            throw new BadRequestProfileException(MessageApi.UserNotEnableLogin);
         }
 
         var lastDateChangePassword = profileUser.LastDateChangePassword;
+        var checkLastDateChangePassword = CheckLastDateChangePassword(lastDateChangePassword, userOptions);
 
-        if (lastDateChangePassword == null || lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
+        //if (lastDateChangePassword == null || lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
+        if (lastDateChangePassword == null || checkLastDateChangePassword)
         {
-            return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
+            //return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
+            throw new BadRequestProfileException(MessageApi.UserForcedChangePassword);
         }
 
         if (await licenseService.CheckUserLicenseExpiredAsync(user))
         {
-            return TypedResults.BadRequest(MessageApi.LicenseExpired);
+            //return TypedResults.BadRequest(MessageApi.LicenseExpired);
+            throw new BadRequestLicenseException(MessageApi.LicenseExpired);
         }
 
         await userManager.UpdateSecurityStampAsync(user);
@@ -236,20 +239,22 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         return await userManager.AddClaimsAsync(user, claims);
     }
 
-    private async Task<IList<Claim>> GetCustomClaimsUserAsync(ApplicationUser user)
+    //private async Task<IList<Claim>> GetCustomClaimsUserAsync(ApplicationUser user)
+    private async Task<List<Claim>> GetCustomClaimsUserAsync(ApplicationUser user)
     {
         var customClaims = new List<Claim>();
         //var userProfile = await profileService.GetClaimUserProfileAsync(user);
         //var userClaimLicense = await licenseService.GetClaimLicenseUserAsync(user);
         //var userClaimModules = await moduleService.GetClaimsModuleUserAsync(user);
+
         var userProfile = new List<Claim>();
         Claim? userClaimLicense = null;
         var userClaimModules = new List<Claim>();
 
         var task = new List<Task> {
-            Task.Run(async () => userProfile = (List<Claim>) await profileService.GetClaimUserProfileAsync(user)),
+            Task.Run(async () => userProfile = await profileService.GetClaimUserProfileAsync(user)),
             Task.Run(async () => userClaimLicense = await licenseService.GetClaimLicenseUserAsync(user)),
-            Task.Run(async () => userClaimModules = (List<Claim>) await moduleService.GetClaimsModuleUserAsync(user))
+            Task.Run(async () => userClaimModules = await moduleService.GetClaimsModuleUserAsync(user))
         };
 
         await Task.WhenAll(task);
@@ -270,5 +275,15 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         }
 
         return customClaims;
+    }
+
+    private bool CheckLastDateChangePassword(DateOnly? lastDate, UsersOptions userOptions)
+    {
+        if (lastDate!.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            return true;
+        }
+
+        return false;
     }
 }
