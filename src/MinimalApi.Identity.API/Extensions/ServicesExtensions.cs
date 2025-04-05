@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Security.Claims;
+using System.Security.Principal;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -53,4 +55,6 @@ public static class ServicesExtensions
     {
         return services.AddRegisterService<TAssembly>(stringEndsWith, ServiceLifetime.Singleton);
     }
+
+    public static string GetClaimValue(this IPrincipal user, string claimType) => ((ClaimsPrincipal)user).FindFirst(claimType)?.Value!;
 }
