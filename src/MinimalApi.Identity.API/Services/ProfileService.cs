@@ -80,7 +80,7 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
         if (result == null)
         {
             //return Array.Empty<Claim>();
-            return [];
+            return new List<Claim>();
         }
 
         return
