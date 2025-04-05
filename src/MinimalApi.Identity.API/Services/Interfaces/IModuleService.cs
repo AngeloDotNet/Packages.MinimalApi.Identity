@@ -12,5 +12,6 @@ public interface IModuleService
     Task<string> RevokeModuleAsync(RevokeModuleModel model);
     Task<string> DeleteModuleAsync(DeleteModuleModel model);
 
-    Task<IList<Claim>> GetClaimsModuleUserAsync(ApplicationUser user);
+    //Task<IList<Claim>> GetClaimsModuleUserAsync(ApplicationUser user);
+    Task<List<Claim>> GetClaimsModuleUserAsync(ApplicationUser user);
 }

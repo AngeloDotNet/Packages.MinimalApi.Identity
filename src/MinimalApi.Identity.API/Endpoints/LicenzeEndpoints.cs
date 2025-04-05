@@ -26,7 +26,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<IResult> ([FromServices] ILicenseService licenseService) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async ([FromServices] ILicenseService licenseService) =>
         {
             return await licenseService.GetAllLicensesAsync();
         })
@@ -45,7 +45,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsCreateLicense, async Task<IResult> ([FromServices] ILicenseService licenseService,
+        apiGroup.MapPost(EndpointsApi.EndpointsCreateLicense, async ([FromServices] ILicenseService licenseService,
             [FromBody] CreateLicenseModel inputModel) =>
         {
             return await licenseService.CreateLicenseAsync(inputModel);
@@ -65,7 +65,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsAssignLicense, async Task<IResult> ([FromServices] ILicenseService licenseService,
+        apiGroup.MapPost(EndpointsApi.EndpointsAssignLicense, async ([FromServices] ILicenseService licenseService,
             [FromBody] AssignLicenseModel inputModel) =>
         {
             return await licenseService.AssignLicenseAsync(inputModel);
@@ -86,7 +86,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeLicense, async Task<IResult> ([FromServices] ILicenseService licenseService,
+        apiGroup.MapDelete(EndpointsApi.EndpointsRevokeLicense, async ([FromServices] ILicenseService licenseService,
             [FromBody] RevokeLicenseModel inputModel) =>
         {
             return await licenseService.RevokeLicenseAsync(inputModel);
@@ -107,7 +107,7 @@ public class LicenzeEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteLicense, async Task<IResult> ([FromServices] ILicenseService licenseService,
+        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteLicense, async ([FromServices] ILicenseService licenseService,
             [FromBody] DeleteLicenseModel inputModel) =>
         {
             return await licenseService.DeleteLicenseAsync(inputModel);

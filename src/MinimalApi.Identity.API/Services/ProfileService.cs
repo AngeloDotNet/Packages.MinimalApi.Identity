@@ -68,7 +68,8 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
         return result > 0 ? MessageApi.ProfileUpdated : throw new BadRequestProfileException(MessageApi.ProfileNotUpdated);
     }
 
-    public async Task<IList<Claim>> GetClaimUserProfileAsync(ApplicationUser user)
+    //public async Task<IList<Claim>> GetClaimUserProfileAsync(ApplicationUser user)
+    public async Task<List<Claim>> GetClaimUserProfileAsync(ApplicationUser user)
     {
         var result = await dbContext.UserProfiles
             .AsNoTracking()
@@ -78,7 +79,8 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
         if (result == null)
         {
-            return Array.Empty<Claim>();
+            //return Array.Empty<Claim>();
+            return new List<Claim>();
         }
 
         return
