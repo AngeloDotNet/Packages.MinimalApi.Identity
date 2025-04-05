@@ -83,10 +83,12 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         if (user?.Identity?.IsAuthenticated == true)
         {
             var claims = user.Claims.ToDictionary(c => c.Type, c => c.Value);
+
             if (claims.TryGetValue(ClaimTypes.NameIdentifier, out var userId))
             {
                 problemDetails.Extensions["userId"] = userId;
             }
+
             if (claims.TryGetValue(ClaimTypes.Name, out var userName))
             {
                 problemDetails.Extensions["userName"] = userName;
@@ -96,51 +98,53 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         return problemDetails;
     }
 
-    private static HttpStatusCode GetStatusCodeFromException(Exception exception) => exception switch
-    {
-        ArgumentOutOfRangeException or
-        ArgumentNullException or
-        BadRequestModuleException or
-        BadRequestProfileException or
-        BadRequestRoleException => HttpStatusCode.BadRequest,
+    private static HttpStatusCode GetStatusCodeFromException(Exception exception)
+        => exception switch
+        {
+            ArgumentOutOfRangeException or ArgumentNullException or BadRequestLicenseException or
+            BadRequestModuleException or BadRequestProfileException or BadRequestRoleException or
+            BadRequestUserException => HttpStatusCode.BadRequest,
 
-        ConflictModuleException or
-        ConflictRoleException => HttpStatusCode.Conflict,
+            ConflictLicenseException or ConflictModuleException or ConflictRoleException => HttpStatusCode.Conflict,
 
-        NotFoundActivePoliciesException or
-        NotFoundModuleException or
-        NotFoundProfileException or
-        NotFoundRoleException or
-        NotFoundUserException => HttpStatusCode.NotFound,
+            NotFoundActivePoliciesException or NotFoundLicenseException or NotFoundModuleException or
+            NotFoundProfileException or NotFoundRoleException or NotFoundUserException => HttpStatusCode.NotFound,
 
-        UserUnknownException or
-        UserWithoutPermissionsException => HttpStatusCode.Unauthorized,
+            UserIsLockedException or UserTokenIsInvalidException or UserUnknownException or
+            UserWithoutPermissionsException => HttpStatusCode.Unauthorized,
 
-        ValidationModelException => HttpStatusCode.UnprocessableEntity,
-        _ => HttpStatusCode.InternalServerError
-    };
+            ValidationModelException => HttpStatusCode.UnprocessableEntity,
+            _ => HttpStatusCode.InternalServerError
+        };
 
-    private static string GetMessageFromException(Exception exception) => exception switch
-    {
-        ArgumentOutOfRangeException argumentOutOfRangeException => argumentOutOfRangeException.Message,
-        ArgumentNullException argumentNullException => argumentNullException.Message,
-        BadRequestModuleException badRequestModuleException => badRequestModuleException.Message,
-        BadRequestProfileException badRequestProfileException => badRequestProfileException.Message,
-        BadRequestRoleException badRequestRoleException => badRequestRoleException.Message,
+    private static string GetMessageFromException(Exception exception)
+        => exception switch
+        {
+            ArgumentOutOfRangeException argumentOutOfRangeException => argumentOutOfRangeException.Message,
+            ArgumentNullException argumentNullException => argumentNullException.Message,
+            BadRequestLicenseException badRequestLicenseException => badRequestLicenseException.Message,
+            BadRequestModuleException badRequestModuleException => badRequestModuleException.Message,
+            BadRequestProfileException badRequestProfileException => badRequestProfileException.Message,
+            BadRequestRoleException badRequestRoleException => badRequestRoleException.Message,
+            BadRequestUserException badRequestUserException => badRequestUserException.Message,
 
-        ConflictModuleException conflictModuleException => conflictModuleException.Message,
-        ConflictRoleException conflictRoleException => conflictRoleException.Message,
+            ConflictLicenseException conflictLicenseException => conflictLicenseException.Message,
+            ConflictModuleException conflictModuleException => conflictModuleException.Message,
+            ConflictRoleException conflictRoleException => conflictRoleException.Message,
 
-        NotFoundActivePoliciesException notFoundActivePoliciesException => notFoundActivePoliciesException.Message,
-        NotFoundModuleException notFoundModuleException => notFoundModuleException.Message,
-        NotFoundProfileException notFoundProfileException => notFoundProfileException.Message,
-        NotFoundRoleException notFoundRoleException => notFoundRoleException.Message,
-        NotFoundUserException notFoundUserException => notFoundUserException.Message,
+            NotFoundActivePoliciesException notFoundActivePoliciesException => notFoundActivePoliciesException.Message,
+            NotFoundLicenseException notFoundLicenseException => notFoundLicenseException.Message,
+            NotFoundModuleException notFoundModuleException => notFoundModuleException.Message,
+            NotFoundProfileException notFoundProfileException => notFoundProfileException.Message,
+            NotFoundRoleException notFoundRoleException => notFoundRoleException.Message,
+            NotFoundUserException notFoundUserException => notFoundUserException.Message,
 
-        UserUnknownException => MessageApi.UserNotAuthenticated,
-        UserWithoutPermissionsException => MessageApi.UserNotHavePermission,
+            UserIsLockedException => MessageApi.UserLockedOut,
+            UserTokenIsInvalidException userTokenIsInvalidException => userTokenIsInvalidException.Message,
+            UserUnknownException => MessageApi.UserNotAuthenticated,
+            UserWithoutPermissionsException => MessageApi.UserNotHavePermission,
 
-        ValidationModelException validationModelException => validationModelException.Message,
-        _ => MessageApi.UnexpectedError
-    };
+            ValidationModelException validationModelException => validationModelException.Message,
+            _ => MessageApi.UnexpectedError
+        };
 }
