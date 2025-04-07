@@ -34,13 +34,9 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         {
             return signInResult switch
             {
-                //{ IsNotAllowed: true } => TypedResults.BadRequest(MessageApi.UserNotAllowedLogin),
                 { IsNotAllowed: true } => throw new BadRequestUserException(MessageApi.UserNotAllowedLogin),
-                //{ IsLockedOut: true } => TypedResults.BadRequest(MessageApi.UserLockedOut),
                 { IsLockedOut: true } => throw new UserIsLockedException(MessageApi.UserLockedOut),
-                //{ RequiresTwoFactor: true } => TypedResults.BadRequest(MessageApi.RequiredTwoFactor),
                 { RequiresTwoFactor: true } => throw new BadRequestUserException(MessageApi.RequiredTwoFactor),
-                //_ => TypedResults.BadRequest(MessageApi.InvalidCredentials)
                 _ => throw new BadRequestUserException(MessageApi.InvalidCredentials)
             };
         }
@@ -50,7 +46,6 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
         if (!user.EmailConfirmed)
         {
-            //return TypedResults.BadRequest(MessageApi.UserNotEmailConfirmed);
             throw new BadRequestUserException(MessageApi.UserNotEmailConfirmed);
         }
 
@@ -59,7 +54,6 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
         if (!profileUser.IsEnabled)
         {
-            //return TypedResults.BadRequest(MessageApi.UserNotEnableLogin);
             throw new BadRequestProfileException(MessageApi.UserNotEnableLogin);
         }
 
@@ -69,13 +63,11 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         //if (lastDateChangePassword == null || lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
         if (lastDateChangePassword == null || checkLastDateChangePassword)
         {
-            //return TypedResults.BadRequest(MessageApi.UserForcedChangePassword);
             throw new BadRequestProfileException(MessageApi.UserForcedChangePassword);
         }
 
         if (await licenseService.CheckUserLicenseExpiredAsync(user))
         {
-            //return TypedResults.BadRequest(MessageApi.LicenseExpired);
             throw new BadRequestLicenseException(MessageApi.LicenseExpired);
         }
 
@@ -239,14 +231,9 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         return await userManager.AddClaimsAsync(user, claims);
     }
 
-    //private async Task<IList<Claim>> GetCustomClaimsUserAsync(ApplicationUser user)
     private async Task<List<Claim>> GetCustomClaimsUserAsync(ApplicationUser user)
     {
         var customClaims = new List<Claim>();
-        //var userProfile = await profileService.GetClaimUserProfileAsync(user);
-        //var userClaimLicense = await licenseService.GetClaimLicenseUserAsync(user);
-        //var userClaimModules = await moduleService.GetClaimsModuleUserAsync(user);
-
         var userProfile = new List<Claim>();
         Claim? userClaimLicense = null;
         var userClaimModules = new List<Claim>();
@@ -277,7 +264,7 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         return customClaims;
     }
 
-    private bool CheckLastDateChangePassword(DateOnly? lastDate, UsersOptions userOptions)
+    private static bool CheckLastDateChangePassword(DateOnly? lastDate, UsersOptions userOptions)
     {
         if (lastDate!.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
         {

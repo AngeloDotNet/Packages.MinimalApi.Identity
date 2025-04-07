@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using MinimalApi.Identity.API.Models;
+﻿using MinimalApi.Identity.API.Models;
 
 namespace MinimalApi.Identity.API.Services.Interfaces;
 
 public interface IClaimsService
 {
-    Task<IResult> GetAllClaimsAsync();
-    Task<IResult> CreateClaimAsync(CreateClaimModel model);
-    Task<IResult> AssignClaimAsync(AssignClaimModel model);
-    Task<IResult> RevokeClaimAsync(RevokeClaimModel model);
-    Task<IResult> DeleteClaimAsync(DeleteClaimModel model);
+    Task<List<ClaimResponseModel>> GetAllClaimsAsync();
+    Task<string> CreateClaimAsync(CreateClaimModel model);
+    Task<string> AssignClaimAsync(AssignClaimModel model);
+    Task<string> RevokeClaimAsync(RevokeClaimModel model);
+    Task<string> DeleteClaimAsync(DeleteClaimModel model);
 }
