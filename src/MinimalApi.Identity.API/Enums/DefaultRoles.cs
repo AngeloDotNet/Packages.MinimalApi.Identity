@@ -1,6 +1,6 @@
 ﻿namespace MinimalApi.Identity.API.Enums;
 
-public enum DefaultRoles
+internal enum DefaultRoles
 {
     Admin,
     PowerUser,
