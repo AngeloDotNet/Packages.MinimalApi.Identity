@@ -26,7 +26,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsAuthRegister, [AllowAnonymous] async Task<IResult> ([FromServices] IAuthService authService,
+        apiGroup.MapPost(EndpointsApi.EndpointsAuthRegister, [AllowAnonymous] async ([FromServices] IAuthService authService,
             [FromBody] RegisterModel inputModel) =>
         {
             return await authService.RegisterAsync(inputModel);
@@ -45,7 +45,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsAuthLogin, [AllowAnonymous] async Task<IResult> ([FromServices] IAuthService authService,
+        apiGroup.MapPost(EndpointsApi.EndpointsAuthLogin, [AllowAnonymous] async ([FromServices] IAuthService authService,
             [FromBody] LoginModel inputModel) =>
         {
             return await authService.LoginAsync(inputModel);
@@ -64,7 +64,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsAuthLogout, [AllowAnonymous] async Task<IResult> ([FromServices] IAuthService authService) =>
+        apiGroup.MapPost(EndpointsApi.EndpointsAuthLogout, [AllowAnonymous] async ([FromServices] IAuthService authService) =>
         {
             return await authService.LogoutAsync();
         })
