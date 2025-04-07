@@ -75,7 +75,7 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
         if (result == null)
         {
-            return [];
+            return Array.Empty<Claim>();
         }
 
         return
