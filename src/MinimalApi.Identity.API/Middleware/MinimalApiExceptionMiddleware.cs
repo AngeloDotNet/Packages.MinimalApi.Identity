@@ -74,6 +74,7 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         if (context.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment())
         {
             var stackTrace = context.Features.Get<IExceptionHandlerFeature>()?.Error?.StackTrace;
+
             if (!string.IsNullOrEmpty(stackTrace))
             {
                 problemDetails.Extensions["stackTrace"] = stackTrace;
@@ -101,14 +102,16 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
     private static HttpStatusCode GetStatusCodeFromException(Exception exception)
         => exception switch
         {
-            ArgumentOutOfRangeException or ArgumentNullException or BadRequestLicenseException or
-            BadRequestModuleException or BadRequestProfileException or BadRequestRoleException or
-            BadRequestUserException => HttpStatusCode.BadRequest,
+            ArgumentOutOfRangeException or ArgumentNullException or BadRequestClaimException or
+            BadRequestLicenseException or BadRequestModuleException or BadRequestProfileException or
+            BadRequestRoleException or BadRequestUserException => HttpStatusCode.BadRequest,
 
-            ConflictLicenseException or ConflictModuleException or ConflictRoleException => HttpStatusCode.Conflict,
+            ConflictClaimException or ConflictLicenseException or ConflictModuleException or
+            ConflictRoleException => HttpStatusCode.Conflict,
 
-            NotFoundActivePoliciesException or NotFoundLicenseException or NotFoundModuleException or
-            NotFoundProfileException or NotFoundRoleException or NotFoundUserException => HttpStatusCode.NotFound,
+            NotFoundActivePoliciesException or NotFoundClaimException or NotFoundLicenseException or
+            NotFoundModuleException or NotFoundProfileException or NotFoundRoleException or
+            NotFoundUserException => HttpStatusCode.NotFound,
 
             UserIsLockedException or UserTokenIsInvalidException or UserUnknownException or
             UserWithoutPermissionsException => HttpStatusCode.Unauthorized,
@@ -122,17 +125,20 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         {
             ArgumentOutOfRangeException argumentOutOfRangeException => argumentOutOfRangeException.Message,
             ArgumentNullException argumentNullException => argumentNullException.Message,
+            BadRequestClaimException badRequestClaimException => badRequestClaimException.Message,
             BadRequestLicenseException badRequestLicenseException => badRequestLicenseException.Message,
             BadRequestModuleException badRequestModuleException => badRequestModuleException.Message,
             BadRequestProfileException badRequestProfileException => badRequestProfileException.Message,
             BadRequestRoleException badRequestRoleException => badRequestRoleException.Message,
             BadRequestUserException badRequestUserException => badRequestUserException.Message,
 
+            ConflictClaimException conflictClaimException => conflictClaimException.Message,
             ConflictLicenseException conflictLicenseException => conflictLicenseException.Message,
             ConflictModuleException conflictModuleException => conflictModuleException.Message,
             ConflictRoleException conflictRoleException => conflictRoleException.Message,
 
             NotFoundActivePoliciesException notFoundActivePoliciesException => notFoundActivePoliciesException.Message,
+            NotFoundClaimException notFoundClaimException => notFoundClaimException.Message,
             NotFoundLicenseException notFoundLicenseException => notFoundLicenseException.Message,
             NotFoundModuleException notFoundModuleException => notFoundModuleException.Message,
             NotFoundProfileException notFoundProfileException => notFoundProfileException.Message,
