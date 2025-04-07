@@ -57,14 +57,20 @@ public static class RegisterServicesExtensions
             .AddProblemDetails()
             .AddHttpContextAccessor()
             .AddSwaggerConfiguration()
+
             .AddMinimalApiDbContext<MinimalApiAuthDbContext>(dbConnString, typeof(TMigrations).Assembly.FullName!)
             .AddMinimalApiIdentityServices<MinimalApiAuthDbContext>(jwtOptions)
             .AddMinimalApiIdentityOptionsServices(identityOptions)
+
             .AddSingleton<IHostedService, AuthorizationPolicyGeneration>()
+
             .AddRegisterTransientService<IAuthService>("Service")
+
             .AddScoped<SignInManager<ApplicationUser>>()
             .AddScoped<IAuthorizationHandler, PermissionHandler>()
+
             .AddHostedService<AuthorizationPolicyUpdater>()
+
             .ConfigureValidation(options => options.ErrorResponseFormat = formatErrorResponse)
             .ConfigureFluentValidation<LoginValidator>()
             .Configure<JsonOptions>(options =>
