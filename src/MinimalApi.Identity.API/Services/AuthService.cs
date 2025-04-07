@@ -21,7 +21,7 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
     UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender,
     IHttpContextAccessor httpContextAccessor, ILicenseService licenseService, IModuleService moduleService, IProfileService profileService) : IAuthService
 {
-    public async Task<IResult> LoginAsync(LoginModel model)
+    public async Task<AuthResponseModel> LoginAsync(LoginModel model)
     {
         var identityOptions = iOptions.Value;
         var jwtOptions = jOptions.Value;
@@ -95,10 +95,10 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
         await userManager.UpdateAsync(user);
 
-        return TypedResults.Ok(loginResponse);
+        return loginResponse;
     }
 
-    public async Task<IResult> RegisterAsync(RegisterModel model)
+    public async Task<string> RegisterAsync(RegisterModel model)
     {
         var usersOptions = uOptions.Value;
         var user = new ApplicationUser
@@ -118,14 +118,14 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
             if (!roleAssignResult.Succeeded)
             {
-                return TypedResults.BadRequest(MessageApi.RoleNotAssigned);
+                throw new BadRequestRoleException(MessageApi.RoleNotAssigned);
             }
 
             var claimsAssignResult = await AddClaimsToUserAsync(user, role);
 
             if (!claimsAssignResult.Succeeded)
             {
-                return TypedResults.BadRequest(MessageApi.ClaimsNotAssigned);
+                throw new BadRequestClaimException(MessageApi.ClaimsNotAssigned);
             }
 
             var userId = await userManager.GetUserIdAsync(user);
@@ -137,17 +137,17 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
             await emailSender.SendEmailTypeAsync(user.Email, callbackUrl, EmailSendingType.RegisterUser);
 
-            return TypedResults.Ok(MessageApi.UserCreated);
+            return MessageApi.UserCreated;
         }
 
-        return TypedResults.BadRequest(result.Errors);
+        throw new BadRequestUserException(result.Errors);
     }
 
-    public async Task<IResult> LogoutAsync()
+    public async Task<string> LogoutAsync()
     {
         await signInManager.SignOutAsync();
 
-        return TypedResults.Ok(MessageApi.UserLogOut);
+        return MessageApi.UserLogOut;
     }
 
     private static AuthResponseModel CreateToken(List<Claim> claims, JwtOptions jwtOptions)
