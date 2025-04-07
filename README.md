@@ -7,7 +7,7 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 
 ### 🏗️ ToDo
 
-- [ ] Replacing generic IResults with specific ones for each services (AccountService, AuthPolicyService, AuthService, ClaimsService)
+- [ ] Replacing generic IResults with specific ones for each services (AccountService, AuthPolicyService, AuthService)
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
 - [ ] Add endpoints to impersonate the user
 - [ ] Add endpoint for forgotten password recovery
@@ -193,6 +193,7 @@ You can find a sample project in the [example](https://github.com/AngeloDotNet/P
 
 - [ ] Replacing the hosted service authorization policy updater using Coravel jobs
 - [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
+- [ ] Add support for the Mediator pattern
 
 ### 📝 License
 

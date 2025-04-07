@@ -41,10 +41,7 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
     public async Task<string> CreateProfileAsync(CreateUserProfileModel model)
     {
         var profile = new UserProfile(model.UserId, model.FirstName, model.LastName);
-        //{
-        //    IsEnabled = true,
-        //    LastDateChangePassword = DateOnly.FromDateTime(DateTime.Now)
-        //};
+
         profile.ChangeUserEnabled(true);
         profile.ChangeLastDateChangePassword(DateOnly.FromDateTime(DateTime.Now));
 
@@ -68,7 +65,6 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
         return result > 0 ? MessageApi.ProfileUpdated : throw new BadRequestProfileException(MessageApi.ProfileNotUpdated);
     }
 
-    //public async Task<IList<Claim>> GetClaimUserProfileAsync(ApplicationUser user)
     public async Task<List<Claim>> GetClaimUserProfileAsync(ApplicationUser user)
     {
         var result = await dbContext.UserProfiles
@@ -79,8 +75,7 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
         if (result == null)
         {
-            //return Array.Empty<Claim>();
-            return new List<Claim>();
+            return Array.Empty<Claim>();
         }
 
         return
@@ -96,7 +91,8 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
         var profile = await dbContext.UserProfiles.FirstOrDefaultAsync(x => x.UserId == model.UserId)
             ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
 
-        profile.IsEnabled = model.IsEnabled;
+        //profile.IsEnabled = model.IsEnabled;
+        profile.ChangeUserEnabled(model.IsEnabled);
 
         dbContext.UserProfiles.Update(profile);
         var result = await dbContext.SaveChangesAsync();

@@ -101,7 +101,6 @@ public class ModuleService(MinimalApiAuthDbContext dbContext, UserManager<Applic
         return MessageApi.ModuleDeleted;
     }
 
-    //public async Task<IList<Claim>> GetClaimsModuleUserAsync(ApplicationUser user)
     public async Task<List<Claim>> GetClaimsModuleUserAsync(ApplicationUser user)
     {
         var result = await dbContext.UserModules
