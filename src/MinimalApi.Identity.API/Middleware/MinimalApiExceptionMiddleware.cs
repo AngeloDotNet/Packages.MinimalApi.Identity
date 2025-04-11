@@ -107,15 +107,15 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         => exception switch
         {
             ArgumentOutOfRangeException or ArgumentNullException or BadRequestClaimException or
-            BadRequestLicenseException or BadRequestModuleException or BadRequestProfileException or
-            BadRequestRoleException or BadRequestUserException => HttpStatusCode.BadRequest,
+            BadRequestLicenseException or BadRequestModuleException or BadRequestPolicyException or
+            BadRequestProfileException or BadRequestRoleException or BadRequestUserException => HttpStatusCode.BadRequest,
 
-            ConflictClaimException or ConflictLicenseException or ConflictModuleException or
-            ConflictRoleException => HttpStatusCode.Conflict,
+            ConflictClaimException or ConflictLicenseException or ConflictPolicyException or
+            ConflictModuleException or ConflictRoleException => HttpStatusCode.Conflict,
 
             NotFoundActivePoliciesException or NotFoundClaimException or NotFoundLicenseException or
-            NotFoundModuleException or NotFoundProfileException or NotFoundRoleException or
-            NotFoundUserException => HttpStatusCode.NotFound,
+            NotFoundModuleException or NotFoundPolicyException or NotFoundProfileException or
+            NotFoundRoleException or NotFoundUserException => HttpStatusCode.NotFound,
 
             UserIsLockedException or UserTokenIsInvalidException or UserUnknownException or
             UserWithoutPermissionsException => HttpStatusCode.Unauthorized,
@@ -132,6 +132,7 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
             BadRequestClaimException badRequestClaimException => badRequestClaimException.Message,
             BadRequestLicenseException badRequestLicenseException => badRequestLicenseException.Message,
             BadRequestModuleException badRequestModuleException => badRequestModuleException.Message,
+            BadRequestPolicyException badRequestPolicyException => badRequestPolicyException.Message,
             BadRequestProfileException badRequestProfileException => badRequestProfileException.Message,
             BadRequestRoleException badRequestRoleException => badRequestRoleException.Message,
             BadRequestUserException badRequestUserException => badRequestUserException.Message,
@@ -139,12 +140,14 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
             ConflictClaimException conflictClaimException => conflictClaimException.Message,
             ConflictLicenseException conflictLicenseException => conflictLicenseException.Message,
             ConflictModuleException conflictModuleException => conflictModuleException.Message,
+            ConflictPolicyException conflictPolicyException => conflictPolicyException.Message,
             ConflictRoleException conflictRoleException => conflictRoleException.Message,
 
             NotFoundActivePoliciesException notFoundActivePoliciesException => notFoundActivePoliciesException.Message,
             NotFoundClaimException notFoundClaimException => notFoundClaimException.Message,
             NotFoundLicenseException notFoundLicenseException => notFoundLicenseException.Message,
             NotFoundModuleException notFoundModuleException => notFoundModuleException.Message,
+            NotFoundPolicyException notFoundPolicyException => notFoundPolicyException.Message,
             NotFoundProfileException notFoundProfileException => notFoundProfileException.Message,
             NotFoundRoleException notFoundRoleException => notFoundRoleException.Message,
             NotFoundUserException notFoundUserException => notFoundUserException.Message,
