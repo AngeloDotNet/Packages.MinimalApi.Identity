@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,6 +7,8 @@ using Microsoft.Extensions.Options;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
+using MinimalApi.Identity.API.Exceptions.BadRequest;
+using MinimalApi.Identity.API.Exceptions.Conflict;
 using MinimalApi.Identity.API.Exceptions.NotFound;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
@@ -18,26 +19,23 @@ namespace MinimalApi.Identity.API.Services;
 public class AuthPolicyService(MinimalApiAuthDbContext dbContext, ILogger<AuthPolicyService> logger,
     IServiceProvider serviceProvider) : IAuthPolicyService
 {
-    public async Task<IResult> GetAllPoliciesAsync()
+    public async Task<List<PolicyResponseModel>> GetAllPoliciesAsync()
     {
         var query = await dbContext.AuthPolicies.AsNoTracking().ToListAsync();
 
         if (query.Count == 0)
         {
-            return TypedResults.NotFound(MessageApi.PolicyNotFound);
+            throw new NotFoundPolicyException(MessageApi.PolicyNotFound);
         }
 
-        var result = query.Select(p
-            => new PolicyResponseModel(p.Id, p.PolicyName, p.PolicyDescription, p.PolicyPermissions)).ToList();
-
-        return TypedResults.Ok(result);
+        return query.Select(p => new PolicyResponseModel(p.Id, p.PolicyName, p.PolicyDescription, p.PolicyPermissions)).ToList();
     }
 
-    public async Task<IResult> CreatePolicyAsync(CreatePolicyModel model)
+    public async Task<string> CreatePolicyAsync(CreatePolicyModel model)
     {
         if (await CheckPolicyExistAsync(model))
         {
-            return TypedResults.Conflict(MessageApi.PolicyAlreadyExist);
+            throw new ConflictPolicyException(MessageApi.PolicyAlreadyExist);
         }
 
         var authPolicy = new AuthPolicy
@@ -52,28 +50,24 @@ public class AuthPolicyService(MinimalApiAuthDbContext dbContext, ILogger<AuthPo
         dbContext.AuthPolicies.Add(authPolicy);
         await dbContext.SaveChangesAsync();
 
-        return TypedResults.Ok(MessageApi.PolicyCreated);
+        return MessageApi.PolicyCreated;
     }
 
-    public async Task<IResult> DeletePolicyAsync(DeletePolicyModel model)
+    public async Task<string> DeletePolicyAsync(DeletePolicyModel model)
     {
         var authPolicy = await dbContext.AuthPolicies.AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == model.Id && x.PolicyName == model.PolicyName);
-
-        if (authPolicy == null)
-        {
-            return TypedResults.NotFound(MessageApi.PolicyNotFound);
-        }
+            .FirstOrDefaultAsync(x => x.Id == model.Id && x.PolicyName == model.PolicyName)
+            ?? throw new NotFoundPolicyException(MessageApi.PolicyNotFound);
 
         if (authPolicy.IsDefault)
         {
-            return TypedResults.BadRequest(MessageApi.PolicyNotDeleted);
+            throw new BadRequestPolicyException(MessageApi.PolicyNotDeleted);
         }
 
         dbContext.AuthPolicies.Remove(authPolicy);
         await dbContext.SaveChangesAsync();
 
-        return TypedResults.Ok(MessageApi.PolicyDeleted);
+        return MessageApi.PolicyDeleted;
     }
 
     public async Task<List<AuthPolicy>> GetAllAuthPoliciesAsync(Expression<Func<AuthPolicy, bool>> filter = null!)
