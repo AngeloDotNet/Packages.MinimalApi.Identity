@@ -26,7 +26,7 @@ public class AuthPolicyEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async Task<IResult> ([FromServices] IAuthPolicyService authPolicyService) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsStringEmpty, async ([FromServices] IAuthPolicyService authPolicyService) =>
         {
             return await authPolicyService.GetAllPoliciesAsync();
         })
@@ -45,7 +45,7 @@ public class AuthPolicyEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointsCreateAuthPolicy, async Task<IResult> ([FromServices] IAuthPolicyService authPolicyService,
+        apiGroup.MapPost(EndpointsApi.EndpointsCreateAuthPolicy, async ([FromServices] IAuthPolicyService authPolicyService,
             [FromBody] CreatePolicyModel inputModel) =>
         {
             return await authPolicyService.CreatePolicyAsync(inputModel);
@@ -66,7 +66,7 @@ public class AuthPolicyEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteAuthPolicy, async Task<IResult> ([FromServices] IAuthPolicyService authPolicyService,
+        apiGroup.MapDelete(EndpointsApi.EndpointsDeleteAuthPolicy, async ([FromServices] IAuthPolicyService authPolicyService,
             [FromBody] DeletePolicyModel inputModel) =>
         {
             return await authPolicyService.DeletePolicyAsync(inputModel);
