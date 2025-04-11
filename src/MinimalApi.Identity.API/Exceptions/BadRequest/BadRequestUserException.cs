@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.AspNetCore.Identity;
 
-namespace MinimalApi.Identity.API.Exceptions;
+namespace MinimalApi.Identity.API.Exceptions.BadRequest;
 
 public class BadRequestUserException : Exception
 {

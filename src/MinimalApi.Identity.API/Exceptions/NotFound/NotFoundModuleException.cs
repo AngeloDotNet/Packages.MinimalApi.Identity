@@ -1,4 +1,4 @@
-﻿namespace MinimalApi.Identity.API.Exceptions;
+﻿namespace MinimalApi.Identity.API.Exceptions.NotFound;
 
 public class NotFoundModuleException : Exception
 {

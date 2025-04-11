@@ -1,4 +1,4 @@
-﻿namespace MinimalApi.Identity.API.Exceptions;
+﻿namespace MinimalApi.Identity.API.Exceptions.Users;
 
 public class UserUnknownException : Exception
 {

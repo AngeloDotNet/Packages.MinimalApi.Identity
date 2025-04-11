@@ -12,6 +12,10 @@ using Microsoft.Extensions.Options;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Exceptions;
+using MinimalApi.Identity.API.Exceptions.BadRequest;
+using MinimalApi.Identity.API.Exceptions.Conflict;
+using MinimalApi.Identity.API.Exceptions.NotFound;
+using MinimalApi.Identity.API.Exceptions.Users;
 using MinimalApi.Identity.API.Options;
 
 namespace MinimalApi.Identity.API.Middleware;

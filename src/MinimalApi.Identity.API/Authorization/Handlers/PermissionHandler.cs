@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Entities;
-using MinimalApi.Identity.API.Exceptions;
+using MinimalApi.Identity.API.Exceptions.Users;
 using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
 

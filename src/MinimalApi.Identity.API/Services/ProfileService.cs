@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
-using MinimalApi.Identity.API.Exceptions;
+using MinimalApi.Identity.API.Exceptions.BadRequest;
+using MinimalApi.Identity.API.Exceptions.NotFound;
+using MinimalApi.Identity.API.Mapping;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
 
@@ -15,7 +17,8 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
     public async Task<List<UserProfileModel>> GetProfilesAsync()
     {
         var profiles = await dbContext.UserProfiles.AsNoTracking()
-            .Select(x => new UserProfileModel(x.UserId, x.User.Email!, x.FirstName, x.LastName, x.IsEnabled, x.LastDateChangePassword))
+            //.Select(x => new UserProfileModel(x.UserId, x.User.Email!, x.FirstName, x.LastName, x.IsEnabled, x.LastDateChangePassword))
+            .Select(profile => ProfileMapper.FromEntity(profile))
             .ToListAsync();
 
         if (profiles.Count == 0)
@@ -35,7 +38,8 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
             .FirstOrDefaultAsync(x => x.UserId == user.Id)
             ?? throw new NotFoundProfileException(MessageApi.ProfileNotFound);
 
-        return new UserProfileModel(profile.UserId, user.Email!, profile.FirstName, profile.LastName, profile.IsEnabled, profile.LastDateChangePassword);
+        //return new UserProfileModel(profile.UserId, user.Email!, profile.FirstName, profile.LastName, profile.IsEnabled, profile.LastDateChangePassword);
+        return ProfileMapper.FromEntity(profile);
     }
 
     public async Task<string> CreateProfileAsync(CreateUserProfileModel model)
@@ -75,8 +79,8 @@ public class ProfileService(MinimalApiAuthDbContext dbContext, UserManager<Appli
 
         if (result == null)
         {
-            //return Array.Empty<Claim>();
-            return new List<Claim>();
+            //return new List<Claim>();
+            return [];
         }
 
         return
