@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using MinimalApi.Identity.API.Constants;
 using MinimalApi.Identity.API.Database;
 using MinimalApi.Identity.API.Entities;
-using MinimalApi.Identity.API.Exceptions;
+using MinimalApi.Identity.API.Exceptions.BadRequest;
+using MinimalApi.Identity.API.Exceptions.Conflict;
+using MinimalApi.Identity.API.Exceptions.NotFound;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Services.Interfaces;
 
