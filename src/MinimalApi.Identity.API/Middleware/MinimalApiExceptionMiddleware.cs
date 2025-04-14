@@ -106,9 +106,10 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
     private static HttpStatusCode GetStatusCodeFromException(Exception exception)
         => exception switch
         {
-            ArgumentOutOfRangeException or ArgumentNullException or BadRequestClaimException or
-            BadRequestLicenseException or BadRequestModuleException or BadRequestPolicyException or
-            BadRequestProfileException or BadRequestRoleException or BadRequestUserException => HttpStatusCode.BadRequest,
+            ArgumentOutOfRangeException or ArgumentNullException or BadRequestException or
+            BadRequestClaimException or BadRequestLicenseException or BadRequestModuleException or
+            BadRequestPolicyException or BadRequestProfileException or BadRequestRoleException or
+            BadRequestUserException => HttpStatusCode.BadRequest,
 
             ConflictClaimException or ConflictLicenseException or ConflictPolicyException or
             ConflictModuleException or ConflictRoleException => HttpStatusCode.Conflict,
@@ -129,6 +130,7 @@ public class MinimalApiExceptionMiddleware(RequestDelegate next, IOptions<Valida
         {
             ArgumentOutOfRangeException argumentOutOfRangeException => argumentOutOfRangeException.Message,
             ArgumentNullException argumentNullException => argumentNullException.Message,
+            BadRequestException badRequestException => badRequestException.Message,
             BadRequestClaimException badRequestClaimException => badRequestClaimException.Message,
             BadRequestLicenseException badRequestLicenseException => badRequestLicenseException.Message,
             BadRequestModuleException badRequestModuleException => badRequestModuleException.Message,
