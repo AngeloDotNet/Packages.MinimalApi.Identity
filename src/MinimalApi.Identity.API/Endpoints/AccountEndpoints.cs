@@ -26,8 +26,8 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
                 return opt;
             });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsConfirmEmail, [AllowAnonymous] async Task<IResult>
-            ([FromServices] IAccountService accountService, [FromRoute] string userId, [FromRoute] string token) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsConfirmEmail, [AllowAnonymous] async ([FromServices] IAccountService accountService,
+            [FromRoute] string userId, [FromRoute] string token) =>
         {
             return await accountService.ConfirmEmailAsync(userId, token);
         })
@@ -44,7 +44,7 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapPost(EndpointsApi.EndpointChangeEmail, async Task<IResult> ([FromServices] IAccountService accountService,
+        apiGroup.MapPost(EndpointsApi.EndpointChangeEmail, async ([FromServices] IAccountService accountService,
             ChangeEmailModel inputModel) =>
         {
             return await accountService.ChangeEmailAsync(inputModel);
@@ -64,9 +64,8 @@ public class AccountEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        apiGroup.MapGet(EndpointsApi.EndpointsConfirmEmailChange, [AllowAnonymous] async Task<IResult>
-            ([FromServices] IAccountService accountService, [FromRoute] string userId, [FromRoute] string email,
-            [FromRoute] string token) =>
+        apiGroup.MapGet(EndpointsApi.EndpointsConfirmEmailChange, [AllowAnonymous] async ([FromServices] IAccountService accountService,
+            [FromRoute] string userId, [FromRoute] string email, [FromRoute] string token) =>
         {
             return await accountService.ConfirmEmailChangeAsync(userId, email, token);
         })

@@ -7,7 +7,6 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 
 ### 🏗️ ToDo
 
-- [ ] Replacing generic IResults with specific ones for each services (AccountService)
 - [ ] Add endpoints to handle refresh token (currently generated, but not usable)
 - [ ] Add endpoints to impersonate the user
 - [ ] Add endpoint for forgotten password recovery
