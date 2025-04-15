@@ -40,7 +40,9 @@ public class PermissionHandler(ILogger<PermissionHandler> logger, UserManager<Ap
             }
         }
 
-        var userId = user.GetClaimValue(ClaimTypes.NameIdentifier);
+        //var userId = user.GetClaimValue(ClaimTypes.NameIdentifier);
+        var userId = user.GetUserId();
+        //var utente = await userManager.FindByIdAsync(userId);
         var utente = await userManager.FindByIdAsync(userId);
         var securityStamp = context.User.GetClaimValue(ClaimTypes.SerialNumber);
 
@@ -51,10 +53,8 @@ public class PermissionHandler(ILogger<PermissionHandler> logger, UserManager<Ap
             logger.LogWarning(message);
             throw new UserUnknownException(message);
         }
-        //else if (utente.LockoutEnd.GetValueOrDefault() > DateTimeOffset.UtcNow || securityStamp != utente.SecurityStamp)
         else if (utente.LockoutEnd.GetValueOrDefault() > DateTimeOffset.UtcNow)
         {
-            //var message = $"User {user?.Identity?.Name} is locked out";
             var message = MessageApi.UserLockedOut;
 
             logger.LogWarning(message);
