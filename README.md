@@ -7,13 +7,18 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 
 ### 🏗️ ToDo
 
-- [ ] Add endpoints to handle refresh token (currently generated, but not usable)
 - [ ] Add endpoints to impersonate the user
 - [ ] Add endpoint for forgotten password recovery
 - [ ] Add endpoint for password change
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
 - [ ] Add API documentation
+
+### 🔜 Future implementations
+
+- [ ] Replacing the hosted service authorization policy updater using Coravel jobs
+- [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
+- [ ] Add support for the Mediator pattern
 
 ### 🛠️ Installation
 
@@ -187,12 +192,6 @@ You can find a sample project in the [example](https://github.com/AngeloDotNet/P
 - [JWT Bearer Token](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer)
 - [MailKit](https://www.nuget.org/packages/MailKit)
 - [Scrutor](https://www.nuget.org/packages/Scrutor)
-
-### 🔜 Future implementations
-
-- [ ] Replacing the hosted service authorization policy updater using Coravel jobs
-- [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
-- [ ] Add support for the Mediator pattern
 
 ### 📝 License
 

@@ -7,4 +7,5 @@ public interface IAuthService
     Task<string> RegisterAsync(RegisterModel model);
     Task<AuthResponseModel> LoginAsync(LoginModel model);
     Task<string> LogoutAsync();
+    Task<AuthResponseModel> RefreshTokenAsync(RefreshTokenModel model);
 }

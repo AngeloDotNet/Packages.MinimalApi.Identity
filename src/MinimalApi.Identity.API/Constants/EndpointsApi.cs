@@ -25,6 +25,7 @@ public static class EndpointsApi
 
     public const string EndpointsAuthRegister = "/register";
     public const string EndpointsAuthLogin = "/login";
+    public const string EndpointsAuthRefreshToken = "/refresh-token";
     public const string EndpointsAuthLogout = "/logout";
     public const string EndpointsForgotPassword = "/forgot-password";
     public const string EndpointsResetPassword = "/reset-password";

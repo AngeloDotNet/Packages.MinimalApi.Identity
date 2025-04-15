@@ -56,5 +56,36 @@ public static class ServicesExtensions
         return services.AddRegisterService<TAssembly>(stringEndsWith, ServiceLifetime.Singleton);
     }
 
+    //public static Guid GetUserId(this IPrincipal user)
+    //{
+    //    var value = user.GetClaimValue(ClaimTypes.NameIdentifier);
+
+    //    return Guid.Parse(value);
+    //}
+
+    //public static string GetUserId(this IPrincipal user)
+    //{
+    //    var value = user.GetClaimValue(ClaimTypes.NameIdentifier);
+
+    //    return Guid.Parse(value).ToString();
+    //}
+
+    public static string GetUserId(this IPrincipal user)
+    {
+        if (user is not ClaimsPrincipal claimsPrincipal)
+        {
+            throw new ArgumentException("User must be a ClaimsPrincipal", nameof(user));
+        }
+
+        var claimValue = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(claimValue))
+        {
+            throw new InvalidOperationException("Claim value for NameIdentifier is missing or empty.");
+        }
+
+        return claimValue;
+    }
+
     public static string GetClaimValue(this IPrincipal user, string claimType) => ((ClaimsPrincipal)user).FindFirst(claimType)?.Value!;
 }

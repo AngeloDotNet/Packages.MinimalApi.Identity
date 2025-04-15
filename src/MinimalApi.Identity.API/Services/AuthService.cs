@@ -13,6 +13,7 @@ using MinimalApi.Identity.API.Enums;
 using MinimalApi.Identity.API.Exceptions.BadRequest;
 using MinimalApi.Identity.API.Exceptions.NotFound;
 using MinimalApi.Identity.API.Exceptions.Users;
+using MinimalApi.Identity.API.Extensions;
 using MinimalApi.Identity.API.Models;
 using MinimalApi.Identity.API.Options;
 using MinimalApi.Identity.API.Services.Interfaces;
@@ -62,7 +63,6 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         var lastDateChangePassword = profileUser.LastDateChangePassword;
         var checkLastDateChangePassword = CheckLastDateChangePassword(lastDateChangePassword, userOptions);
 
-        //if (lastDateChangePassword == null || lastDateChangePassword.Value.AddDays(userOptions.PasswordExpirationDays) <= DateOnly.FromDateTime(DateTime.UtcNow))
         if (lastDateChangePassword == null || checkLastDateChangePassword)
         {
             throw new BadRequestProfileException(MessageApi.UserForcedChangePassword);
@@ -92,8 +92,8 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
         var loginResponse = CreateToken(claims, jwtOptions);
 
-        //user.RefreshToken = loginResponse.RefreshToken;
-        //user.RefreshTokenExpirationDate = DateTime.UtcNow.AddMinutes(60);
+        user.RefreshToken = loginResponse.RefreshToken;
+        user.RefreshTokenExpirationDate = DateTime.UtcNow.AddMinutes(60);
 
         await userManager.UpdateAsync(user);
 
@@ -143,6 +143,60 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         }
 
         throw new BadRequestUserException(result.Errors);
+    }
+
+    //public async Task<AuthResponseModel> RefreshTokenAsync(RefreshTokenModel model)
+    //{
+    //    var jwtOptions = jOptions.Value;
+    //    var user = ValidateAccessToken(model.AccessToken);
+
+    //    if (user != null)
+    //    {
+    //        var userId = user.GetUserId();
+    //        var dbUser = await userManager.FindByIdAsync(userId);
+
+    //        if (dbUser?.RefreshToken == null || dbUser?.RefreshTokenExpirationDate < DateTime.UtcNow || dbUser?.RefreshToken != model.RefreshToken)
+    //        {
+    //            throw new BadRequestUserException(MessageApi.InvalidRefreshToken);
+    //            //return null;
+    //        }
+
+    //        var loginResponse = CreateToken(user.Claims.ToList(), jwtOptions);
+
+    //        dbUser.RefreshToken = loginResponse.RefreshToken;
+    //        dbUser.RefreshTokenExpirationDate = DateTime.UtcNow.AddMinutes(jwtOptions.RefreshTokenExpirationMinutes);
+
+    //        await userManager.UpdateAsync(dbUser);
+
+    //        return loginResponse;
+    //    }
+
+    //    throw new BadRequestUserException(MessageApi.InvalidAccessToken);
+    //    //return null;
+    //}
+
+    public async Task<AuthResponseModel> RefreshTokenAsync(RefreshTokenModel model)
+    {
+        var jwtOptions = jOptions.Value;
+        var user = ValidateAccessToken(model.AccessToken)
+            ?? throw new BadRequestUserException(MessageApi.InvalidAccessToken);
+
+        var userId = user.GetUserId();
+        var dbUser = await userManager.FindByIdAsync(userId);
+
+        if (dbUser?.RefreshToken == null || dbUser.RefreshTokenExpirationDate <= DateTime.UtcNow || dbUser.RefreshToken != model.RefreshToken)
+        {
+            throw new BadRequestUserException(MessageApi.InvalidRefreshToken);
+        }
+
+        var loginResponse = CreateToken(user.Claims.ToList(), jwtOptions);
+
+        dbUser.RefreshToken = loginResponse.RefreshToken;
+        dbUser.RefreshTokenExpirationDate = DateTime.UtcNow.AddMinutes(jwtOptions.RefreshTokenExpirationMinutes);
+
+        await userManager.UpdateAsync(dbUser);
+
+        return loginResponse;
     }
 
     public async Task<string> LogoutAsync()
@@ -264,6 +318,39 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         }
 
         return customClaims;
+    }
+
+    private ClaimsPrincipal ValidateAccessToken(string accessToken)
+    {
+        var jwtOptions = jOptions.Value;
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateLifetime = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecurityKey)),
+            RequireExpirationTime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        try
+        {
+            var user = tokenHandler.ValidateToken(accessToken, tokenValidationParameters, out var securityToken);
+
+            if (securityToken is JwtSecurityToken jwtSecurityToken && jwtSecurityToken.Header.Alg == SecurityAlgorithms.HmacSha256)
+            {
+                return user;
+            }
+        }
+        catch
+        { }
+
+        return null;
     }
 
     private static bool CheckLastDateChangePassword(DateOnly? lastDate, UsersOptions userOptions)
