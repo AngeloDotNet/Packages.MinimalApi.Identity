@@ -60,7 +60,24 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
 
             opt.Response(StatusCodes.Status200OK).Description = "User logged in successfully";
             opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
+            return opt;
+        });
 
+        apiGroup.MapPost(EndpointsApi.EndpointsAuthRefreshToken, [AllowAnonymous] async ([FromServices] IAuthService authService,
+            [FromBody] RefreshTokenModel inputModel) =>
+        {
+            return await authService.RefreshTokenAsync(inputModel);
+        })
+        .Produces<Ok<AuthResponseModel>>(StatusCodes.Status200OK)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
+        .WithValidation<RefreshTokenModel>()
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Refresh token user";
+            opt.Summary = "Refresh token user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Token refreshed successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
             return opt;
         });
 
