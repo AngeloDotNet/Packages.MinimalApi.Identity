@@ -52,12 +52,12 @@ jobs:
         dotnet nuget add source --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
         dotnet nuget push **\*.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
-#    - name: Create release
-#      uses: actions/create-release@v1
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      with:
-#          tag_name: ${{ env.TAG_NAME }}_v${{ steps.nbgv.outputs.NuGetPackageVersion }}
-#          release_name: ${{ env.RELEASE_NAME }} ${{ steps.nbgv.outputs.NuGetPackageVersion }}
-#          draft: false
-#          prerelease: false
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          tag_name: ${{ env.TAG_NAME }}_v${{ steps.nbgv.outputs.NuGetPackageVersion }}
+          release_name: ${{ env.RELEASE_NAME }} ${{ steps.nbgv.outputs.NuGetPackageVersion }}
+          draft: false
+          prerelease: false
