@@ -145,36 +145,6 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         throw new BadRequestUserException(result.Errors);
     }
 
-    //public async Task<AuthResponseModel> RefreshTokenAsync(RefreshTokenModel model)
-    //{
-    //    var jwtOptions = jOptions.Value;
-    //    var user = ValidateAccessToken(model.AccessToken);
-
-    //    if (user != null)
-    //    {
-    //        var userId = user.GetUserId();
-    //        var dbUser = await userManager.FindByIdAsync(userId);
-
-    //        if (dbUser?.RefreshToken == null || dbUser?.RefreshTokenExpirationDate < DateTime.UtcNow || dbUser?.RefreshToken != model.RefreshToken)
-    //        {
-    //            throw new BadRequestUserException(MessageApi.InvalidRefreshToken);
-    //            //return null;
-    //        }
-
-    //        var loginResponse = CreateToken(user.Claims.ToList(), jwtOptions);
-
-    //        dbUser.RefreshToken = loginResponse.RefreshToken;
-    //        dbUser.RefreshTokenExpirationDate = DateTime.UtcNow.AddMinutes(jwtOptions.RefreshTokenExpirationMinutes);
-
-    //        await userManager.UpdateAsync(dbUser);
-
-    //        return loginResponse;
-    //    }
-
-    //    throw new BadRequestUserException(MessageApi.InvalidAccessToken);
-    //    //return null;
-    //}
-
     public async Task<AuthResponseModel> RefreshTokenAsync(RefreshTokenModel model)
     {
         var jwtOptions = jOptions.Value;
@@ -348,9 +318,14 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
             }
         }
         catch
-        { }
+        {
+            // Token validation failed
+            // Log the exception if needed
+        }
 
-        return null;
+        // Token is invalid or expired
+        // Log the invalid token if needed
+        return null!;
     }
 
     private static bool CheckLastDateChangePassword(DateOnly? lastDate, UsersOptions userOptions)

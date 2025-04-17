@@ -56,20 +56,6 @@ public static class ServicesExtensions
         return services.AddRegisterService<TAssembly>(stringEndsWith, ServiceLifetime.Singleton);
     }
 
-    //public static Guid GetUserId(this IPrincipal user)
-    //{
-    //    var value = user.GetClaimValue(ClaimTypes.NameIdentifier);
-
-    //    return Guid.Parse(value);
-    //}
-
-    //public static string GetUserId(this IPrincipal user)
-    //{
-    //    var value = user.GetClaimValue(ClaimTypes.NameIdentifier);
-
-    //    return Guid.Parse(value).ToString();
-    //}
-
     public static string GetUserId(this IPrincipal user)
     {
         if (user is not ClaimsPrincipal claimsPrincipal)

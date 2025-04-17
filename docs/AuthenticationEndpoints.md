@@ -1,6 +1,8 @@
 ### Endpoints: /auth
 
+> These endpoints do not require authentication.
 #### Login
+
 ```http
   POST /api/auth/login
 ```
@@ -17,9 +19,8 @@
   POST /api/auth/logout
 ```
 
-> This endpoint does not require any parameters.
-
 #### Register
+
 ```http
   POST /api/auth/register
 ```
@@ -33,6 +34,7 @@
 | `password` | `string` | Yes |
 
 #### Refresh Token
+
 ```http
   POST /api/auth/refresh-token
 ```
