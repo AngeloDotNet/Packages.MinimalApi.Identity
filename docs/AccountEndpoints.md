@@ -2,6 +2,8 @@
 
 #### Confirm email address
 
+> This endpoint does not require authentication.
+
 ```http
   GET /api/account/confirm-email/{userId}/{token}
 ```
@@ -23,6 +25,8 @@
 | `newEmail` | `string` | Yes |
 
 #### Confirm email address change
+
+> This endpoint does not require authentication.
 
 ```http
   GET /api/account/confirm-email-change/{userId}/{email}/{token}
