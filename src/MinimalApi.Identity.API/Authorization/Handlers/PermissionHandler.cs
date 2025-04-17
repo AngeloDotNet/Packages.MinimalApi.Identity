@@ -40,9 +40,7 @@ public class PermissionHandler(ILogger<PermissionHandler> logger, UserManager<Ap
             }
         }
 
-        //var userId = user.GetClaimValue(ClaimTypes.NameIdentifier);
         var userId = user.GetUserId();
-        //var utente = await userManager.FindByIdAsync(userId);
         var utente = await userManager.FindByIdAsync(userId);
         var securityStamp = context.User.GetClaimValue(ClaimTypes.SerialNumber);
 
