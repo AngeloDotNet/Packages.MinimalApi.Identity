@@ -1,7 +1,6 @@
 ### Endpoints: /auth
 
-> This endpoints does not require authentication.
-
+> These endpoints do not require authentication.
 #### Login
 
 ```http
