@@ -9,7 +9,6 @@ public interface IAuthPolicyService
     Task<List<PolicyResponseModel>> GetAllPoliciesAsync();
     Task<string> CreatePolicyAsync(CreatePolicyModel model);
     Task<string> DeletePolicyAsync(DeletePolicyModel model);
-
     Task<bool> GenerateAuthPoliciesAsync();
     Task<bool> UpdateAuthPoliciesAsync();
     Task<List<AuthPolicy>> GetAllAuthPoliciesAsync(Expression<Func<AuthPolicy, bool>> filter = null!);

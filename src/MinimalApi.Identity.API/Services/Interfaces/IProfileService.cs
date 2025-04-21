@@ -10,7 +10,6 @@ public interface IProfileService
     Task<UserProfileModel> GetProfileAsync(int userId);
     Task<string> CreateProfileAsync(CreateUserProfileModel model);
     Task<string> EditProfileAsync(EditUserProfileModel model);
-    //Task<IList<Claim>> GetClaimUserProfileAsync(ApplicationUser user);
     Task<List<Claim>> GetClaimUserProfileAsync(ApplicationUser user);
     Task<string> ChangeEnablementStatusUserProfileAsync(ChangeEnableProfileModel model);
 }
