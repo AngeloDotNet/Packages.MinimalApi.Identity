@@ -10,65 +10,12 @@ using MinimalApi.Identity.BusinessLayer.Authorization.Requirement;
 
 namespace MinimalApi.Identity.API.Authorization.Handlers;
 
-//TODO: cleanup this class
 public class PermissionHandler(ILogger<PermissionHandler> logger, UserManager<ApplicationUser> userManager) : IAuthorizationHandler
 {
     public async Task HandleAsync(AuthorizationHandlerContext context)
     {
         var user = context.User;
         var permissionsRequirements = context.Requirements.OfType<PermissionRequirement>();
-
-        //if (user.Identity?.IsAuthenticated != true)
-        //{
-        //    var message = "User is not authenticated";
-
-        //    logger.LogWarning(message);
-        //    throw new UserUnknownException(message);
-        //}
-
-        //if (UsersExtensions.IsAuthenticated(user, logger))
-        //{
-        //    foreach (var permissionRequirement in permissionsRequirements)
-        //    {
-        //        if (permissionRequirement.Permissions.All(permission => user.HasClaim(CustomClaimTypes.Permission, permission)))
-        //        {
-        //            context.Succeed(permissionRequirement);
-        //        }
-        //        else
-        //        {
-        //            var message = $"User {user?.Identity?.Name} does not have the required permissions";
-
-        //            logger.LogWarning(message);
-        //            throw new UserWithoutPermissionsException(message);
-        //        }
-        //    }
-
-        //    var userId = user.GetUserId();
-        //    var utente = await userManager.FindByIdAsync(userId);
-        //    var securityStamp = context.User.GetClaimValue(ClaimTypes.SerialNumber);
-
-        //    if (utente == null)
-        //    {
-        //        var message = $"User {user?.Identity?.Name} not found";
-
-        //        logger.LogWarning(message);
-        //        throw new UserUnknownException(message);
-        //    }
-        //    else if (utente.LockoutEnd.GetValueOrDefault() > DateTimeOffset.UtcNow)
-        //    {
-        //        var message = MessageApi.UserLockedOut;
-
-        //        logger.LogWarning(message);
-        //        throw new UserIsLockedException(message);
-        //    }
-        //    else if (securityStamp != utente.SecurityStamp)
-        //    {
-        //        var message = $"User {user?.Identity?.Name} security stamp is invalid";
-
-        //        logger.LogWarning(message);
-        //        throw new UserTokenIsInvalidException(message);
-        //    }
-        //}
 
         if (UsersExtensions.IsAuthenticated(user))
         {
