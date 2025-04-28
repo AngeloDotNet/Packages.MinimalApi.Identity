@@ -81,6 +81,24 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
+        apiGroup.MapPost(EndpointsApi.EndpointsImpersonateUser, async ([FromServices] IAuthService authService,
+            [FromBody] ImpersonateUserModel inputModel) =>
+        {
+            return await authService.ImpersonateAsync(inputModel);
+        })
+        .Produces<Ok<AuthResponseModel>>(StatusCodes.Status200OK)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
+        .WithValidation<ImpersonateUserModel>()
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Impersonate user";
+            opt.Summary = "Impersonate user";
+
+            opt.Response(StatusCodes.Status200OK).Description = "User impersonated successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
+            return opt;
+        });
+
         apiGroup.MapPost(EndpointsApi.EndpointsAuthLogout, [AllowAnonymous] async ([FromServices] IAuthService authService) =>
         {
             return await authService.LogoutAsync();
