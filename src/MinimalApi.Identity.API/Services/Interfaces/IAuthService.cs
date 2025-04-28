@@ -8,4 +8,5 @@ public interface IAuthService
     Task<AuthResponseModel> LoginAsync(LoginModel model);
     Task<string> LogoutAsync();
     Task<AuthResponseModel> RefreshTokenAsync(RefreshTokenModel model);
+    Task<AuthResponseModel> ImpersonateAsync(ImpersonateUserModel inputModel);
 }

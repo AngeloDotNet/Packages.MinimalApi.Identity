@@ -176,6 +176,57 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         return MessageApi.UserLogOut;
     }
 
+    public async Task<AuthResponseModel> ImpersonateAsync(ImpersonateUserModel inputModel)
+    {
+        var jwtOptions = jOptions.Value;
+        var user = await userManager.FindByIdAsync(inputModel.UserId.ToString())
+            ?? throw new UserUnknownException($"User not found");
+
+        if (user.LockoutEnd.GetValueOrDefault() > DateTimeOffset.UtcNow)
+        {
+            throw new UserIsLockedException(MessageApi.UserLockedOut);
+        }
+
+        await userManager.UpdateSecurityStampAsync(user);
+
+        var userRoles = await userManager.GetRolesAsync(user);
+        var userClaims = await userManager.GetClaimsAsync(user);
+
+        var customClaims = await GetCustomClaimsUserAsync(user);
+        var identity = UsersExtensions.GetIdentity(httpContextAccessor);
+
+        UpdateClaim(ClaimTypes.NameIdentifier, user.Id.ToString());
+        UpdateClaim(ClaimTypes.Name, user.UserName ?? string.Empty);
+        UpdateClaim(ClaimTypes.Email, user.Email ?? string.Empty);
+        UpdateClaim(ClaimTypes.SerialNumber, user.SecurityStamp!.ToString());
+
+        var updateIdentity = identity.Claims
+            .Union(userClaims)
+            .Union(customClaims)
+            .Union(userRoles.Select(role => new Claim(ClaimTypes.Role, role))).ToList();
+
+        var loginResponse = CreateToken(updateIdentity, jwtOptions);
+
+        user.RefreshToken = loginResponse.RefreshToken;
+        user.RefreshTokenExpirationDate = DateTime.UtcNow.AddMinutes(jwtOptions.RefreshTokenExpirationMinutes);
+
+        await userManager.UpdateAsync(user);
+
+        return loginResponse;
+
+        void UpdateClaim(string type, string value)
+        {
+            var existingClaim = identity.FindFirst(type);
+
+            if (existingClaim != null)
+            {
+                identity.RemoveClaim(existingClaim);
+            }
+
+            identity.AddClaim(new Claim(type, value));
+        }
+    }
+
     private static AuthResponseModel CreateToken(List<Claim> claims, JwtOptions jwtOptions)
     {
         var audienceClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud);
