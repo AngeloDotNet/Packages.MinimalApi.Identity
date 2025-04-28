@@ -32,6 +32,7 @@ public static class EndpointsApi
     public const string EndpointChangeEmail = "/change-email";
     public const string EndpointsConfirmEmail = "/confirm-email/{userId}/{token}";
     public const string EndpointsConfirmEmailChange = "/confirm-email-change/{userId}/{email}/{token}";
+    public const string EndpointsImpersonateUser = "/impersonate-user";
 
     public const string EndpointsGetProfile = "/{userId}";
     public const string EndpointsEditProfile = "/edit-profile";
