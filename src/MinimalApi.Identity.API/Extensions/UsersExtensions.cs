@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
+using Microsoft.AspNetCore.Http;
 using MinimalApi.Identity.API.Exceptions.Users;
 
 namespace MinimalApi.Identity.API.Extensions;
@@ -36,4 +37,6 @@ public static class UsersExtensions
 
         return userIsAuthenticated;
     }
+
+    public static ClaimsIdentity GetIdentity(this IHttpContextAccessor httpContextAccessor) => httpContextAccessor.HttpContext.User.Identity as ClaimsIdentity;
 }

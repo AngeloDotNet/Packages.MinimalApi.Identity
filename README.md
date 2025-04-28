@@ -7,11 +7,11 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 
 ### 🏗️ ToDo
 
-- [ ] Add endpoints to impersonate the user
 - [ ] Add endpoint for forgotten password recovery
 - [ ] Add endpoint for password change
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
+- [ ] Test endpoints to impersonate the user
 - [ ] Add API documentation
 
 ### 🔜 Future implementations
@@ -20,7 +20,7 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 - [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
 - [ ] Add support for the Mediator pattern
 - [ ] Add support for multi tenancy
-- [ ] Add authentication support from third-party providers
+- [ ] Add authentication support from third-party providers (e.g. GitHub, Azure)
 
 ### 🛠️ Installation
 
