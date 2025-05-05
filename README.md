@@ -7,8 +7,7 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 
 ### 🏗️ ToDo
 
-- [ ] Add endpoint for forgotten password recovery
-- [ ] Add endpoint for password change
+- [ ] Add endpoint for password change (Reset Password)
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
 - [ ] Test endpoints to impersonate the user
@@ -18,7 +17,6 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 
 - [ ] Replacing the hosted service authorization policy updater using Coravel jobs
 - [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
-- [ ] Add support for the Mediator pattern
 - [ ] Add support for multi tenancy
 - [ ] Add authentication support from third-party providers (e.g. GitHub, Azure)
 
