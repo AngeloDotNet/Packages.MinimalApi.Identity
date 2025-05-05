@@ -22,7 +22,8 @@ namespace MinimalApi.Identity.API.Services;
 
 public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOptions> iOptions, IOptions<UsersOptions> uOptions,
     UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSenderService emailSender,
-    IHttpContextAccessor httpContextAccessor, ILicenseService licenseService, IModuleService moduleService, IProfileService profileService) : IAuthService
+    IHttpContextAccessor httpContextAccessor, ILicenseService licenseService, IModuleService moduleService, IProfileService profileService)
+    : IAuthService
 {
     public async Task<AuthResponseModel> LoginAsync(LoginModel model)
     {
@@ -227,6 +228,28 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         }
     }
 
+    public async Task<string> ForgotPasswordAsync(ForgotPasswordModel inputModel)
+    {
+        var user = await userManager.FindByEmailAsync(inputModel.Email)
+            ?? throw new NotFoundUserException(MessageApi.UserNotFound);
+
+        if (!await userManager.IsEmailConfirmedAsync(user))
+        {
+            throw new BadRequestException(MessageApi.ErrorEmailNotConfirmed);
+        }
+
+        var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+        var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetToken));
+        var messageText = $"To reset your password, you will need to indicate this code: {encodedToken}. " +
+            "It is recommended to copy and paste for simplicity.";
+
+        await emailSender.SendEmailAsync(user.Email!, "Reset Password", messageText, EmailSendingType.ForgotPassword);
+
+        return MessageApi.SendEmailResetPassword;
+    }
+
+    #region "Private method"
+
     private static AuthResponseModel CreateToken(List<Claim> claims, JwtOptions jwtOptions)
     {
         var audienceClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud);
@@ -388,4 +411,6 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
         return false;
     }
+
+    #endregion
 }
