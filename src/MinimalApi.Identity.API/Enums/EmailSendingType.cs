@@ -3,5 +3,6 @@
 public enum EmailSendingType
 {
     RegisterUser,
-    ChangeEmail
+    ChangeEmail,
+    ForgotPassword
 }
