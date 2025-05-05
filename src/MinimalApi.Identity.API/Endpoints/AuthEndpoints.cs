@@ -114,46 +114,22 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             return opt;
         });
 
-        //apiGroup.MapPost(EndpointsApi.EndpointsForgotPassword, async Task<Results<Ok<string>, NotFound<string>>>
-        //        ([FromServices] UserManager<ApplicationUser> userManager, [FromServices] IEmailSender emailSender,
-        //        [FromServices] IHttpContextAccessor httpContextAccessor, [FromBody] ForgotPasswordModel inputModel) =>
-        //    {
-        //        var user = await userManager.FindByEmailAsync(inputModel.Email);
+        apiGroup.MapPost(EndpointsApi.EndpointsForgotPassword, async ([FromServices] IAuthService authService,
+            [FromBody] ForgotPasswordModel inputModel) =>
+        {
+            return await authService.ForgotPasswordAsync(inputModel);
+        })
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
+        .WithValidation<ForgotPasswordModel>()
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Forgot password";
+            opt.Summary = "Forgot password";
 
-        //        if (user == null)
-        //        {
-        //            return TypedResults.NotFound(MessageApi.UserNotFound);
-        //        }
-
-        //        var token = await userManager.GeneratePasswordResetTokenAsync(user);
-        //        var request = httpContextAccessor.HttpContext!.Request;
-
-        //        await emailSender.SendEmailAsync(user.Email!, "Reset Password", $"To reset your password, you will need to indicate " +
-        //            $"this token: {token}. It is recommended to copy and paste for simplicity.");
-
-        //        return TypedResults.Ok(MessageApi.SendEmailResetPassword);
-        //    })
-        //    .WithOpenApi();
-
-        //apiGroup.MapPost(EndpointsApi.EndpointsResetPassword, async Task<Results<Ok<string>, NotFound<string>,
-        //    BadRequest<IEnumerable<IdentityError>>>> ([FromServices] UserManager<ApplicationUser> userManager,
-        //    [FromBody] ResetPasswordModel inputModel) =>
-        //{
-        //    var user = await userManager.FindByEmailAsync(inputModel.Email);
-        //    if (user == null)
-        //    {
-        //        return TypedResults.NotFound(MessageApi.UserNotFound);
-        //    }
-
-        //    var result = await userManager.ResetPasswordAsync(user, inputModel.Token, inputModel.Password);
-
-        //    if (result.Succeeded)
-        //    {
-        //        return TypedResults.Ok(MessageApi.ResetPassword);
-        //    }
-
-        //    return TypedResults.BadRequest(result.Errors);
-        //})
-        //.WithOpenApi();
+            opt.Response(StatusCodes.Status200OK).Description = "Password reset link sent successfully";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
+            return opt;
+        });
     }
 }

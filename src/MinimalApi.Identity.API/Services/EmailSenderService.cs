@@ -11,10 +11,13 @@ namespace MinimalApi.Identity.API.Services;
 public class EmailSenderService(IEmailSavingService emailSaving, IOptions<SmtpOptions> smtpOptions) : IEmailSenderService
 {
     public async Task SendEmailTypeAsync(string email, string callbackUrl, EmailSendingType typeSender)
-        => await SendEmailAsync(email, "Confirm your email",
+        => await MailKitSendEmailAsync(email, "Confirm your email",
             $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.", typeSender);
 
-    private async Task SendEmailAsync(string emailTo, string emailSubject, string emailMessage, EmailSendingType emailSendingType)
+    public async Task SendEmailAsync(string email, string subject, string message, EmailSendingType typeSender)
+        => await MailKitSendEmailAsync(email, subject, message, typeSender);
+
+    private async Task MailKitSendEmailAsync(string emailTo, string emailSubject, string emailMessage, EmailSendingType emailSendingType)
     {
         var options = smtpOptions.Value;
 

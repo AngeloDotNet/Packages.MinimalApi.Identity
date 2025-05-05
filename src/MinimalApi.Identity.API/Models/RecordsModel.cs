@@ -2,7 +2,7 @@
 
 public record class RegisterModel(string Firstname, string Lastname, string Username, string Email, string Password);
 public record class LoginModel(string Username, string Password, bool RememberMe);
-//public record class ForgotPasswordModel(string Email);
+public record class ForgotPasswordModel(string Email);
 //public record class ResetPasswordModel(string Email, string Token, string Password);
 public record class RefreshTokenModel(string AccessToken, string RefreshToken);
 public record class ChangeEmailModel(string Email, string NewEmail);

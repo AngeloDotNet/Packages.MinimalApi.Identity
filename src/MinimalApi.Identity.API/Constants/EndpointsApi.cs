@@ -28,7 +28,7 @@ public static class EndpointsApi
     public const string EndpointsAuthRefreshToken = "/refresh-token";
     public const string EndpointsAuthLogout = "/logout";
     public const string EndpointsForgotPassword = "/forgot-password";
-    public const string EndpointsResetPassword = "/reset-password";
+    public const string EndpointsResetPassword = "/reset-password/{code}";
     public const string EndpointChangeEmail = "/change-email";
     public const string EndpointsConfirmEmail = "/confirm-email/{userId}/{token}";
     public const string EndpointsConfirmEmailChange = "/confirm-email-change/{userId}/{email}/{token}";

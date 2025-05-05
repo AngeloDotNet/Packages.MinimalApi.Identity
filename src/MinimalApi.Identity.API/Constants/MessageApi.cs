@@ -12,8 +12,9 @@ public static class MessageApi
     public const string ErrorChangeUsername = "Error changing username";
     public const string NewEmailIsRequired = "New email is required";
     public const string SendEmailForChangeEmail = "Confirmation link to change email sent. Please check your email";
-    public const string SendEmailResetPassword = "Email sent successfully";
+    public const string SendEmailResetPassword = "Please check your email to reset your password";
     public const string ResetPassword = "Password reset successfully";
+    public const string ErrorEmailNotConfirmed = "Email not confirmed";
 
     public const string UserCreated = "User created successfully";
     public const string UserNotAllowedLogin = "User is not allowed to sign in";
