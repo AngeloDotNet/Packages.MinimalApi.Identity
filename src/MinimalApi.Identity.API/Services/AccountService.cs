@@ -21,12 +21,8 @@ public class AccountService(UserManager<ApplicationUser> userManager, IEmailSend
             throw new BadRequestUserException(MessageApi.UserIdTokenRequired);
         }
 
-        var user = await userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            throw new BadRequestUserException(MessageApi.UserNotFound);
-        }
+        var user = await userManager.FindByIdAsync(userId)
+            ?? throw new BadRequestUserException(MessageApi.UserNotFound);
 
         var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
         var result = await userManager.ConfirmEmailAsync(user, code);
