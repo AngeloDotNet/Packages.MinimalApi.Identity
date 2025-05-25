@@ -25,9 +25,11 @@ jobs:
         fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
 
     - name: Setup .NET Core SDK ${{ env.NET_VERSION }}
-      uses: actions/setup-dotnet@v4.3.0
+      #uses: actions/setup-dotnet@v4.3.0
+      uses: actions/setup-dotnet@v4.3.2
       with:
         dotnet-version: ${{ env.NET_VERSION }}
+        dotnet-quality: 'ga'
 
     - name: Build with dotnet
       run: dotnet build --configuration Release
@@ -53,7 +55,8 @@ jobs:
         dotnet nuget push **\*.nupkg --source github --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
     - name: Create release
-      uses: actions/create-release@v1
+      #uses: actions/create-release@v1
+      uses: actions/create-release@v1.1.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
