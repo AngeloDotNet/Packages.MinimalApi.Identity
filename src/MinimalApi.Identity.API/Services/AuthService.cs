@@ -250,7 +250,7 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
 
     public async Task<string> ResetPasswordAsync(ResetPasswordModel inputModel, string code)
     {
-        if (code == null)
+        if (string.IsNullOrWhiteSpace(code))
         {
             throw new BadRequestUserException(MessageApi.ErrorCodeResetPassword);
         }
