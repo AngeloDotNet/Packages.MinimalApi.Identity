@@ -139,7 +139,7 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
         })
         .Produces<Ok<string>>(StatusCodes.Status200OK)
         .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
-        .WithValidation<ForgotPasswordModel>()
+        .WithValidation<ResetPasswordModel>()
         .WithOpenApi(opt =>
         {
             opt.Description = "Reset password";
