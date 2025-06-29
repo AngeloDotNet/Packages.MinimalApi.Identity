@@ -15,6 +15,7 @@ public static class MessageApi
     public const string SendEmailResetPassword = "Please check your email to reset your password";
     public const string ResetPassword = "Password reset successfully";
     public const string ErrorEmailNotConfirmed = "Email not confirmed";
+    public const string ErrorCodeResetPassword = "A code must be supplied for password reset.";
 
     public const string UserCreated = "User created successfully";
     public const string UserNotAllowedLogin = "User is not allowed to sign in";

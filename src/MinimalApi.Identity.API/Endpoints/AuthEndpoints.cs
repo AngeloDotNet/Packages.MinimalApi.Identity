@@ -131,5 +131,23 @@ public class AuthEndpoints : IEndpointRouteHandlerBuilder
             opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
             return opt;
         });
+
+        apiGroup.MapPost(EndpointsApi.EndpointsResetPassword, async ([FromServices] IAuthService authService,
+            [FromBody] ResetPasswordModel inputModel, [FromRoute] string code) =>
+        {
+            return await authService.ResetPasswordAsync(inputModel, code);
+        })
+        .Produces<Ok<string>>(StatusCodes.Status200OK)
+        .ProducesDefaultProblem(StatusCodes.Status400BadRequest, StatusCodes.Status422UnprocessableEntity)
+        .WithValidation<ResetPasswordModel>()
+        .WithOpenApi(opt =>
+        {
+            opt.Description = "Reset password";
+            opt.Summary = "Reset password";
+
+            opt.Response(StatusCodes.Status200OK).Description = "Your password has been reset.";
+            opt.Response(StatusCodes.Status400BadRequest).Description = "Bad Request";
+            return opt;
+        });
     }
 }

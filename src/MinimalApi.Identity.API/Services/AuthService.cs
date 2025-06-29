@@ -248,6 +248,28 @@ public class AuthService(IOptions<JwtOptions> jOptions, IOptions<NetIdentityOpti
         return MessageApi.SendEmailResetPassword;
     }
 
+    public async Task<string> ResetPasswordAsync(ResetPasswordModel inputModel, string code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            throw new BadRequestUserException(MessageApi.ErrorCodeResetPassword);
+        }
+
+        var user = await userManager.FindByEmailAsync(inputModel.Email)
+            ?? throw new NotFoundUserException(MessageApi.UserNotFound);
+
+        var result = await userManager.ResetPasswordAsync(user, code, inputModel.Password);
+
+        if (result.Succeeded)
+        {
+            return MessageApi.ResetPassword;
+        }
+        else
+        {
+            throw new BadRequestUserException(result.Errors);
+        }
+    }
+
     #region "Private method"
 
     private static AuthResponseModel CreateToken(List<Claim> claims, JwtOptions jwtOptions)

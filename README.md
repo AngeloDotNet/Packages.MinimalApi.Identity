@@ -7,7 +7,6 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 
 ### 🏗️ ToDo
 
-- [ ] Add endpoint for password change (Reset Password)
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
 - [ ] Test endpoints to impersonate the user

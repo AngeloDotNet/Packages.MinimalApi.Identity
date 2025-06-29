@@ -10,4 +10,5 @@ public interface IAuthService
     Task<AuthResponseModel> RefreshTokenAsync(RefreshTokenModel model);
     Task<AuthResponseModel> ImpersonateAsync(ImpersonateUserModel inputModel);
     Task<string> ForgotPasswordAsync(ForgotPasswordModel inputModel);
+    Task<string> ResetPasswordAsync(ResetPasswordModel inputModel, string code);
 }
