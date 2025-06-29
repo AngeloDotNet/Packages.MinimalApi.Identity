@@ -20,6 +20,7 @@ public class ResetPasswordValidator : AbstractValidator<ResetPasswordModel>
             .MinimumLength(identityOptions.RequiredLength).WithMessage($"Password must be at least {identityOptions.RequiredLength} characters");
 
         RuleFor(x => x.ConfirmPassword)
+            .NotEmpty().WithMessage("Confirm password is required.")
             .Equal(x => x.Password).WithMessage("The password and confirmation password do not match.");
     }
 }
