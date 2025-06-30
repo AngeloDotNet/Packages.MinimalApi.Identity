@@ -14,7 +14,8 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 
 ### 🔜 Future implementations
 
-- [ ] Replacing the hosted service authorization policy updater using Coravel jobs
+- [ ] Replace exceptions with implementation of operation results 
+- [ ] Replace authorization policy update via Coravel processes
 - [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
 - [ ] Add support for multi tenancy
 - [ ] Add authentication support from third-party providers (e.g. GitHub, Azure)
