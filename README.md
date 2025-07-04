@@ -10,12 +10,14 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
 - [ ] Test endpoints to impersonate the user
+- [ ] Move email sending logic to a hosted service
 - [ ] Add API documentation
 
 ### 🔜 Future implementations
 
 - [ ] Replace exceptions with implementation of operation results 
-- [ ] Replace authorization policy update via Coravel processes
+- [ ] Replacing the hosted service email sender using Coravel jobs
+- [ ] Replacing the hosted service authorization policy updater using Coravel jobs
 - [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
 - [ ] Add support for multi tenancy
 - [ ] Add authentication support from third-party providers (e.g. GitHub, Azure)
