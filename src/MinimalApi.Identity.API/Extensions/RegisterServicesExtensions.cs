@@ -66,7 +66,6 @@ public static class RegisterServicesExtensions
             .AddScoped<SignInManager<ApplicationUser>>()
             .AddScoped<IAuthorizationHandler, PermissionHandler>()
 
-            //.AddSingleton<IHostedService, AuthorizationPolicyGeneration>()
             .AddHostedService<AuthorizationPolicyGeneration>()
             .AddHostedService<AuthorizationPolicyUpdater>()
 
