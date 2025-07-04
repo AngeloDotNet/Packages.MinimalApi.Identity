@@ -14,7 +14,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
@@ -62,13 +61,13 @@ public static class RegisterServicesExtensions
             .AddMinimalApiIdentityServices<MinimalApiAuthDbContext>(jwtOptions)
             .AddMinimalApiIdentityOptionsServices(identityOptions)
 
-            .AddSingleton<IHostedService, AuthorizationPolicyGeneration>()
-
             .AddRegisterTransientService<IAuthService>("Service")
 
             .AddScoped<SignInManager<ApplicationUser>>()
             .AddScoped<IAuthorizationHandler, PermissionHandler>()
 
+            //.AddSingleton<IHostedService, AuthorizationPolicyGeneration>()
+            .AddHostedService<AuthorizationPolicyGeneration>()
             .AddHostedService<AuthorizationPolicyUpdater>()
 
             .ConfigureValidation(options => options.ErrorResponseFormat = formatErrorResponse)
