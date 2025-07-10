@@ -10,7 +10,7 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 - [ ] Add endpoints for two-factor authentication and management
 - [ ] Add endpoints for downloading and deleting personal data
 - [ ] Test endpoints to impersonate the user
-- [ ] Move email sending logic to a hosted services
+- [ ] Move email sending logic to a hosted service
 - [ ] Add API documentation
 
 ### 🔜 Future implementations
