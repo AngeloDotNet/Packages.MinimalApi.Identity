@@ -3,8 +3,9 @@
 Library for dynamically managing users, roles, claims, modules and license, using .NET 8 Minimal API, Entity Framework Core and SQL Server.
 
 > [!IMPORTANT]
-> **This library is still under development of new implementations.**
+> **This library is no longer maintained as we preferred to continue with a modular implementation with the new MinimalApi.Identity library, available in this github [repository](https://github.com/AngeloDotNet/MinimalApi.Identity)**
 
+<!--
 ### 🏗️ ToDo
 
 - [ ] Add endpoints for two-factor authentication and management
@@ -21,6 +22,7 @@ Library for dynamically managing users, roles, claims, modules and license, usin
 - [ ] Add support for relational databases other than MS SQLServer (e.g. MySQL and PostgreSQL)
 - [ ] Add support for multi tenancy
 - [ ] Add authentication support from third-party providers (e.g. GitHub, Azure)
+-->
 
 ### 🛠️ Installation
 
